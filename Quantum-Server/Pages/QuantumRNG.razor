@@ -1,6 +1,6 @@
 ﻿@page "/quantum"
-@using Quantum
 @using Microsoft.Quantum.Simulation.Simulators
+@using Quantum
 
 <h1>Quantum RNG</h1>
 
@@ -9,12 +9,14 @@
 <button class="btn btn-primary" @onclick="@RunQuantumRNG">Run RNG</button>
 
 @code {
-    public int RandomNum {get; set;}
+    public int RandomNum { get; set; }
 
-    public async Task RunQuantumRNG() {
+    public async Task RunQuantumRNG()
+    {
         using (var qsim = new QuantumSimulator())
         {
-            RandomNum = (int) await Quantum.RandomInt.Run(qsim, 128);
+            RandomNum = (int) await RandomInt.Run(qsim, 128);
         }
     }
+
 }
