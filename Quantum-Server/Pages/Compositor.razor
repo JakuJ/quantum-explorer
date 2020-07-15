@@ -1,19 +1,20 @@
 ﻿@page "/compositor"
-@using Quantum_Server.Data;
+@using Quantum_Server.Data
 
 <h1>QIL proof of concept</h1>
 
-<input type="text" @bind="@Code"/>
+<input type="text" @bind="@_code"/>
 <button @onclick="@Execute">Execute</button>
 
 <p>Last output: @Message</p>
 
 @code {
     string Message { get; set; } = "";
-    string Code { get; set; } = "";
+    string _code = "";
 
     private async Task Execute()
     {
-        Message = await CodeRunner.RunCode(Code);
+        Message = await CodeRunner.RunCode(_code);
     }
+
 }
