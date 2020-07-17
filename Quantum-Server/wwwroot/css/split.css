@@ -25,12 +25,12 @@
 
 .gutter.gutter-horizontal {
   cursor: col-resize;
-  /*background-image: url('../grips/vertical.png');*/
+  background-image: url('../images/grips/vertical.png');
 }
 
 .gutter.gutter-vertical {
   cursor: row-resize;
-  /*background-image: url('../grips/horizontal.png');*/
+  background-image: url('../images/grips/vertical.png');
 }
 
 .split.split-horizontal,

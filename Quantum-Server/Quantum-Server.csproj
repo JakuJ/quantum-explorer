@@ -13,10 +13,6 @@
     <Content Remove="$(JsLibRoot)**"/>
     <None Remove="$(JsLibRoot)**"/>
     <None Include="$(JsLibRoot)**" Exclude="$(JsLibRoot)node_modules\**"/>
-    <Content Update="wwwroot\css\split.css">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
   </ItemGroup>
 
   <Target Name="EnsureNodeEnv" BeforeTargets="BuildJsBundle" Condition=" !Exists('$(JsLibRoot)node_modules') ">
