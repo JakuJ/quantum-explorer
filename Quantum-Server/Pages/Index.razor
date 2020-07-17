@@ -1,5 +1,44 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<main>
+    <div id="editor-box">
+        <Editor/>
+    </div>
+    <div id="compositor-box">
+        <Compositor/>
+    </div>
+    <div id="visualizer-box">
+        <Visualizer/>
+    </div>
+</main>
 
-Welcome to your new app.
+<style>
+    main {
+        display: grid;
+        border: 3px dotted red;
+        grid-gap: 3px;
+        grid-template: "nav head" min-content "nav main" 1fr / min-content 1fr;
+    }
+
+    #editor-box {
+        grid-area: nav;
+        border: 3px dotted blue;
+        overflow: auto;
+        resize: horizontal;
+        min-width: 120px;
+    }
+
+    #compositor-box {
+        grid-area: head;
+        border: 3px dotted orange;
+        overflow: auto;
+        resize: vertical;
+        min-height: min-content;
+    }
+
+    #visualizer-box {
+        grid-area: main;
+        border: 3px dotted gray;
+        min-height: min-content;
+    }
+</style>

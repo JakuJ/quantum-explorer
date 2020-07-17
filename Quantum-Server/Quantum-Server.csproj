@@ -13,14 +13,26 @@
 
   <ItemGroup Label="Package references">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.5"/>
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7"/>
+    <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0"/>
   </ItemGroup>
 
   <ItemGroup Label="StyleCop support">
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164" />
-    <AdditionalFiles Include="..\stylecop.json" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164"/>
+    <AdditionalFiles Include="..\stylecop.json"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Components\Editor.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Compositor.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Visualizer.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
 
   <PropertyGroup Label="Rulesets">
