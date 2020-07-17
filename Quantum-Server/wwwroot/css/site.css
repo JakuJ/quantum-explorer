@@ -39,11 +39,10 @@ a, .btn-link {
 }
 
 .main .content {
-  max-height: 100%;
-  overflow: hidden;
+  height: 90%;
   flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
+  box-sizing: border-box;
+  background-color: #F6F6F6;
 }
 
 .valid.modified:not([type=checkbox]) {

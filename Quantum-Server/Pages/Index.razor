@@ -1,44 +1,28 @@
 ﻿@page "/"
+@inject IJSRuntime JsRuntime;
 
-<main>
-    <div id="editor-box">
+<div id="splitPanes">
+    <div id="left-pane" class="split split-horizontal">
         <Editor/>
     </div>
-    <div id="compositor-box">
-        <Compositor/>
+    <div id="right-pane" class="split split-horizontal">
+        <div id="upper-pane" class="split split-content">
+            <Compositor/>
+        </div>
+        <div id="lower-pane" class="split split-content">
+            <Visualizer/>
+        </div>
     </div>
-    <div id="visualizer-box">
-        <Visualizer/>
-    </div>
-</main>
+</div>
 
-<style>
-    main {
-        display: grid;
-        border: 3px dotted red;
-        grid-gap: 3px;
-        grid-template: "nav head" min-content "nav main" 1fr / min-content 1fr;
+@code {
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes");
+        }
     }
 
-    #editor-box {
-        grid-area: nav;
-        border: 3px dotted blue;
-        overflow: auto;
-        resize: horizontal;
-        min-width: 120px;
-    }
-
-    #compositor-box {
-        grid-area: head;
-        border: 3px dotted orange;
-        overflow: auto;
-        resize: vertical;
-        min-height: min-content;
-    }
-
-    #visualizer-box {
-        grid-area: main;
-        border: 3px dotted gray;
-        min-height: min-content;
-    }
-</style>
+}

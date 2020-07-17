@@ -4,3 +4,5 @@
 .idea/
 bin/
 obj/
+node_modules/
+/Quantum-Server/wwwroot/js/

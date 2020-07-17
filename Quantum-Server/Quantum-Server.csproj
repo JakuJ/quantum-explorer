@@ -5,14 +5,46 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
     <Platforms>AnyCPU;x64</Platforms>
+    <JsLibRoot>JsLib\</JsLibRoot>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="$(JsLibRoot)**"/>
+    <None Remove="$(JsLibRoot)**"/>
+    <None Include="$(JsLibRoot)**" Exclude="$(JsLibRoot)node_modules\**"/>
+    <Content Update="wwwroot\css\split.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="EnsureNodeEnv" BeforeTargets="BuildJsBundle" Condition=" !Exists('$(JsLibRoot)node_modules') ">
+    <!-- Ensure Node.js is installed -->
+    <Exec Command="node --version" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
+    </Exec>
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE."/>
+    <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..."/>
+    <Exec WorkingDirectory="$(JsLibRoot)" Command="npm install"/>
+  </Target>
+
+  <Target Name="BuildJsBundle" BeforeTargets="PreBuildEvent">
+    <Exec WorkingDirectory="$(JsLibRoot)" Command="npm run build"/>
+  </Target>
+
+  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
+    <Exec WorkingDirectory="$(JsLibRoot)" Command="npm install"/>
+    <Exec WorkingDirectory="$(JsLibRoot)" Command="npm run build"/>
+  </Target>
+
   <ItemGroup Label="Project references">
-    <ProjectReference Include="..\Quantum\Quantum.csproj" />
+    <ProjectReference Include="..\Quantum\Quantum.csproj"/>
   </ItemGroup>
 
   <ItemGroup Label="Package references">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0"/>
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.5"/>
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7"/>
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0"/>
@@ -21,18 +53,6 @@
   <ItemGroup Label="StyleCop support">
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164"/>
     <AdditionalFiles Include="..\stylecop.json"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="Components\Editor.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
-    <Content Update="Components\Compositor.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
-    <Content Update="Components\Visualizer.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
   </ItemGroup>
 
   <PropertyGroup Label="Rulesets">
