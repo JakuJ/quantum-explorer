@@ -1,5 +1,28 @@
 ﻿@page "/"
+@inject IJSRuntime JsRuntime;
 
-<h1>Hello, world!</h1>
+<div id="splitPanes">
+    <div id="left-pane" class="split split-horizontal">
+        <Editor/>
+    </div>
+    <div id="right-pane" class="split split-horizontal">
+        <div id="upper-pane" class="split split-content">
+            <Compositor/>
+        </div>
+        <div id="lower-pane" class="split split-content">
+            <Visualizer/>
+        </div>
+    </div>
+</div>
 
-Welcome to your new app.
+@code {
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes");
+        }
+    }
+
+}
