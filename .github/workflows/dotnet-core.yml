@@ -2,14 +2,18 @@ name: .NET Core
 
 on:
   push:
-    branches: [ develop ]
   pull_request:
-    branches: [ develop ]
+    branches:
+    - master
+    - develop
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
 
     steps:
     - uses: actions/checkout@v2
