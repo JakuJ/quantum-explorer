@@ -15,15 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Quantum_Server": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "http://localhost:27641"
-    },
-    "Quantum-Server": {
+    "Run project": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
