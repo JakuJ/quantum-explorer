@@ -4,8 +4,6 @@ VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quantum-Server", "Quantum-Server\Quantum-Server.csproj", "{4A7427DF-DB0A-418A-9839-A6ED38D6518C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quantum", "Quantum\Quantum.csproj", "{2F49F181-BB1C-47C5-AA53-52E90BDAE72A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -16,10 +14,6 @@ Global
 		{4A7427DF-DB0A-418A-9839-A6ED38D6518C}.Debug|x64.Build.0 = Debug|x64
 		{4A7427DF-DB0A-418A-9839-A6ED38D6518C}.Release|x64.ActiveCfg = Release|x64
 		{4A7427DF-DB0A-418A-9839-A6ED38D6518C}.Release|x64.Build.0 = Release|x64
-		{2F49F181-BB1C-47C5-AA53-52E90BDAE72A}.Debug|x64.ActiveCfg = Debug|x64
-		{2F49F181-BB1C-47C5-AA53-52E90BDAE72A}.Debug|x64.Build.0 = Debug|x64
-		{2F49F181-BB1C-47C5-AA53-52E90BDAE72A}.Release|x64.ActiveCfg = Release|x64
-		{2F49F181-BB1C-47C5-AA53-52E90BDAE72A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
