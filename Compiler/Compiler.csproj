@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <RootNamespace>CompilerExtensions</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20070124" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="TestFile.qs" />
+      <Resource Include="TestFile.qs" />
+    </ItemGroup>
+
+</Project>

@@ -8,6 +8,8 @@
 </div>
 
 @code {
+    Editor editor;
+    Visualizer visualizer;
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -34,6 +36,12 @@
                 TypeNameHandling = TypeNameHandling.Auto
             });
             JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
+
+var compiler = new Compiler();
+            string path = Path.Combine(Environment.CurrentDirectory, "../Compiler/TestFile.qs");
+            await compiler.Compile(path);
+
+            editor.Code = compiler.GetCode();
         }
     }
 
