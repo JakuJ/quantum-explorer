@@ -7,11 +7,8 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20070124" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="TestFile.qs" />
-      <Resource Include="TestFile.qs" />
+      <PackageReference Include="Microsoft.Quantum.QSharp.Core" Version="0.12.20072031" />
+      <PackageReference Include="Microsoft.Quantum.Standard" Version="0.12.20072031" />
     </ItemGroup>
 
 </Project>

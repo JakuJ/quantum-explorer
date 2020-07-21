@@ -37,8 +37,8 @@
             });
             JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
 
-var compiler = new Compiler();
-            string path = Path.Combine(Environment.CurrentDirectory, "../Compiler/TestFile.qs");
+            var compiler = new Compiler();
+            string path = Path.Combine(Environment.CurrentDirectory, "../QSharpTestSources/Library.qs");
             await compiler.Compile(path);
 
             editor.Code = compiler.GetCode();
