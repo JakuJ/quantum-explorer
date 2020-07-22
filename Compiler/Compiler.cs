@@ -10,15 +10,14 @@ using Microsoft.Quantum.QsCompiler.DataTypes;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
 using Microsoft.Quantum.QsCompiler.Transformations.QsCodeOutput;
 using Compilation = Microsoft.Quantum.QsCompiler.CompilationBuilder.CompilationUnitManager.Compilation;
-using Microsoft.Quantum.Intrinsic;
 
-namespace CompilerExtensions
+namespace Compiler
 {
     public class Compiler : ICompiler
     {
         private Compilation compilation;
 
-        static string GetDllPath(string dll)
+        private static string GetDllPath(string dll)
         {
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -31,9 +30,14 @@ namespace CompilerExtensions
             return Path.Combine(assemblyDir, dll);
         }
 
-        public async Task Compile(string filepath)
+        public async Task Compile(string code)
         {
-            ImmutableDictionary<Uri, string> sourceFiles = ProjectManager.LoadSourceFiles(new[] {filepath});
+            var sourceFiles = new Dictionary<Uri, string>
+            {
+                // Dummy filepath to a nonexistent file
+                {new Uri("file:///tmp/TempFile.qs"), code}
+            }.ToImmutableDictionary();
+
             ImmutableHashSet<FileContentManager> files = CompilationUnitManager.InitializeFileManagers(sourceFiles);
 
             using var manager = new CompilationUnitManager();

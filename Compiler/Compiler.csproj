@@ -2,11 +2,14 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <RootNamespace>CompilerExtensions</RootNamespace>
+        <RootNamespace>Compiler</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20070124" />
+    </ItemGroup>
+
+    <ItemGroup Label="References for the Q# compiler">
       <PackageReference Include="Microsoft.Quantum.QSharp.Core" Version="0.12.20072031" />
       <PackageReference Include="Microsoft.Quantum.Standard" Version="0.12.20072031" />
     </ItemGroup>

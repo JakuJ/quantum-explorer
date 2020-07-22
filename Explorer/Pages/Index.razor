@@ -1,6 +1,9 @@
 ﻿@page "/"
 @using Explorer.Utilities.ComponentTree
 @using Newtonsoft.Json
+@using Compiler
+@using System.IO
+@using System.Diagnostics
 @inject IJSRuntime JsRuntime;
 
 <div id="splitPanes">
@@ -29,20 +32,22 @@
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender) return;
+
+        string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
         {
-            string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto
-            });
-            JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
+            TypeNameHandling = TypeNameHandling.Auto
+        });
+        JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
 
-            var compiler = new Compiler();
-            string path = Path.Combine(Environment.CurrentDirectory, "../QSharpTestSources/Library.qs");
-            await compiler.Compile(path);
+        await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes");
 
-            editor.Code = compiler.GetCode();
-        }
+        ICompiler compiler = new Compiler();
+        string path = Path.Combine(Environment.CurrentDirectory, "../QSharpTestSources/Library.qs");
+        string code = await File.ReadAllTextAsync(path);
+        await compiler.Compile(code);
+
+        editor.Code = compiler.GetCode();
     }
 
 }

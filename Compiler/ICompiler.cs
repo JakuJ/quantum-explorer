@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CompilerExtensions
+namespace Compiler
 {
     public interface ICompiler
     {
-        Task Compile(string filepath);
+        Task Compile(string code);
 
         string GetCode();
         List<string> GetDiagnostics();
