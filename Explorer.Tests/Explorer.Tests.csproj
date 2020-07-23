@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="$(SolutionDir)\msbuild\Test.props" />
+
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>false</IsPackable>
@@ -14,22 +16,5 @@
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
   </ItemGroup>
-
-  <ItemGroup Label="StyleCop support">
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164" />
-    <AdditionalFiles Include="..\stylecop.json" />
-  </ItemGroup>
-
-  <PropertyGroup Label="Rulesets">
-    <CodeAnalysisRuleSet>..\Custom.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
-    <CodeAnalysisOutputToConsole>true</CodeAnalysisOutputToConsole>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-  </PropertyGroup>
-
-  <PropertyGroup Label="XML Docs">
-    <noWarn>0001</noWarn>
-    <noWarn>1600</noWarn>
-  </PropertyGroup>
 
 </Project>

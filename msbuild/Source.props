@@ -1,0 +1,14 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(MSBuildThisFileDirectory)\Common.props" />
+
+  <PropertyGroup Label="Rulesets">
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\Common.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Label="XML Docs">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Don't actually require XML comments anywhere -->
+    <noWarn>1591</noWarn>
+  </PropertyGroup>
+</Project>
