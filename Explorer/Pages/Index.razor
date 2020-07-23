@@ -1,27 +1,37 @@
 ﻿@page "/"
+@using Explorer.Utilities.ComponentTree
 @inject IJSRuntime JsRuntime;
 
 <div id="splitPanes">
-    <div id="left-pane" class="split split-horizontal">
-        <Editor/>
-    </div>
-    <div id="right-pane" class="split split-horizontal">
-        <div id="upper-pane" class="split split-content">
-            <Compositor/>
-        </div>
-        <div id="lower-pane" class="split split-content">
-            <Visualizer/>
-        </div>
-    </div>
+    @Components
 </div>
 
 @code {
+
+    RenderFragment Components => new PanelRenderer().Render(tree);
+
+    PanelTree tree;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        tree = new PanelTree(PanelTree.Orientation.Horizontal);
+
+        tree.AddPanel(new Editor());
+
+        var rightPanel = new PanelTree(PanelTree.Orientation.Vertical);
+        rightPanel.AddPanel(new Compositor());
+        rightPanel.AddPanel(new Visualizer());
+
+        tree.AddPanel(rightPanel);
+    }
 
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
-            JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes");
+            JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", tree);
         }
     }
 

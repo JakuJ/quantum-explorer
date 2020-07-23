@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.Quantum.Simulation.Core;
 
-namespace Quantum_Server.Extensions
+namespace Explorer.Extensions
 {
     /// <summary>
     /// Extension methods regarding conversions.

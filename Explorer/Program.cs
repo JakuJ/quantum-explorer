@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Quantum_Server
+namespace Explorer
 {
     /// <summary>
     ///     Class containing the entry point to the program.

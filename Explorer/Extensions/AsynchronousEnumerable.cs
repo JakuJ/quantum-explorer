@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Quantum_Server.Extensions
+namespace Explorer.Extensions
 {
     /// <summary>
     /// A collection of extension methods that introduce LINQ-like transformations

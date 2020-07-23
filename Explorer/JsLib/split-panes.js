@@ -1,14 +1,24 @@
 import Split from 'split.js';
 
-export function initializeSplitPanes() {
-  Split(['#left-pane', '#right-pane'], {
-    gutterSize: 8,
-    sizes: [50, 50],
-  });
+function equalSizes(num) {
+  return new Array(num).fill(100 / num);
+}
 
-  Split(['#upper-pane', '#lower-pane'], {
-    direction: 'vertical',
-    sizes: [50, 50],
-    gutterSize: 8,
-  });
+export function initializeSplitPanes(panel) {
+
+  console.log(JSON.stringify(panel));
+
+  if (panel.children) {
+    let ids = panel.children.map(x => `#${x.elementId}`);
+
+    Split(ids, {
+      direction: panel.direction,
+      gutterSize: 8,
+      sizes: equalSizes(ids.length),
+    });
+
+    for (let p of panel.children) {
+      initializeSplitPanes(p);
+    }
+  }
 }
