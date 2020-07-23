@@ -2,7 +2,10 @@ using System;
 
 namespace Explorer.Utilities
 {
-    public class UniqueId
+    /// <summary>
+    /// A class allowing for creation of unique IDs that are safe to use as the HTML 'id' properties.
+    /// </summary>
+    public static class UniqueId
     {
         /// <summary>
         /// Returns a new, unique ID.

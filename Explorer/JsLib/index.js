@@ -1,5 +1,5 @@
 import {initializeSplitPanes} from './split-panes';
 
-export function InitializeSplitPanes(panel) {
-  initializeSplitPanes(panel);
+export function InitializeSplitPanes(panelJSON) {
+  initializeSplitPanes(JSON.parse(panelJSON));
 }

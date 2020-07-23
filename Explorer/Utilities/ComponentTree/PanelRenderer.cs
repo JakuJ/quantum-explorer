@@ -5,19 +5,26 @@ using Microsoft.AspNetCore.Components.Rendering;
 
 namespace Explorer.Utilities.ComponentTree
 {
+    /// <summary>
+    /// A class that processes <see cref="IPanel"/> component trees and render them appropriately.
+    /// </summary>
     public class PanelRenderer
     {
         private readonly Stack<string> classes = new Stack<string>();
-        private int sequence = 0;
+        private RenderTreeBuilder? builder;
+        private int sequence;
 
         private int Sequence => sequence++;
 
-        private RenderTreeBuilder? builder;
-
+        /// <summary>
+        /// Create a <see cref="RenderFragment"/> that represents the provided panel tree.
+        /// </summary>
+        /// <param name="panel">A tree of components that are meant to be placed in resizable panels.</param>
+        /// <returns>A delegate that writes the content to a <see cref="RenderTreeBuilder"/>.</returns>
         public RenderFragment Render(PanelTree panel) => treeBuilder =>
         {
             builder = treeBuilder;
-            classes.Push(panel.ChildOrientation == PanelTree.Orientation.Horizontal ? "split-horizontal" : "split-content");
+            classes.Push(panel.Direction == PanelTree.Alignment.Horizontal ? "split-horizontal" : "split-content");
 
             foreach (IPanel child in panel.Children)
             {
@@ -25,7 +32,11 @@ namespace Explorer.Utilities.ComponentTree
             }
         };
 
-        public void VisitResizable(PanelComponent panel)
+        /// <summary>
+        /// Generate content for a razor component inside a <see cref="Panel"/> wrapper.
+        /// </summary>
+        /// <param name="panel">A wrapper around a razor component.</param>
+        public void RenderPanel(Panel panel)
         {
             builder!.OpenElement(Sequence, "div");
             builder.AddAttribute(Sequence, "id", panel.ElementId);
@@ -49,7 +60,11 @@ namespace Explorer.Utilities.ComponentTree
             builder.CloseElement();
         }
 
-        public void VisitPanelTree(PanelTree tree)
+        /// <summary>
+        /// Recursively generate content for all nodes in the provided component tree.
+        /// </summary>
+        /// <param name="tree">A tree of component panels.</param>
+        public void RenderPanelTree(PanelTree tree)
         {
             builder!.OpenElement(Sequence, "div");
             builder.AddAttribute(Sequence, "id", tree.ElementId);
@@ -59,7 +74,7 @@ namespace Explorer.Utilities.ComponentTree
                 builder.AddAttribute(Sequence, "class", $"split {classes.Peek()}");
             }
 
-            classes.Push(tree.ChildOrientation == PanelTree.Orientation.Horizontal ? "split-horizontal" : "split-content");
+            classes.Push(tree.Direction == PanelTree.Alignment.Horizontal ? "split-horizontal" : "split-content");
             foreach (IPanel panel in tree.Children)
             {
                 panel.AcceptRenderer(this);

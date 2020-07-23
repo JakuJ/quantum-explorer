@@ -1,5 +1,7 @@
 ﻿@page "/"
 @using Explorer.Utilities.ComponentTree
+@using Newtonsoft.Json
+@using JsonSerializer = System.Text.Json.JsonSerializer
 @inject IJSRuntime JsRuntime;
 
 <div id="splitPanes">
@@ -10,33 +12,29 @@
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
-    readonly PanelTree tree = new PanelTree(PanelTree.Orientation.Horizontal);
+    readonly PanelTree tree = new PanelTree(PanelTree.Alignment.Horizontal);
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
         tree.AddPanel(new Editor());
 
-        var doublePanel = new PanelTree(PanelTree.Orientation.Vertical);
-        doublePanel.AddPanel(new Editor());
-        doublePanel.AddPanel(new Compositor());
+        var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
+        sidePanel.AddPanel(new Compositor());
+        sidePanel.AddPanel(new Visualizer());
 
-        tree.AddPanel(doublePanel);
-
-        var triplePanel = new PanelTree(PanelTree.Orientation.Vertical);
-        triplePanel.AddPanel(new Editor());
-        triplePanel.AddPanel(new Compositor());
-        triplePanel.AddPanel(new Visualizer());
-
-        tree.AddPanel(triplePanel);
+        tree.AddPanel(sidePanel);
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
-            JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", tree);
+            string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+            });
+            JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
         }
     }
 

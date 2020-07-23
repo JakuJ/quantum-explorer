@@ -6,15 +6,15 @@ function equalSizes(num) {
 
 export function initializeSplitPanes(panel) {
 
-  if (panel.children) {
-    let ids = panel.children.map(x => `#${x.elementId}`);
+  if (panel.hasOwnProperty('Children')) {
+    let ids = panel.Children.map(x => `#${x.ElementId}`);
 
     Split(ids, {
-      direction: panel.direction,
+      direction: panel.Direction === 1 ? 'vertical' : 'horizontal',
       gutterSize: 8,
       sizes: equalSizes(ids.length),
     });
 
-    panel.children.forEach(p => initializeSplitPanes(p));
+    panel.Children.forEach(p => initializeSplitPanes(p));
   }
 }
