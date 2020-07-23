@@ -12,7 +12,7 @@ namespace Explorer.Utilities.ComponentTree
             Component = component;
         }
 
-        public string ElementId { get; } = UniqueId.GetUniqueId();
+        public string ElementId { get; } = UniqueId.CreateUniqueId();
 
         public List<IPanel>? Children { get; } = null;
 

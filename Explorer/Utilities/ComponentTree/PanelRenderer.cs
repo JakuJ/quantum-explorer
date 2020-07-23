@@ -8,9 +8,9 @@ namespace Explorer.Utilities.ComponentTree
     public class PanelRenderer
     {
         private readonly Stack<string> classes = new Stack<string>();
-        private int _sequence = 0;
+        private int sequence = 0;
 
-        private int sequence => _sequence++;
+        private int Sequence => sequence++;
 
         private RenderTreeBuilder? builder;
 
@@ -27,23 +27,23 @@ namespace Explorer.Utilities.ComponentTree
 
         public void VisitResizable(PanelComponent panel)
         {
-            builder!.OpenElement(sequence, "div");
-            builder.AddAttribute(sequence, "id", panel.ElementId);
+            builder!.OpenElement(Sequence, "div");
+            builder.AddAttribute(Sequence, "id", panel.ElementId);
 
             if (classes.Count > 0)
             {
-                builder.AddAttribute(sequence, "class", $"split {classes.Peek()}");
+                builder.AddAttribute(Sequence, "class", $"split {classes.Peek()}");
             }
 
-            builder.OpenComponent<Resizable>(sequence);
+            builder.OpenComponent<Resizable>(Sequence);
 
             void PanelComponent(RenderTreeBuilder builder2)
             {
-                builder2.OpenComponent(sequence, panel.Component.GetType());
+                builder2.OpenComponent(Sequence, panel.Component.GetType());
                 builder2.CloseComponent();
             }
 
-            builder.AddAttribute(sequence, "ChildContent", (RenderFragment) PanelComponent);
+            builder.AddAttribute(Sequence, "ChildContent", (RenderFragment)PanelComponent);
 
             builder.CloseComponent();
             builder.CloseElement();
@@ -51,12 +51,12 @@ namespace Explorer.Utilities.ComponentTree
 
         public void VisitPanelTree(PanelTree tree)
         {
-            builder!.OpenElement(sequence, "div");
-            builder.AddAttribute(sequence, "id", tree.ElementId);
+            builder!.OpenElement(Sequence, "div");
+            builder.AddAttribute(Sequence, "id", tree.ElementId);
 
             if (classes.Count > 0)
             {
-                builder.AddAttribute(sequence, "class", $"split {classes.Peek()}");
+                builder.AddAttribute(Sequence, "class", $"split {classes.Peek()}");
             }
 
             classes.Push(tree.ChildOrientation == PanelTree.Orientation.Horizontal ? "split-horizontal" : "split-content");

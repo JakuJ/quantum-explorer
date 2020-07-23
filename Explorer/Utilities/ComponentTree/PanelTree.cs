@@ -6,7 +6,7 @@ namespace Explorer.Utilities.ComponentTree
 {
     public class PanelTree : IPanel
     {
-        public string ElementId { get; } = UniqueId.GetUniqueId();
+        public string ElementId { get; } = UniqueId.CreateUniqueId();
 
         public Orientation ChildOrientation { get; }
 

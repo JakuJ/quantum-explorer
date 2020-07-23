@@ -2,9 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Explorer\Explorer.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="nunit" Version="3.12.0" />
@@ -13,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup Label="StyleCop support">
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164"/>
-    <AdditionalFiles Include="..\stylecop.json"/>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164" />
+    <AdditionalFiles Include="..\stylecop.json" />
   </ItemGroup>
 
   <PropertyGroup Label="Rulesets">
@@ -23,9 +26,10 @@
     <CodeAnalysisOutputToConsole>true</CodeAnalysisOutputToConsole>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\Explorer\Explorer.csproj" />
-  </ItemGroup>
+
+  <PropertyGroup Label="XML Docs">
+    <noWarn>0001</noWarn>
+    <noWarn>1600</noWarn>
+  </PropertyGroup>
 
 </Project>
