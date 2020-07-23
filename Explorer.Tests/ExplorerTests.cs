@@ -4,7 +4,7 @@ using Quantum_Server.Extensions;
 
 namespace Explorer.Tests
 {
-    public class Tests
+    public class ExplorerTests
     {
 
         [SetUp]
