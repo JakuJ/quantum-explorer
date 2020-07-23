@@ -1,9 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using Explorer.Utilities.ComponentTree;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -40,12 +37,11 @@ namespace Explorer
 
             app.UseRouting();
 
-            app
-               .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapBlazorHub();
-                    endpoints.MapFallbackToPage("/_Host");
-                });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapBlazorHub();
+                endpoints.MapFallbackToPage("/_Host");
+            });
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

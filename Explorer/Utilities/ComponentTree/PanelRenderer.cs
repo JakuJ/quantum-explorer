@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Components.Rendering;
 namespace Explorer.Utilities.ComponentTree
 {
     /// <summary>
-    /// A class that processes <see cref="IPanel"/> component trees and render them appropriately.
+    /// A class that processes <see cref="IPanel" /> component trees and render them appropriately.
     /// </summary>
-    public class PanelRenderer
+    internal class PanelRenderer
     {
         private readonly Stack<string> classes = new Stack<string>();
         private RenderTreeBuilder? builder;
@@ -17,23 +17,7 @@ namespace Explorer.Utilities.ComponentTree
         private int Sequence => sequence++;
 
         /// <summary>
-        /// Create a <see cref="RenderFragment"/> that represents the provided panel tree.
-        /// </summary>
-        /// <param name="panel">A tree of components that are meant to be placed in resizable panels.</param>
-        /// <returns>A delegate that writes the content to a <see cref="RenderTreeBuilder"/>.</returns>
-        public RenderFragment Render(PanelTree panel) => treeBuilder =>
-        {
-            builder = treeBuilder;
-            classes.Push(panel.Direction == PanelTree.Alignment.Horizontal ? "split-horizontal" : "split-content");
-
-            foreach (IPanel child in panel.Children)
-            {
-                child.AcceptRenderer(this);
-            }
-        };
-
-        /// <summary>
-        /// Generate content for a razor component inside a <see cref="Panel"/> wrapper.
+        /// Generate content for a razor component inside a <see cref="Panel" /> wrapper.
         /// </summary>
         /// <param name="panel">A wrapper around a razor component.</param>
         public void RenderPanel(Panel panel)
@@ -82,6 +66,20 @@ namespace Explorer.Utilities.ComponentTree
 
             classes.Pop();
             builder.CloseElement();
+        }
+
+        internal RenderFragment Render(PanelTree panel)
+        {
+            return treeBuilder =>
+            {
+                builder = treeBuilder;
+                classes.Push(panel.Direction == PanelTree.Alignment.Horizontal ? "split-horizontal" : "split-content");
+
+                foreach (IPanel child in panel.Children)
+                {
+                    child.AcceptRenderer(this);
+                }
+            };
         }
     }
 }
