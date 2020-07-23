@@ -1,6 +1,4 @@
 using NUnit.Framework;
-using Quantum_Server;
-using Quantum_Server.Extensions;
 
 namespace Explorer.Tests
 {
@@ -8,9 +6,7 @@ namespace Explorer.Tests
     public class Explorer_SampleTest
     {
         [SetUp]
-        public void Setup()
-        {
-        }
+        public void Setup() { }
 
         [Test]
         public void Test()

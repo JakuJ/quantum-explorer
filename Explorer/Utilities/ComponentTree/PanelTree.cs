@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Components;
 
 namespace Explorer.Utilities.ComponentTree
 {
@@ -9,17 +10,11 @@ namespace Explorer.Utilities.ComponentTree
 
         public Orientation ChildOrientation { get; }
 
-        public string? Direction
+        public string? Direction => ChildOrientation switch
         {
-            get
-            {
-                return ChildOrientation switch
-                {
-                    Orientation.Horizontal => "horizontal",
-                    Orientation.Vertical   => "vertical",
-                };
-            }
-        }
+            Orientation.Vertical => "vertical",
+            _                    => "horizontal",
+        };
 
         public List<IPanel> Children { get; }
 
@@ -40,6 +35,8 @@ namespace Explorer.Utilities.ComponentTree
         }
 
         public void AddPanel(IPanel panel) => Children.Add(panel);
+
+        public void AddPanel(IComponent component) => Children.Add(new PanelComponent(component));
 
         public void AcceptRenderer(PanelRenderer render) => render.VisitPanelTree(this);
     }

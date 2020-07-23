@@ -6,8 +6,6 @@ function equalSizes(num) {
 
 export function initializeSplitPanes(panel) {
 
-  console.log(JSON.stringify(panel));
-
   if (panel.children) {
     let ids = panel.children.map(x => `#${x.elementId}`);
 
@@ -17,8 +15,6 @@ export function initializeSplitPanes(panel) {
       sizes: equalSizes(ids.length),
     });
 
-    for (let p of panel.children) {
-      initializeSplitPanes(p);
-    }
+    panel.children.forEach(p => initializeSplitPanes(p));
   }
 }

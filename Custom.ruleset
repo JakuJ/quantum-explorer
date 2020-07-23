@@ -8,6 +8,7 @@
     <Description Resource="CustomStyleRules_Description"/>
   </Localization>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA1025" Action="None"/> <!-- Code should not contain multiple whitespace in a row -->
     <Rule Id="SA1101" Action="None"/> <!-- Prefix local calls with this -->
     <Rule Id="SA1633" Action="None"/> <!-- File should have header -->
     <Rule Id="SA1600" Action="Warning"/> <!-- Elements should be documented -->

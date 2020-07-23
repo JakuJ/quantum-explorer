@@ -6,9 +6,9 @@
     <PlatformTarget>x64</PlatformTarget>
     <Platforms>AnyCPU;x64</Platforms>
     <JsLibRoot>JsLib\</JsLibRoot>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)node_modules\**</DefaultItemExcludes>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup Label="Package references">
@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.Quantum.Development.Kit" Version="0.12.20070124" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Quantum-Server' ">
+  <PropertyGroup>
     <StartAction>Project</StartAction>
     <ExternalConsole>true</ExternalConsole>
     <ApplicationURL>https://localhost:5001;http://localhost:5000</ApplicationURL>
@@ -31,9 +31,6 @@
     <Content Remove="$(JsLibRoot)**" />
     <None Remove="$(JsLibRoot)**" />
     <None Include="$(JsLibRoot)**" Exclude="$(JsLibRoot)node_modules\**" />
-    <Content Update="Shared\Resizable.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
   </ItemGroup>
 
   <Target Name="EnsureNodeEnv" BeforeTargets="BuildJsBundle" Condition=" !Exists('$(JsLibRoot)node_modules') ">

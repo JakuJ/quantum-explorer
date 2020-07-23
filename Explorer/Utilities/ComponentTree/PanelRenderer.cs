@@ -1,4 +1,5 @@
-using Explorer.Shared;
+using System.Collections.Generic;
+using Explorer.Templates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
@@ -6,52 +7,65 @@ namespace Explorer.Utilities.ComponentTree
 {
     public class PanelRenderer
     {
-        private RenderTreeBuilder builder;
-        private string? currentClass;
+        private readonly Stack<string> classes = new Stack<string>();
+        private int _sequence = 0;
 
-        public RenderFragment Render(PanelTree panel) => builder =>
+        private int sequence => _sequence++;
+
+        private RenderTreeBuilder? builder;
+
+        public RenderFragment Render(PanelTree panel) => treeBuilder =>
         {
-            this.builder = builder;
-            currentClass = panel.ChildOrientation == PanelTree.Orientation.Horizontal ? "split-horizontal" : "split-content";
+            builder = treeBuilder;
+            classes.Push(panel.ChildOrientation == PanelTree.Orientation.Horizontal ? "split-horizontal" : "split-content");
 
-            foreach (IPanel panel in panel.Children)
+            foreach (IPanel child in panel.Children)
             {
-                panel.AcceptRenderer(this);
+                child.AcceptRenderer(this);
             }
         };
 
-        public void VisitResizable(Resizable resizable)
+        public void VisitResizable(PanelComponent panel)
         {
-            builder.OpenElement(0, "div");
-            builder.AddAttribute(1, "id", resizable.ElementId);
+            builder!.OpenElement(sequence, "div");
+            builder.AddAttribute(sequence, "id", panel.ElementId);
 
-            if (currentClass != null)
+            if (classes.Count > 0)
             {
-                builder.AddAttribute(2, "class", $"split {currentClass}");
+                builder.AddAttribute(sequence, "class", $"split {classes.Peek()}");
             }
 
-            builder.OpenComponent(3, resizable.GetType());
-            builder.CloseComponent();
+            builder.OpenComponent<Resizable>(sequence);
 
+            void PanelComponent(RenderTreeBuilder builder2)
+            {
+                builder2.OpenComponent(sequence, panel.Component.GetType());
+                builder2.CloseComponent();
+            }
+
+            builder.AddAttribute(sequence, "ChildContent", (RenderFragment) PanelComponent);
+
+            builder.CloseComponent();
             builder.CloseElement();
         }
 
         public void VisitPanelTree(PanelTree tree)
         {
-            builder.OpenElement(0, "div");
-            builder.AddAttribute(1, "id", tree.ElementId);
+            builder!.OpenElement(sequence, "div");
+            builder.AddAttribute(sequence, "id", tree.ElementId);
 
-            if (currentClass != null)
+            if (classes.Count > 0)
             {
-                builder.AddAttribute(2, "class", $"split {currentClass}");
+                builder.AddAttribute(sequence, "class", $"split {classes.Peek()}");
             }
 
-            currentClass = tree.ChildOrientation == PanelTree.Orientation.Horizontal ? "split-horizontal" : "split-content";
+            classes.Push(tree.ChildOrientation == PanelTree.Orientation.Horizontal ? "split-horizontal" : "split-content");
             foreach (IPanel panel in tree.Children)
             {
                 panel.AcceptRenderer(this);
             }
 
+            classes.Pop();
             builder.CloseElement();
         }
     }

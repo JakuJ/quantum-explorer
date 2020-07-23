@@ -10,21 +10,26 @@
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
-    PanelTree tree;
+    readonly PanelTree tree = new PanelTree(PanelTree.Orientation.Horizontal);
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        tree = new PanelTree(PanelTree.Orientation.Horizontal);
-
         tree.AddPanel(new Editor());
 
-        var rightPanel = new PanelTree(PanelTree.Orientation.Vertical);
-        rightPanel.AddPanel(new Compositor());
-        rightPanel.AddPanel(new Visualizer());
+        var doublePanel = new PanelTree(PanelTree.Orientation.Vertical);
+        doublePanel.AddPanel(new Editor());
+        doublePanel.AddPanel(new Compositor());
 
-        tree.AddPanel(rightPanel);
+        tree.AddPanel(doublePanel);
+
+        var triplePanel = new PanelTree(PanelTree.Orientation.Vertical);
+        triplePanel.AddPanel(new Editor());
+        triplePanel.AddPanel(new Compositor());
+        triplePanel.AddPanel(new Visualizer());
+
+        tree.AddPanel(triplePanel);
     }
 
     protected override void OnAfterRender(bool firstRender)
