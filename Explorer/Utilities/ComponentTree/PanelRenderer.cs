@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Components.Rendering;
 namespace Explorer.Utilities.ComponentTree
 {
     /// <summary>
-    /// A class that processes <see cref="IPanel" /> component trees and render them appropriately.
+    /// A class that processes <see cref="IPanel" /> component trees and renders them appropriately.
     /// </summary>
     internal class PanelRenderer
     {
-        private readonly Stack<string> classes = new Stack<string>();
+        private readonly Stack<PanelTree.Alignment> classes = new Stack<PanelTree.Alignment>();
         private RenderTreeBuilder? builder;
         private int sequence;
 
@@ -27,7 +27,8 @@ namespace Explorer.Utilities.ComponentTree
 
             if (classes.Count > 0)
             {
-                builder.AddAttribute(Sequence, "class", $"split {classes.Peek()}");
+                string cls = classes.Peek() == PanelTree.Alignment.Horizontal ? "split-horizontal" : "";
+                builder.AddAttribute(Sequence, "class", $"split {cls} split-content");
             }
 
             builder.OpenComponent<Resizable>(Sequence);
@@ -55,10 +56,11 @@ namespace Explorer.Utilities.ComponentTree
 
             if (classes.Count > 0)
             {
-                builder.AddAttribute(Sequence, "class", $"split {classes.Peek()}");
+                string cls = classes.Peek() == PanelTree.Alignment.Horizontal ? "split-horizontal" : "";
+                builder.AddAttribute(Sequence, "class", $"split {cls}");
             }
 
-            classes.Push(tree.Direction == PanelTree.Alignment.Horizontal ? "split-horizontal" : "split-content");
+            classes.Push(tree.Direction);
             foreach (IPanel panel in tree.Children)
             {
                 panel.AcceptRenderer(this);
@@ -73,7 +75,7 @@ namespace Explorer.Utilities.ComponentTree
             return treeBuilder =>
             {
                 builder = treeBuilder;
-                classes.Push(panel.Direction == PanelTree.Alignment.Horizontal ? "split-horizontal" : "split-content");
+                classes.Push(panel.Direction);
 
                 foreach (IPanel child in panel.Children)
                 {

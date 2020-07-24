@@ -9,16 +9,12 @@
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   overflow: hidden;
-  border-style: solid;
-  border-color: #C0C0C0;
-}
-
-.split.split-horizontal {
-  border-width: 0 1px;
 }
 
 .split.split-content {
-  border-width: 1px 0;
+  border-style: solid;
+  border-color: #C0C0C0;
+  border-width: 1px;
 }
 
 .gutter {
