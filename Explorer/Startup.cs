@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 namespace Explorer
 {
     [SuppressMessage("Documentation", "SA1600", Justification = "Boilerplate")]
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public Startup(IConfiguration configuration)

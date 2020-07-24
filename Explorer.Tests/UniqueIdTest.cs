@@ -6,6 +6,7 @@ using NUnit.Framework;
 namespace Explorer.Tests
 {
     [TestFixture]
+    [Parallelizable]
     public class UniqueIdTest
     {
         [Test]

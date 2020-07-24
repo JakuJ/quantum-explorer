@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components.Rendering;
 namespace Explorer.Utilities.ComponentTree
 {
     /// <summary>
-    /// A class that processes <see cref="IPanel" /> component trees and renders them appropriately.
+    /// A class that processes <see cref="T:Explorer.Utilities.ComponentTree.IPanel" /> component trees and renders them appropriately.
     /// </summary>
     internal class PanelRenderer
     {
