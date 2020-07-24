@@ -9,7 +9,7 @@ namespace Explorer.Utilities.ComponentTree
     /// A node in the panel tree.
     /// Represents a horizontal or vertical container with resizable panels.
     /// </summary>
-    public class PanelTree : IPanel
+    internal class PanelTree : IPanel
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PanelTree" /> class.
