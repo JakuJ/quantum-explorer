@@ -1,4 +1,5 @@
-# quantum-explorer
+# Quantum Explorer
+![.NET Core](https://github.com/JakuJ/quantum-explorer/workflows/.NET%20Core/badge.svg)
 
 # Requirements
 
@@ -18,6 +19,9 @@ dotnet build
     
 # run at localhost:5001 
 dotnet run --project Explorer
+
+# test
+dotnet test
 ```
 
 # Coding style
