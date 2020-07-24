@@ -11,7 +11,7 @@ namespace Explorer.Utilities
         /// Returns a new, unique ID.
         /// Due to use in HTML element identifiers, these IDs always start with a character.
         /// </summary>
-        /// <returns>A string of 32 hexadecimal digits that starts with a character (a-e).</returns>
+        /// <returns>A string of 32 hexadecimal digits that starts with a character 'f'.</returns>
         public static string CreateUniqueId()
         {
             var guid = Guid.NewGuid();

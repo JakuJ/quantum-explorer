@@ -12,9 +12,7 @@
 }
 
 .split.split-content {
-  border-style: solid;
-  border-color: #C0C0C0;
-  border-width: 1px;
+  border: 1px solid #C0C0C0;
 }
 
 .gutter {
@@ -25,12 +23,12 @@
 
 .gutter.gutter-horizontal {
   cursor: col-resize;
-  background-image: url('../images/grips/vertical.png');
+  background-image: url('../images/grips/horizontal.png');
 }
 
 .gutter.gutter-vertical {
   cursor: row-resize;
-  background-image: url('../images/grips/horizontal.png');
+  background-image: url('../images/grips/vertical.png');
 }
 
 .split.split-horizontal,
