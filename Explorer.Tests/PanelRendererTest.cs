@@ -67,5 +67,19 @@ namespace Explorer.Tests
             Assert.AreEqual(2, page.FindComponents<Compositor>().Count, "There should be two compositors on the page");
             Assert.AreEqual(4, page.FindComponents<Visualizer>().Count, "There should be four visualizers on the page");
         }
+
+        [Test]
+        public void AllowsForTheSameComponentInTwoPlaces()
+        {
+            using var ctx = new TestContext();
+            var tree = new PanelTree(PanelTree.Alignment.Horizontal);
+
+            var editor = new Editor();
+            tree.AddPanel(editor);
+            tree.AddPanel(editor);
+
+            var page = RenderTree(ctx, tree);
+            Assert.AreEqual(2, page.FindComponents<Editor>().Count, "There should be two separate editors");
+        }
     }
 }
