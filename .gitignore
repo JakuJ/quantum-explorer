@@ -6,3 +6,4 @@ bin/
 obj/
 node_modules/
 /Explorer/wwwroot/js/
+*.DotSettings.user

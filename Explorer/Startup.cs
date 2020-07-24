@@ -5,15 +5,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Quantum_Server
+namespace Explorer
 {
     [SuppressMessage("Documentation", "SA1600", Justification = "Boilerplate")]
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
@@ -37,12 +35,11 @@ namespace Quantum_Server
 
             app.UseRouting();
 
-            app
-               .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapBlazorHub();
-                    endpoints.MapFallbackToPage("/_Host");
-                });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapBlazorHub();
+                endpoints.MapFallbackToPage("/_Host");
+            });
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

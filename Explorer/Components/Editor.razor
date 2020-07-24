@@ -1,20 +1,17 @@
-<textarea @bind="Code" id="editor">This is the Q# code editor for now.</textarea>
-
+<textarea @bind="Code" class="editor-textarea"></textarea>
 
 @code {
 
-    string Code { get; set; }
+    private string code = "This is the Q# code editor for now.";
+
+    public string Code
+    {
+        get => code;
+        set
+        {
+            code = value;
+            StateHasChanged();
+        }
+    }
 
 }
-
-
-<style>
-    textarea {
-        resize: none;
-    }
-
-    #editor {
-        width: 100%;
-        height: 100%;
-    }
-</style>

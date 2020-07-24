@@ -11,10 +11,8 @@
   overflow: hidden;
 }
 
-.split-content {
+.split.split-content {
   border: 1px solid #C0C0C0;
-  box-shadow: inset 0 1px 2px #e4e4e4;
-  background-color: #fff;
 }
 
 .gutter {
@@ -25,7 +23,7 @@
 
 .gutter.gutter-horizontal {
   cursor: col-resize;
-  background-image: url('../images/grips/vertical.png');
+  background-image: url('../images/grips/horizontal.png');
 }
 
 .gutter.gutter-vertical {

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="StyleCop rules for test projects"
+         Description="StyleCop ruleset for this unit test projects."
+         ToolsVersion="15.0">
+  <Localization ResourceAssembly="Microsoft.VisualStudio.CodeAnalysis.RuleSets.Strings.dll"
+                ResourceBaseName="Microsoft.VisualStudio.CodeAnalysis.RuleSets.Strings.Localized">
+    <Name Resource="TestStyleRules_Name" />
+    <Description Resource="TestStyleRules_Description" />
+  </Localization>
+  <Include Path=".\Common.ruleset" Action="Default" />
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA0001" Action="None" /> <!--  XML comment analysis is disabled due to project configuration -->
+  </Rules>
+</RuleSet>
