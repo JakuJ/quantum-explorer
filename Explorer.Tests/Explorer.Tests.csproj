@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="$(SolutionDir)\msbuild\Test.props" />
+  <Import Project="..\msbuild\Test.props" />
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
