@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
 using Explorer.Components;
@@ -11,17 +12,17 @@ namespace Explorer.Tests
     public class EditorTest
     {
         [Test]
-        public void ChangingCodePropertyUpdatesText()
+        public async Task ChangingCodePropertyUpdatesText()
         {
             using var ctx = new TestContext();
             var page = ctx.RenderComponent<Editor>();
-            Editor instance = page.Instance;
+            Editor editor = page.Instance;
 
             string text = page.Find("textarea").GetAttribute("value");
-            Assert.AreEqual(instance.Code, text, "The value of the textarea should be the initial value of the Code property");
+            Assert.AreEqual(editor.Code, text, "The value of the textarea should be the initial value of the Code property");
 
             const string testCode = "Sample code";
-            instance.Code = testCode;
+            await page.InvokeAsync(() => { editor.Code = testCode; });
 
             text = page.Find("textarea").GetAttribute("value");
             Assert.AreEqual(testCode, text, "The value of the textarea should be the updated value of the Code property");

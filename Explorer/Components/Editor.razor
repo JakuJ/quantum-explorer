@@ -2,6 +2,16 @@
 
 @code {
 
-    public string Code { get; set; } = "This is the Q# code editor for now.";
+    private string code = "This is the Q# code editor for now.";
+
+    public string Code
+    {
+        get => code;
+        set
+        {
+            code = value;
+            StateHasChanged();
+        }
+    }
 
 }
