@@ -7,14 +7,14 @@ namespace Explorer.Utilities.ComponentTree
     /// <summary>
     /// A leaf in the panel tree. Wraps around an <see cref="IComponent" />.
     /// </summary>
-    internal class Panel : IPanel
+    internal class Panel<T> : IPanel
+        where T : IComponent
     {
-        internal Panel(IComponent component) => Component = component;
-
         /// <summary>
-        /// Gets the component that this <see cref="Panel" /> instance wraps around.
+        /// Gets or sets the rendered instance of the component.
+        /// This property is null until the panel is actually rendered using a <see cref="PanelRenderer"/>.
         /// </summary>
-        internal IComponent Component { get; }
+        internal T Component { get; set; } = default!;
 
         [JsonProperty]
         internal string ElementId { get; } = UniqueId.CreateUniqueId();

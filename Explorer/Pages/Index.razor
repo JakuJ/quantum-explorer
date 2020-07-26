@@ -16,11 +16,11 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        tree.AddPanel(new Editor());
+        tree.AddPanel<Editor>();
 
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
-        sidePanel.AddPanel(new Compositor());
-        sidePanel.AddPanel(new Visualizer());
+        sidePanel.AddPanel<Compositor>();
+        sidePanel.AddPanel<Visualizer>();
 
         tree.AddPanel(sidePanel);
     }

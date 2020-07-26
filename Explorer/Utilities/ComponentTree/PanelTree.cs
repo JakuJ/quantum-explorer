@@ -47,6 +47,12 @@ namespace Explorer.Utilities.ComponentTree
 
         internal void AddPanel(IPanel panel) => Children.Add(panel);
 
-        internal void AddPanel(IComponent component) => Children.Add(new Panel(component));
+        internal Panel<T> AddPanel<T>()
+            where T : IComponent
+        {
+            var panel = new Panel<T>();
+            Children.Add(panel);
+            return panel;
+        }
     }
 }

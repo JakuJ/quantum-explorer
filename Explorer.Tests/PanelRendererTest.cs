@@ -32,7 +32,7 @@ namespace Explorer.Tests
         {
             using var ctx = new TestContext();
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
-            tree.AddPanel(new Editor());
+            tree.AddPanel<Editor>();
             var page = RenderTree(ctx, tree);
             Assert.DoesNotThrow(() => page.FindComponent<Editor>(), "There should be an Editor on the page");
         }
@@ -42,21 +42,21 @@ namespace Explorer.Tests
         {
             using var ctx = new TestContext();
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
-            tree.AddPanel(new Editor());
+            tree.AddPanel<Editor>();
 
             var two = new PanelTree(PanelTree.Alignment.Vertical);
-            two.AddPanel(new Compositor());
-            two.AddPanel(new Visualizer());
+            tree.AddPanel<Compositor>();
+            tree.AddPanel<Visualizer>();
 
             tree.AddPanel(two);
 
             var three = new PanelTree(PanelTree.Alignment.Horizontal);
-            three.AddPanel(new Visualizer());
-            three.AddPanel(new Compositor());
+            tree.AddPanel<Visualizer>();
+            tree.AddPanel<Compositor>();
 
             var four = new PanelTree(PanelTree.Alignment.Vertical);
-            three.AddPanel(new Visualizer());
-            three.AddPanel(new Visualizer());
+            tree.AddPanel<Visualizer>();
+            tree.AddPanel<Visualizer>();
 
             three.AddPanel(four);
             tree.AddPanel(three);
@@ -69,17 +69,16 @@ namespace Explorer.Tests
         }
 
         [Test]
-        public void AllowsForTheSameComponentInTwoPlaces()
+        public void AllowsAccessToTheRenderedComponentInstance()
         {
             using var ctx = new TestContext();
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
 
-            var editor = new Editor();
-            tree.AddPanel(editor);
-            tree.AddPanel(editor);
-
+            Panel<Editor> editor = tree.AddPanel<Editor>();
             var page = RenderTree(ctx, tree);
-            Assert.AreEqual(2, page.FindComponents<Editor>().Count, "There should be two separate editors");
+
+            var editorInstance = page.FindComponent<Editor>().Instance;
+            Assert.AreSame(editor.Component, editorInstance, "The instance of the component on the page should be accessible from code");
         }
     }
 }
