@@ -6,4 +6,15 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\Test.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
+  <ItemGroup Label="Packages">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Code Coverage">
+    <PackageReference Include="coverlet.collector" Version="1.3.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
