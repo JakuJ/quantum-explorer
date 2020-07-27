@@ -35,4 +35,3 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: ./TestResults/
         flags: unittests
-        env_vars: OS
