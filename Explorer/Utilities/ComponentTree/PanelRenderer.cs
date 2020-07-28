@@ -17,10 +17,11 @@ namespace Explorer.Utilities.ComponentTree
         private int Sequence => sequence++;
 
         /// <summary>
-        /// Generate content for a razor component inside a <see cref="Panel" /> wrapper.
+        /// Generate content for a razor component inside a <see cref="Panel{T}" /> wrapper.
         /// </summary>
         /// <param name="panel">A wrapper around a razor component.</param>
-        public void RenderPanel(Panel panel)
+        public void RenderPanel<T>(Panel<T> panel)
+            where T : IComponent
         {
             builder!.OpenElement(Sequence, "div");
             builder.AddAttribute(Sequence, "id", panel.ElementId);
@@ -35,7 +36,8 @@ namespace Explorer.Utilities.ComponentTree
 
             void PanelComponent(RenderTreeBuilder builder2)
             {
-                builder2.OpenComponent(Sequence, panel.Component.GetType());
+                builder2.OpenComponent(Sequence, typeof(T));
+                builder2.AddComponentReferenceCapture(Sequence, reference => { panel.Component = (T)reference; });
                 builder2.CloseComponent();
             }
 
