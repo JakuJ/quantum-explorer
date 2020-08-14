@@ -4,8 +4,4 @@
         <TargetFramework>netstandard2.1</TargetFramework>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Content Include="Library.qs" />
-    </ItemGroup>
-
 </Project>

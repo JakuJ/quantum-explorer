@@ -33,6 +33,9 @@
     <Content Remove="$(JsLibRoot)**" />
     <None Remove="$(JsLibRoot)**" />
     <None Include="$(JsLibRoot)**" Exclude="$(JsLibRoot)node_modules\**" />
+    <Content Update="Components\DiagnosticList.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
 
   <Target Name="EnsureNodeEnv" BeforeTargets="BuildJsBundle" Condition=" !Exists('$(JsLibRoot)node_modules') ">

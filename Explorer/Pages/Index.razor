@@ -5,14 +5,15 @@
 @using System.IO
 @using System.Diagnostics
 @inject IJSRuntime JsRuntime;
+@inject ICompiler Compiler;
 
 <div id="splitPanes">
     @Components
 </div>
 
 @code {
-    Editor editor;
-    Visualizer visualizer;
+    Panel<Editor> editor;
+    Panel<DiagnosticList> diagnostics;
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -21,33 +22,35 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        tree.AddPanel<Editor>();
+        editor = tree.AddPanel<Editor>();
 
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
         sidePanel.AddPanel<Compositor>();
-        sidePanel.AddPanel<Visualizer>();
+        diagnostics = sidePanel.AddPanel<DiagnosticList>();
 
         tree.AddPanel(sidePanel);
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
+        await InitializePanels();
+
+        // string path = Path.Combine(Environment.CurrentDirectory, "../QSharpTestSources/Library.qs");
+        // string code = await File.ReadAllTextAsync(path);
+        // await Compiler.Compile(code);
+        //
+        // editor.Component.Code = Compiler.GetCode();
+        // diagnostics.Component.Diagnostics = Compiler.GetDiagnostics();
+    }
+
+    private async Task InitializePanels()
+    {
         string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Auto
         });
-        JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
-
-        await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes");
-
-        ICompiler compiler = new Compiler();
-        string path = Path.Combine(Environment.CurrentDirectory, "../QSharpTestSources/Library.qs");
-        string code = await File.ReadAllTextAsync(path);
-        await compiler.Compile(code);
-
-        editor.Code = compiler.GetCode();
+        await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
     }
-
 }

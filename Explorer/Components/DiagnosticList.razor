@@ -1,0 +1,21 @@
+@using Microsoft.VisualStudio.LanguageServer.Protocol
+
+<table class="table text-center">
+    <thead>
+    <th>Severity</th>
+    <th>Message</th>
+    </thead>
+    <tbody>
+    @foreach (Diagnostic diagnostic in Diagnostics)
+    {
+        <tr>@diagnostic.Severity</tr>
+        <tr>@diagnostic.Message</tr>
+    }
+    </tbody>
+</table>
+
+@code {
+
+    public List<Diagnostic> Diagnostics { get; set; } = new List<Diagnostic>();
+
+}

@@ -8,8 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Explorer.Tests", "Explorer.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Compiler\Compiler.csproj", "{385E2363-FAE0-4898-A20A-7E8E75D1B916}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QSharpTestSources", "QSharpTestSources\QSharpTestSources.csproj", "{0C2A880F-E2CE-47A5-A557-B14DE0704705}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -28,10 +26,6 @@ Global
 		{385E2363-FAE0-4898-A20A-7E8E75D1B916}.Debug|x64.Build.0 = Debug|Any CPU
 		{385E2363-FAE0-4898-A20A-7E8E75D1B916}.Release|x64.ActiveCfg = Release|Any CPU
 		{385E2363-FAE0-4898-A20A-7E8E75D1B916}.Release|x64.Build.0 = Release|Any CPU
-		{0C2A880F-E2CE-47A5-A557-B14DE0704705}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{0C2A880F-E2CE-47A5-A557-B14DE0704705}.Debug|x64.Build.0 = Debug|Any CPU
-		{0C2A880F-E2CE-47A5-A557-B14DE0704705}.Release|x64.ActiveCfg = Release|Any CPU
-		{0C2A880F-E2CE-47A5-A557-B14DE0704705}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

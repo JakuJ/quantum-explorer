@@ -9,11 +9,14 @@ using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.DataTypes;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
 using Microsoft.Quantum.QsCompiler.Transformations.QsCodeOutput;
+using Microsoft.VisualStudio.LanguageServer.Protocol;
 using Compilation = Microsoft.Quantum.QsCompiler.CompilationBuilder.CompilationUnitManager.Compilation;
 
 namespace Compiler
 {
-    public class Compiler : ICompiler
+    /// <inheritdoc />
+    /// <summary>An instance of <see cref="ICompiler"/> using the official Q# compiler.</summary>
+    public class QsCompiler : ICompiler
     {
         private Compilation compilation;
 
@@ -30,6 +33,7 @@ namespace Compiler
             return Path.Combine(assemblyDir, dll);
         }
 
+        /// <inheritdoc/>
         public async Task Compile(string code)
         {
             var sourceFiles = new Dictionary<Uri, string>
@@ -42,6 +46,8 @@ namespace Compiler
 
             using var manager = new CompilationUnitManager();
 
+            // These are the assemblies that are linked with the compiled file
+            // TODO: Dynamically find necessary assemblies based on 'open' directives in the code.
             string[] paths =
             {
                 GetDllPath("Microsoft.Quantum.Standard.dll"),
@@ -55,6 +61,7 @@ namespace Compiler
             compilation = manager.Build();
         }
 
+        /// <inheritdoc/>
         public string GetCode()
         {
             SyntaxTreeToQsharp st = SyntaxTreeToQsharp.Default;
@@ -62,6 +69,7 @@ namespace Compiler
             return st.ToCode(comp.Namespaces.FirstOrDefault());
         }
 
-        public List<string> GetDiagnostics() => compilation.Diagnostics().Select(x => x.Message).ToList();
+        /// <inheritdoc/>
+        public List<Diagnostic> GetDiagnostics() => compilation.Diagnostics().ToList();
     }
 }
