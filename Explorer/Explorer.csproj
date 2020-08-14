@@ -2,9 +2,8 @@
 
   <Import Project="..\msbuild\Source.props" />
 
-  <PropertyGroup Label="Main">
+  <PropertyGroup>
     <RootNamespace>Explorer</RootNamespace>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <JsLibRoot>JsLib\</JsLibRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>

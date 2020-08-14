@@ -2,18 +2,21 @@
 
   <Import Project="..\msbuild\Source.props" />
 
-    <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
-        <RootNamespace>Compiler</RootNamespace>
-    </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>Compiler</RootNamespace>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20070124" />
-    </ItemGroup>
+  <ItemGroup Label="Projects">
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
 
-    <ItemGroup Label="References for the Q# compiler">
-      <PackageReference Include="Microsoft.Quantum.QSharp.Core" Version="0.12.20072031" />
-      <PackageReference Include="Microsoft.Quantum.Standard" Version="0.12.20072031" />
-    </ItemGroup>
+  <ItemGroup Label="Packages">
+    <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20070124" />
+  </ItemGroup>
+
+  <ItemGroup Label="References for the Q# compiler">
+    <PackageReference Include="Microsoft.Quantum.QSharp.Core" Version="0.12.20072031" />
+    <PackageReference Include="Microsoft.Quantum.Standard" Version="0.12.20072031" />
+  </ItemGroup>
 
 </Project>

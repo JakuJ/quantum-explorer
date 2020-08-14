@@ -1,8 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
 using Bunit;
 using Bunit.TestDoubles.JSInterop;
 using Compiler;
-using Explorer.Components;
 using Explorer.Templates;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -15,13 +13,18 @@ namespace Explorer.Tests
     [Parallelizable]
     public class IndexPageTest
     {
+        private static TestContext InitializeContext()
+        {
+            var ctx = new TestContext();
+            ctx.Services.AddMockJSRuntime();
+            ctx.Services.AddSingleton<ICompiler>(new MockICompiler());
+            return ctx;
+        }
+
         [Test]
         public void Has3Panels()
         {
-            using var ctx = new TestContext();
-            ctx.Services.AddMockJSRuntime();
-            ctx.Services.AddSingleton<ICompiler>(new QsCompiler());
-
+            using var ctx = InitializeContext();
             var index = ctx.RenderComponent<Index>();
             Assert.AreEqual(3, index.FindComponents<Resizable>().Count, "There should be three Resizable panels at the beginning");
         }

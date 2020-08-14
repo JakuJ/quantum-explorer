@@ -2,8 +2,6 @@
 @using Explorer.Utilities.ComponentTree
 @using Newtonsoft.Json
 @using Compiler
-@using System.IO
-@using System.Diagnostics
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 
@@ -12,8 +10,9 @@
 </div>
 
 @code {
-    Panel<Editor> editor;
-    Panel<DiagnosticList> diagnostics;
+
+    Panel<Editor>? editor;
+    Panel<DiagnosticList>? diagnostics;
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -37,12 +36,12 @@
 
         await InitializePanels();
 
-        // string path = Path.Combine(Environment.CurrentDirectory, "../QSharpTestSources/Library.qs");
-        // string code = await File.ReadAllTextAsync(path);
-        // await Compiler.Compile(code);
-        //
-        // editor.Component.Code = Compiler.GetCode();
-        // diagnostics.Component.Diagnostics = Compiler.GetDiagnostics();
+    // string path = Path.Combine(Environment.CurrentDirectory, "../QSharpTestSources/Library.qs");
+    // string code = await File.ReadAllTextAsync(path);
+    // await Compiler.Compile(code);
+    //
+    // editor.Component.Code = Compiler.GetCode();
+    // diagnostics.Component.Diagnostics = Compiler.GetDiagnostics();
     }
 
     private async Task InitializePanels()
@@ -53,4 +52,5 @@
         });
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
     }
+
 }
