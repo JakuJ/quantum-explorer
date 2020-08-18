@@ -1,25 +1,41 @@
 using System;
 using System.Diagnostics;
 
-// TODO: Inject the logging service when available, instead of Console.WriteLine'ing.
 namespace Common
 {
     /// <inheritdoc />
     /// <summary>
     /// A class that measures time from object creation to its disposal.
     /// </summary>
+    /// <example><code>
+    /// using (new ScopedTimer( ...action or message... ))
+    /// {
+    ///     ... some code that takes a long time to execute ...
+    /// }
+    /// </code></example>
     public class ScopedTimer : IDisposable
     {
         private readonly Stopwatch stopwatch;
-        private readonly string action;
+        private readonly Action<Stopwatch>? action;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ScopedTimer"/> class.
-        /// </summary>
-        /// <param name="action">A name to be placed in the message.</param>
-        public ScopedTimer(string action)
+        /// <inheritdoc cref="ScopedTimer()"/>
+        /// <param name="message">The message to be printed after instance disposal.</param>
+        public ScopedTimer(string message) : this()
         {
-            this.action = action;
+            // TODO: Use a logging service
+            action = watch => { Console.Error.WriteLineAsync($"{message} took: {watch.ElapsedMilliseconds}ms"); };
+        }
+
+        /// <inheritdoc cref="ScopedTimer()"/>
+        /// <param name="action">An <see cref="Action"/> to perform after disposal.</param>
+        public ScopedTimer(Action action) : this() => this.action = _ => { action(); };
+
+        /// <inheritdoc cref="ScopedTimer(Action)"/>
+        public ScopedTimer(Action<Stopwatch> action) : this() => this.action = action;
+
+        /// <summary>Initializes a new instance of the <see cref="ScopedTimer"/> class.</summary>
+        private ScopedTimer()
+        {
             stopwatch = new Stopwatch();
             stopwatch.Start();
         }
@@ -28,7 +44,7 @@ namespace Common
         public void Dispose()
         {
             stopwatch.Stop();
-            Console.Error.WriteLineAsync($"{action} took: {stopwatch.ElapsedMilliseconds}ms");
+            action?.Invoke(stopwatch);
         }
     }
 }

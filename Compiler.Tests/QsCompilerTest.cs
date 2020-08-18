@@ -12,7 +12,7 @@ namespace Compiler.Tests
         public async Task CompilesExampleCodeWithoutWarnings()
         {
             string code = await GetSource("Library");
-            var compiler = new QsCompiler();
+            using var compiler = new QsCompiler();
 
             await compiler.Compile(code);
             Assert.AreEqual(0, compiler.GetDiagnostics().Count, "There should be no warnings or errors");
