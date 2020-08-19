@@ -23,7 +23,7 @@ namespace Common.Tests
         public void AwaitAnAsyncValue()
         {
             int value = WaitAndReturn().WaitAndUnwrapException();
-            Assert.AreEqual(Target, value, "Awaiting the value should take at least a second");
+            Assert.AreEqual(Target, value, "The awaited value should be correct");
         }
 
         private static async Task JustWait() => await Task.Delay(Delay);
