@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using Explorer.Utilities;
 using NUnit.Framework;
 
-namespace Explorer.Tests
+namespace Common.Tests
 {
     [TestFixture]
     [Parallelizable]
