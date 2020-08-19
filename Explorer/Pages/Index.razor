@@ -7,7 +7,7 @@
 
 <div class="main">
     <div class="top-row px-4">
-        <button class="btn btn-primary" @onclick="OnCompile">Analyze and pretty-print</button>
+        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze and pretty-print</button>
         <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
     </div>
 
@@ -20,9 +20,9 @@
 
 @code {
 #nullable disable
-    Panel<Editor> editor;
-    Panel<Editor> outputEditor;
-    Panel<DiagnosticList> diagnostics;
+    internal Panel<Editor> Editor;
+    internal Panel<Editor> OutputEditor;
+    internal Panel<DiagnosticList> Diagnostics;
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -31,23 +31,23 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        editor = tree.AddPanel<Editor>();
+        Editor = tree.AddPanel<Editor>();
 
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
 
-        outputEditor = sidePanel.AddPanel<Editor>();
-        diagnostics = sidePanel.AddPanel<DiagnosticList>();
+        OutputEditor = sidePanel.AddPanel<Editor>();
+        Diagnostics = sidePanel.AddPanel<DiagnosticList>();
 
         tree.AddPanel(sidePanel);
     }
 
     private async Task OnCompile()
     {
-        string code = editor.Component.Code;
+        string code = Editor.Component.Code;
         await Compiler.Compile(code);
 
-        diagnostics.Component.Diagnostics = Compiler.GetDiagnostics();
-        outputEditor.Component.Code = Compiler.GetCode();
+        Diagnostics.Component.Diagnostics = Compiler.GetDiagnostics();
+        OutputEditor.Component.Code = Compiler.GetCode();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -55,7 +55,7 @@
         if (!firstRender) return;
 
         await InitializePanels();
-        outputEditor.Component.Code = "The pretty-printed code is going to show up here.";
+        OutputEditor.Component.Code = "The pretty-printed code is going to show up here.";
     }
 
     private async Task InitializePanels()

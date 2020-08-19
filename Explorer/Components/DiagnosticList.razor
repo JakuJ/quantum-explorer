@@ -28,7 +28,7 @@
         set
         {
             diagnostics = value;
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
         }
     }
 
