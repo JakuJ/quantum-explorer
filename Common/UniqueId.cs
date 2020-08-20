@@ -1,6 +1,6 @@
 using System;
 
-namespace Explorer.Utilities
+namespace Common
 {
     /// <summary>
     /// A class allowing for creation of unique IDs that are safe to use as the HTML 'id' properties.

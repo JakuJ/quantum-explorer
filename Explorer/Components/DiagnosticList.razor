@@ -1,0 +1,35 @@
+@using Microsoft.VisualStudio.LanguageServer.Protocol
+
+<table class="table text-center">
+    <thead>
+    <th>Line</th>
+    <th>Severity</th>
+    <th>Message</th>
+    </thead>
+    <tbody>
+    @foreach (Diagnostic diagnostic in Diagnostics)
+    {
+        <tr>
+            <td>@diagnostic.Range.Start.Line</td>
+            <td>@diagnostic.Severity</td>
+            <td>@diagnostic.Message</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+
+    private List<Diagnostic> diagnostics = new List<Diagnostic>();
+
+    public List<Diagnostic> Diagnostics
+    {
+        get => diagnostics;
+        set
+        {
+            diagnostics = value;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+}

@@ -2,12 +2,15 @@
 
   <Import Project="..\msbuild\Source.props" />
 
-  <PropertyGroup Label="Main">
+  <PropertyGroup>
     <RootNamespace>Explorer</RootNamespace>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <JsLibRoot>JsLib\</JsLibRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Compiler\Compiler.csproj" />
+  </ItemGroup>
 
   <ItemGroup Label="Package references">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
@@ -29,6 +32,9 @@
     <Content Remove="$(JsLibRoot)**" />
     <None Remove="$(JsLibRoot)**" />
     <None Include="$(JsLibRoot)**" Exclude="$(JsLibRoot)node_modules\**" />
+    <Content Update="Components\DiagnosticList.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
 
   <Target Name="EnsureNodeEnv" BeforeTargets="BuildJsBundle" Condition=" !Exists('$(JsLibRoot)node_modules') ">

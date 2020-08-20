@@ -10,7 +10,7 @@
         set
         {
             code = value;
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
         }
     }
 
