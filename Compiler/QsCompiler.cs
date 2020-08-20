@@ -22,25 +22,28 @@ namespace Compiler
     {
         // These are cached references that we link with the compiled source files
         // Loading them takes 10-20 seconds, that's why.
-        private static readonly ImmutableDictionary<NonNullable<string>, References.Headers> RefPaths;
-        private readonly ILogger<ICompiler> logger;
-        private readonly ILoggerFactory loggerFactory;
+        private static ImmutableDictionary<NonNullable<string>, References.Headers>? refPaths;
+        private readonly ILogger<QsCompiler> logger;
         private readonly CompilationUnitManager manager;
         private Compilation? compilation;
 
-        // TODO: Or just agree to a standard set of assemblies, cached for speed?
-        // TODO: Dynamically add necessary assemblies based on 'open' directives in the code?
-        static QsCompiler()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QsCompiler"/> class.
+        /// </summary>
+        /// <param name="factory">A logger factory.</param>
+        public QsCompiler(ILoggerFactory factory)
         {
-            string[] assemblies =
+            logger = factory.CreateLogger<QsCompiler>();
+
+            if (refPaths == null)
             {
-                GetDllPath("Microsoft.Quantum.Standard.dll"),
-                GetDllPath("Microsoft.Quantum.QSharp.Core.dll"),
-            };
-            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-            using (new ScopedTimer("Preloading Q# assemblies", loggerFactory))
+                PreloadReferences(logger);
+            }
+
+            using (new ScopedTimer("Loading cached references", logger))
             {
-                RefPaths = ProjectManager.LoadReferencedAssemblies(assemblies);
+                manager = new CompilationUnitManager();
+                manager.UpdateReferencesAsync(new References(refPaths)).WaitAndUnwrapException();
             }
         }
 
@@ -58,40 +61,24 @@ namespace Compiler
             set => compilation = value;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="QsCompiler"/> class.
-        /// </summary>
-        /// <param name="loggerFactory">Logger factory.</param>
-        public QsCompiler(ILoggerFactory loggerFactory)
-        {
-            this.loggerFactory = loggerFactory;
-            logger = loggerFactory.CreateLogger<ICompiler>();
-
-            using (new ScopedTimer("Loading cached references", loggerFactory))
-            {
-                manager = new CompilationUnitManager();
-                manager.UpdateReferencesAsync(new References(RefPaths)).WaitAndUnwrapException();
-            }
-        }
-
         /// <inheritdoc/>
         public async Task Compile(string code)
         {
             ImmutableHashSet<FileContentManager> files;
 
-            using (new ScopedTimer("Initializing the file manager", loggerFactory))
+            using (new ScopedTimer("Initializing the file manager", logger))
             {
                 // A dummy filename. It's constant, so we override any previous source files.
                 var sourceFiles = new Dictionary<Uri, string> { { new Uri("file:///tmp/TempFile.qs"), code } };
                 files = CompilationUnitManager.InitializeFileManagers(sourceFiles.ToImmutableDictionary());
             }
 
-            using (new ScopedTimer("Updating source files", loggerFactory))
+            using (new ScopedTimer("Updating source files", logger))
             {
                 await manager.AddOrUpdateSourceFilesAsync(files);
             }
 
-            using (new ScopedTimer("Compiling", loggerFactory))
+            using (new ScopedTimer("Compiling", logger))
             {
                 CurrentCompilation = manager.Build();
             }
@@ -112,6 +99,22 @@ namespace Compiler
         public void Dispose()
         {
             manager.Dispose();
+        }
+
+        private static void PreloadReferences(ILogger logger)
+        {
+            // TODO: Or just agree to a standard set of assemblies, cached for speed?
+            // TODO: Dynamically add necessary assemblies based on 'open' directives in the code?
+            string[] assemblies =
+            {
+                GetDllPath("Microsoft.Quantum.Standard.dll"),
+                GetDllPath("Microsoft.Quantum.QSharp.Core.dll"),
+            };
+
+            using (new ScopedTimer("Preloading Q# assemblies", logger))
+            {
+                refPaths = ProjectManager.LoadReferencedAssemblies(assemblies);
+            }
         }
 
         private static string GetDllPath(string dll)
