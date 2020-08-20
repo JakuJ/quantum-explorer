@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Common;
+using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.DataTypes;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
@@ -22,6 +23,8 @@ namespace Compiler
         // These are cached references that we link with the compiled source files
         // Loading them takes 10-20 seconds, that's why.
         private static readonly ImmutableDictionary<NonNullable<string>, References.Headers> RefPaths;
+        private readonly ILogger<ICompiler> logger;
+        private readonly ILoggerFactory loggerFactory;
         private readonly CompilationUnitManager manager;
         private Compilation? compilation;
 
@@ -34,8 +37,8 @@ namespace Compiler
                 GetDllPath("Microsoft.Quantum.Standard.dll"),
                 GetDllPath("Microsoft.Quantum.QSharp.Core.dll"),
             };
-
-            using (new ScopedTimer("Preloading Q# assemblies"))
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            using (new ScopedTimer("Preloading Q# assemblies", loggerFactory))
             {
                 RefPaths = ProjectManager.LoadReferencedAssemblies(assemblies);
             }
@@ -58,9 +61,13 @@ namespace Compiler
         /// <summary>
         /// Initializes a new instance of the <see cref="QsCompiler"/> class.
         /// </summary>
-        public QsCompiler()
+        /// <param name="loggerFactory">Logger factory.</param>
+        public QsCompiler(ILoggerFactory loggerFactory)
         {
-            using (new ScopedTimer("Loading cached references"))
+            this.loggerFactory = loggerFactory;
+            logger = loggerFactory.CreateLogger<ICompiler>();
+
+            using (new ScopedTimer("Loading cached references", loggerFactory))
             {
                 manager = new CompilationUnitManager();
                 manager.UpdateReferencesAsync(new References(RefPaths)).WaitAndUnwrapException();
@@ -72,19 +79,19 @@ namespace Compiler
         {
             ImmutableHashSet<FileContentManager> files;
 
-            using (new ScopedTimer("Initializing the file manager"))
+            using (new ScopedTimer("Initializing the file manager", loggerFactory))
             {
                 // A dummy filename. It's constant, so we override any previous source files.
                 var sourceFiles = new Dictionary<Uri, string> { { new Uri("file:///tmp/TempFile.qs"), code } };
                 files = CompilationUnitManager.InitializeFileManagers(sourceFiles.ToImmutableDictionary());
             }
 
-            using (new ScopedTimer("Updating source files"))
+            using (new ScopedTimer("Updating source files", loggerFactory))
             {
                 await manager.AddOrUpdateSourceFilesAsync(files);
             }
 
-            using (new ScopedTimer("Compiling"))
+            using (new ScopedTimer("Compiling", loggerFactory))
             {
                 CurrentCompilation = manager.Build();
             }

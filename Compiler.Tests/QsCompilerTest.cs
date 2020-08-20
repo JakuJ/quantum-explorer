@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Compiler.Tests
@@ -12,7 +13,8 @@ namespace Compiler.Tests
         public async Task CompilesExampleCodeWithoutWarnings()
         {
             string code = await GetSource("Library");
-            using var compiler = new QsCompiler();
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            using var compiler = new QsCompiler(loggerFactory);
 
             await compiler.Compile(code);
             Assert.AreEqual(0, compiler.GetDiagnostics().Count, "There should be no warnings or errors");

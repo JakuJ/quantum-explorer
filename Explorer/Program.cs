@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 [assembly: InternalsVisibleTo("Explorer.Tests")]
 
@@ -23,6 +24,12 @@ namespace Explorer
         {
             return Host
                   .CreateDefaultBuilder(args)
+                  .ConfigureLogging(logBuilder =>
+                    {
+                        logBuilder.AddConsole();
+                        logBuilder.AddDebug();
+                        logBuilder.AddEventSourceLogger();
+                    })
                   .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
         }
     }

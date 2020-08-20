@@ -5,6 +5,7 @@ using Bunit.TestDoubles.JSInterop;
 using Compiler;
 using Explorer.Templates;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Index = Explorer.Pages.Index;
 using TestContext = Bunit.TestContext;
@@ -21,7 +22,10 @@ namespace Explorer.Tests
         {
             var ctx = new TestContext();
             ctx.Services.AddMockJSRuntime();
-            ctx.Services.AddSingleton<ICompiler>(new QsCompiler());
+            ctx.Services.AddSingleton<ICompiler>((container) =>
+                new QsCompiler(container.GetRequiredService<ILoggerFactory>()));
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            ctx.Services.AddSingleton(typeof(ILoggerFactory), loggerFactory);
             return ctx;
         }
 

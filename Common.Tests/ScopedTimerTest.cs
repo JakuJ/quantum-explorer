@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Common.Tests
@@ -9,7 +10,8 @@ namespace Common.Tests
         public void PerformsTheProvidedAction()
         {
             var value = "no";
-            using (new ScopedTimer(() => { value = "yes"; })) { }
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            using (new ScopedTimer(() => { value = "yes"; }, loggerFactory)) { }
 
             Assert.AreEqual("yes", value, "Scoped timer should perform provided action after disposal");
         }

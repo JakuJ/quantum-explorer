@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Common.Tests
@@ -11,10 +12,10 @@ namespace Common.Tests
         [Test]
         public void AwaitDelay()
         {
-            using var timer = new ScopedTimer(watch =>
-            {
-                Assert.GreaterOrEqual(watch.ElapsedMilliseconds, Delay, "The delay should be properly awaited");
-            });
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            using var timer = new ScopedTimer(
+                watch => Assert.GreaterOrEqual(watch.ElapsedMilliseconds, Delay, "The delay should be properly awaited"),
+                loggerFactory);
 
             JustWait().WaitAndUnwrapException();
         }
