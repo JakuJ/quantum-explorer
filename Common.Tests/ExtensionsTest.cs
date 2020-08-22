@@ -11,10 +11,8 @@ namespace Common.Tests
         [Test]
         public void AwaitDelay()
         {
-            using var timer = new ScopedTimer(watch =>
-            {
-                Assert.GreaterOrEqual(watch.ElapsedMilliseconds, Delay, "The delay should be properly awaited");
-            });
+            using var timer =
+                new ScopedTimer(watch => Assert.GreaterOrEqual(watch.ElapsedMilliseconds, Delay, "The delay should be properly awaited"));
 
             JustWait().WaitAndUnwrapException();
         }

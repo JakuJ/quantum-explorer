@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Compiler.Tests
@@ -8,13 +9,19 @@ namespace Compiler.Tests
     [Parallelizable]
     public class QsCompilerTest
     {
+        private static readonly ILoggerFactory ConsoleLogger = LoggerFactory.Create(builder => builder.AddConsole());
+
         [Test]
         public async Task CompilesExampleCodeWithoutWarnings()
         {
+            // Arrange
             string code = await GetSource("Library");
-            using var compiler = new QsCompiler();
+            using var compiler = new QsCompiler(ConsoleLogger.CreateLogger<QsCompiler>());
 
+            // Act
             await compiler.Compile(code);
+
+            // Assert
             Assert.AreEqual(0, compiler.GetDiagnostics().Count, "There should be no warnings or errors");
         }
 

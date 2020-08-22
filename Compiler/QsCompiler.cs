@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Common;
+using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.DataTypes;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
@@ -21,23 +22,28 @@ namespace Compiler
     {
         // These are cached references that we link with the compiled source files
         // Loading them takes 10-20 seconds, that's why.
-        private static readonly ImmutableDictionary<NonNullable<string>, References.Headers> RefPaths;
+        private static ImmutableDictionary<NonNullable<string>, References.Headers>? refPaths;
+        private readonly ILogger<QsCompiler> logger;
         private readonly CompilationUnitManager manager;
         private Compilation? compilation;
 
-        // TODO: Or just agree to a standard set of assemblies, cached for speed?
-        // TODO: Dynamically add necessary assemblies based on 'open' directives in the code?
-        static QsCompiler()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QsCompiler"/> class.
+        /// </summary>
+        /// <param name="logger">A <see cref="Logger"/> instance to log the message with.</param>
+        public QsCompiler(ILogger<QsCompiler> logger)
         {
-            string[] assemblies =
-            {
-                GetDllPath("Microsoft.Quantum.Standard.dll"),
-                GetDllPath("Microsoft.Quantum.QSharp.Core.dll"),
-            };
+            this.logger = logger;
 
-            using (new ScopedTimer("Preloading Q# assemblies"))
+            if (refPaths == null)
             {
-                RefPaths = ProjectManager.LoadReferencedAssemblies(assemblies);
+                PreloadReferences(logger);
+            }
+
+            using (new ScopedTimer("Loading cached references", logger))
+            {
+                manager = new CompilationUnitManager();
+                manager.UpdateReferencesAsync(new References(refPaths)).WaitAndUnwrapException();
             }
         }
 
@@ -55,36 +61,24 @@ namespace Compiler
             set => compilation = value;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="QsCompiler"/> class.
-        /// </summary>
-        public QsCompiler()
-        {
-            using (new ScopedTimer("Loading cached references"))
-            {
-                manager = new CompilationUnitManager();
-                manager.UpdateReferencesAsync(new References(RefPaths)).WaitAndUnwrapException();
-            }
-        }
-
         /// <inheritdoc/>
         public async Task Compile(string code)
         {
             ImmutableHashSet<FileContentManager> files;
 
-            using (new ScopedTimer("Initializing the file manager"))
+            using (new ScopedTimer("Initializing the file manager", logger))
             {
                 // A dummy filename. It's constant, so we override any previous source files.
                 var sourceFiles = new Dictionary<Uri, string> { { new Uri("file:///tmp/TempFile.qs"), code } };
                 files = CompilationUnitManager.InitializeFileManagers(sourceFiles.ToImmutableDictionary());
             }
 
-            using (new ScopedTimer("Updating source files"))
+            using (new ScopedTimer("Updating source files", logger))
             {
                 await manager.AddOrUpdateSourceFilesAsync(files);
             }
 
-            using (new ScopedTimer("Compiling"))
+            using (new ScopedTimer("Compiling", logger))
             {
                 CurrentCompilation = manager.Build();
             }
@@ -105,6 +99,22 @@ namespace Compiler
         public void Dispose()
         {
             manager.Dispose();
+        }
+
+        private static void PreloadReferences(ILogger logger)
+        {
+            // TODO: Or just agree to a standard set of assemblies, cached for speed?
+            // TODO: Dynamically add necessary assemblies based on 'open' directives in the code?
+            string[] assemblies =
+            {
+                GetDllPath("Microsoft.Quantum.Standard.dll"),
+                GetDllPath("Microsoft.Quantum.QSharp.Core.dll"),
+            };
+
+            using (new ScopedTimer("Preloading Q# assemblies", logger))
+            {
+                refPaths = ProjectManager.LoadReferencedAssemblies(assemblies);
+            }
         }
 
         private static string GetDllPath(string dll)

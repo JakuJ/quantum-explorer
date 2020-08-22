@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Common
 {
@@ -20,10 +21,10 @@ namespace Common
 
         /// <inheritdoc cref="ScopedTimer()"/>
         /// <param name="message">The message to be printed after instance disposal.</param>
-        public ScopedTimer(string message) : this()
+        /// <param name="logger">A <see cref="Logger"/> instance to log the message with.</param>
+        public ScopedTimer(string message, ILogger logger) : this()
         {
-            // TODO: Use a logging service
-            action = watch => { Console.Error.WriteLineAsync($"{message} took: {watch.ElapsedMilliseconds}ms"); };
+            action = watch => { logger.LogInformation($"{message} took: {watch.ElapsedMilliseconds}ms"); };
         }
 
         /// <inheritdoc cref="ScopedTimer()"/>
