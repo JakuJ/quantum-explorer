@@ -9,14 +9,15 @@ namespace Compiler.Tests
     [Parallelizable]
     public class QsCompilerTest
     {
-        private static readonly ILoggerFactory ConsoleLogger = LoggerFactory.Create(builder => builder.AddConsole());
+        private static readonly ILogger<QsCompiler> ConsoleLogger
+            = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<QsCompiler>();
 
         [Test]
         public async Task CompilesExampleCodeWithoutWarnings()
         {
             // Arrange
             string code = await GetSource("Library");
-            using var compiler = new QsCompiler(ConsoleLogger.CreateLogger<QsCompiler>());
+            using var compiler = new QsCompiler(ConsoleLogger);
 
             // Act
             await compiler.Compile(code);

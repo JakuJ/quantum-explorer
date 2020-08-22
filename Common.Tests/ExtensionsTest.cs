@@ -6,13 +6,15 @@ namespace Common.Tests
     [TestFixture]
     public class ExtensionsTest
     {
-        private const int Delay = 1000, Target = 42;
+        private const int Delay = 1000, DelayError = 50, Target = 42;
 
         [Test]
         public void AwaitDelay()
         {
             using var timer =
-                new ScopedTimer(watch => Assert.GreaterOrEqual(watch.ElapsedMilliseconds, Delay, "The delay should be properly awaited"));
+                new ScopedTimer(watch => Assert.GreaterOrEqual(
+                                    watch.ElapsedMilliseconds, Delay - DelayError,
+                                    "The delay should be properly awaited"));
 
             JustWait().WaitAndUnwrapException();
         }
