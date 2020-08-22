@@ -16,7 +16,7 @@ namespace Compiler.Tests
         {
             // Arrange
             string code = await GetSource("Library");
-            using var compiler = new QsCompiler(ConsoleLogger);
+            using var compiler = new QsCompiler(ConsoleLogger.CreateLogger<QsCompiler>());
 
             // Act
             await compiler.Compile(code);

@@ -30,10 +30,10 @@ namespace Compiler
         /// <summary>
         /// Initializes a new instance of the <see cref="QsCompiler"/> class.
         /// </summary>
-        /// <param name="factory">A logger factory.</param>
-        public QsCompiler(ILoggerFactory factory)
+        /// <param name="logger">A <see cref="Logger"/> instance to log the message with.</param>
+        public QsCompiler(ILogger<QsCompiler> logger)
         {
-            logger = factory.CreateLogger<QsCompiler>();
+            this.logger = logger;
 
             if (refPaths == null)
             {

@@ -32,7 +32,7 @@ namespace Explorer.Tests
             }
             else
             {
-                ctx.Services.AddSingleton<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILoggerFactory>()));
+                ctx.Services.AddSingleton<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
             }
 
             ctx.Services.AddLogging(builder => builder.AddConsole());
