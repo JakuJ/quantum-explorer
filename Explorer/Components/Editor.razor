@@ -1,5 +1,8 @@
-<textarea @bind="Code" class="editor-textarea"></textarea>
+@inject IJSRuntime JSRuntime
+@*<textarea @bind="Code" class="editor-textarea"></textarea>*@
+<div id="editorRoot" class="editor-textarea">
 
+</div>
 @code {
 
     private string code = "This is the Q# code editor for now.";
@@ -13,5 +16,19 @@
             InvokeAsync(StateHasChanged);
         }
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitWebComponentAsync();
+        }
+    }
+
+    private async Task InitWebComponentAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("Library.InitializeEditor");
+    }
+
 
 }
