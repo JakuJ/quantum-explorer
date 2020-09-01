@@ -2,6 +2,7 @@
 @using Explorer.Utilities.ComponentTree
 @using Newtonsoft.Json
 @using Compiler
+@using System.Text
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 
@@ -42,11 +43,17 @@
 
     private async Task OnCompile()
     {
-        string code = Editor.Component.Code;
-        await Compiler.Compile(code);
+        await Compiler.Compile(Editor.Component.Code);
 
-        Diagnostics.Component.Diagnostics = Compiler.GetDiagnostics();
-        OutputEditor.Component.Code = Compiler.GetCode();
+        Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
+        Dictionary<string, GateGrid> ast = AstToGateGrid.GetGrids(Compiler.Compilation);
+
+        var builder = new StringBuilder("Defined operations:" + Environment.NewLine);
+        foreach (string key in ast.Keys)
+        {
+            builder.AppendLine(key);
+        }
+        OutputEditor.Component.Code = builder.ToString();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

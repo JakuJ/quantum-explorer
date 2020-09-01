@@ -14,7 +14,7 @@ namespace Common
     ///     ... some code that takes a long time to execute ...
     /// }
     /// </code></example>
-    public class ScopedTimer : IDisposable
+    public sealed class ScopedTimer : IDisposable
     {
         private readonly Stopwatch stopwatch;
         private readonly Action<Stopwatch>? action;

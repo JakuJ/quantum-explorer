@@ -13,7 +13,8 @@ namespace Common.Tests
         {
             using var timer =
                 new ScopedTimer(watch => Assert.GreaterOrEqual(
-                                    watch.ElapsedMilliseconds, Delay - DelayError,
+                                    watch.ElapsedMilliseconds,
+                                    Delay - DelayError,
                                     "The delay should be properly awaited"));
 
             JustWait().WaitAndUnwrapException();
