@@ -26,6 +26,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
-    "babel-loader": "^8.1.0"
+    "babel-loader": "^8.1.0",
+    "style-loader": "^1.2.1",
+    "css-loader": "^4.2.2",
+    "file-loader": "^6.1.0"
   }
 }
