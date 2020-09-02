@@ -5,13 +5,13 @@ export class Editor {
     static InitializeEditor(element) {
         element.innerHTML = "";
 
-        window.editorsArray = window.editorsArray || {};
+        window.editorsDict = window.editorsDict || {};
         window.editorsCounter = window.editorsCounter || 0;
 
         var id = "id" + window.editorsCounter;
         window.editorsCounter = window.editorsCounter + 1;
 
-        window.editorsArray[id] = monaco.editor.create(element, {
+        window.editorsDict[id] = monaco.editor.create(element, {
             value: `using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,14 +38,14 @@ using System.Threading.Tasks;
 
 
     static GetCode(id) {
-        var text = window.editorsArray[id].getValue();
+        var text = window.editorsDict[id].getValue();
         console.log(text);
         return text;
     }
 
     static SetCode(id, code) {
         console.log(code);
-        window.editorsArray[id].setValue(code);
+        window.editorsDict[id].setValue(code);
     }
 }
 
