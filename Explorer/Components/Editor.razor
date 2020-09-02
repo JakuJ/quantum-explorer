@@ -1,7 +1,6 @@
 @inject IJSRuntime JSRuntime
 @using Microsoft.AspNetCore.Components.Rendering
 
-@*<textarea @bind="Code" class="editor-textarea"></textarea>*@
 <div class="editor-textarea" @ref="editorRootRef">
 
 </div>
@@ -23,19 +22,6 @@
     public async Task SetCode(string code)
     {
         await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code);
-    }
-
-    public string Code
-    {
-        get
-        {
-            return JSRuntime.InvokeAsync<string>("Library.Editor.GetCode").Result;
-        }
-        set
-        {
-            JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", value);
-            //InvokeAsync(StateHasChanged);
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
