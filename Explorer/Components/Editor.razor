@@ -1,19 +1,40 @@
 @inject IJSRuntime JSRuntime
+@using Microsoft.AspNetCore.Components.Rendering
+
 @*<textarea @bind="Code" class="editor-textarea"></textarea>*@
-<div id="editorRoot" class="editor-textarea">
+<div class="editor-textarea" @ref="editorRootRef">
 
 </div>
 @code {
+    private ElementReference editorRootRef;
 
-    private string code = "This is the Q# code editor for now.";
+    private string editorId = "";
+
+    private async Task InitWebComponentAsync()
+    {
+        editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef);
+    }
+
+    public async Task<string> GetCode()
+    {
+        return await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
+    }
+
+    public async Task SetCode(string code)
+    {
+        await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code);
+    }
 
     public string Code
     {
-        get => code;
+        get
+        {
+            return JSRuntime.InvokeAsync<string>("Library.Editor.GetCode").Result;
+        }
         set
         {
-            code = value;
-            InvokeAsync(StateHasChanged);
+            JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", value);
+            //InvokeAsync(StateHasChanged);
         }
     }
 
@@ -24,11 +45,5 @@
             await InitWebComponentAsync();
         }
     }
-
-    private async Task InitWebComponentAsync()
-    {
-        await JSRuntime.InvokeVoidAsync("Library.InitializeEditor");
-    }
-
 
 }

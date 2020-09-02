@@ -1,17 +1,22 @@
 import * as monaco from 'monaco-editor';
 
-export function initializeEditor() {
+export class Editor {
 
-    var editor = document.getElementById('editorRoot');
-    editor.innerHTML = "";
+    static InitializeEditor(element) {
+        element.innerHTML = "";
 
+        window.editorsArray = window.editorsArray || {};
+        window.editorsCounter = window.editorsCounter || 0;
 
-    monaco.editor.create(editor, {
-        value: `using System;
+        var id = "id" + window.editorsCounter;
+        window.editorsCounter = window.editorsCounter + 1;
+
+        window.editorsArray[id] = monaco.editor.create(element, {
+            value: `using System;
 using System.Collections.Generic;
-        using System.Linq;
-        using System.Text;
-        using System.Threading.Tasks;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
         namespace CSharpTutorials
 {
@@ -25,6 +30,23 @@ using System.Collections.Generic;
         }
     }
 }`,
-        language: "csharp"
-    });
+            language: "csharp"
+        });
+
+        return id;
+    }
+
+
+    static GetCode(id) {
+        var text = window.editorsArray[id].getValue();
+        console.log(text);
+        return text;
+    }
+
+    static SetCode(id, code) {
+        console.log(code);
+        window.editorsArray[id].setValue(code);
+    }
 }
+
+

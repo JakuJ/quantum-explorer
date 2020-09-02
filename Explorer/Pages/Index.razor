@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using Explorer.Utilities.ComponentTree
 @using Newtonsoft.Json
 @using Compiler
@@ -42,11 +42,11 @@
 
     private async Task OnCompile()
     {
-        string code = Editor.Component.Code;
+        string code = await Editor.Component.GetCode();
         await Compiler.Compile(code);
 
         Diagnostics.Component.Diagnostics = Compiler.GetDiagnostics();
-        OutputEditor.Component.Code = Compiler.GetCode();
+        await OutputEditor.Component.SetCode(Compiler.GetCode());
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -54,7 +54,7 @@
         if (!firstRender) return;
 
         await InitializePanels();
-        OutputEditor.Component.Code = "The pretty-printed code is going to show up here.";
+        //OutputEditor.Component.Code = "The pretty-printed code is going to show up here.";
     }
 
     private async Task InitializePanels()
