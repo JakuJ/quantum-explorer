@@ -44,14 +44,14 @@ namespace Compiler
                     currentFunction = value;
                     if (!Functions.ContainsKey(CurrentFunction))
                     {
-                        Functions[CurrentFunction] = new GateGrid();
+                        Functions[CurrentFunction] = new GateGrid(1);
                     }
                 }
             }
 
             public Dictionary<string, GateGrid> Functions { get; } = new Dictionary<string, GateGrid>();
 
-            public void AddGate(string gate) => Functions[CurrentFunction].AddGate(gate);
+            public void AddGate(string gate) => Functions[CurrentFunction].AddGate(0, new QuantumGate(gate));
         }
 
         private class Transform : SyntaxTreeTransformation<TransformationState>

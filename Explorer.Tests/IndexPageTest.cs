@@ -37,7 +37,7 @@ namespace Explorer.Tests
         public void Has3Panels()
         {
             // Arrange
-            using var ctx = InitializeContext(mockCompiler: true);
+            using var ctx = InitializeContext(true);
 
             // Act
             var index = ctx.RenderComponent<Index>();
