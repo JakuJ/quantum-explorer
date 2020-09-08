@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
@@ -7,7 +9,44 @@ namespace Compiler.Tests
     [Parallelizable]
     public class GateGridTest
     {
+        [DatapointSource]
+        private IEnumerable<(GateGrid Grid1, GateGrid Grid2)> Grids
+        {
+            get
+            {
+                const int howMany = 20;
+                var rng = new Random();
+
+                for (var i = 0; i < howMany; i++)
+                {
+                    int qubits = rng.Next(10);
+
+                    var grid1 = new GateGrid(qubits);
+                    var grid2 = new GateGrid(qubits);
+
+                    for (var q = 0; q < qubits; q++)
+                    {
+                        int gates = rng.Next(10);
+                        for (var g = 0; g < gates; g++)
+                        {
+                            var gate = new QuantumGate("X");
+                            grid1.AddGate(q, gate);
+                            grid2.AddGate(q, gate);
+                        }
+                    }
+
+                    yield return (grid1, grid2);
+                }
+            }
+        }
+
         [Theory]
+        public void StructuralComparison((GateGrid Gate1, GateGrid Gate2) grid)
+        {
+            Assert.AreEqual(grid.Gate1, grid.Gate2, "Gate grids should be structurally equal");
+        }
+
+        [Test]
         public void EmptyGridHasNoLayers()
         {
             // Arrange

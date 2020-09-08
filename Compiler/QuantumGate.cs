@@ -1,3 +1,5 @@
+using System;
+
 namespace Compiler
 {
     /// <summary>A simplified representation of a quantum gate meant to be used in the compositor.</summary>
@@ -15,5 +17,30 @@ namespace Compiler
 
         /// <summary>Gets how many qubits this gate operates on.</summary>
         public int Qubits { get; }
+
+        public static bool operator ==(QuantumGate? left, QuantumGate? right) => Equals(left, right);
+
+        public static bool operator !=(QuantumGate? left, QuantumGate? right) => !Equals(left, right);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => HashCode.Combine(Symbol, Qubits);
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            return obj.GetType() == GetType() && Equals((QuantumGate)obj);
+        }
+
+        private bool Equals(QuantumGate other) => Symbol == other.Symbol && Qubits == other.Qubits;
     }
 }

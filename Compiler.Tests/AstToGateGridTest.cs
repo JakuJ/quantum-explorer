@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -9,7 +9,36 @@ namespace Compiler.Tests
     [Parallelizable]
     public class AstToGateGridTest
     {
-        [TestCaseSource(typeof(TestSources), nameof(TestSources.Sources))]
+        private class TestSources
+        {
+            internal static object[] DeclaredOps => new object[]
+            {
+                new object[] { "Library", new[] { "RandomBit", "RandomInt" } },
+                new object[] { "MultipleOperations", new[] { "EntanglePair", "IdentityGate", "Noop", "RandomBit" } },
+            };
+
+            internal static object[] GateGrids => new object[]
+            {
+                new object[] { "AllocateOne", new GateGrid(1) },
+                new object[] { "AllocateOneAndApplyH", new GateGrid(new[] { new[] { new QuantumGate("H") } }) },
+                new object[] { "AllocateTwo", new GateGrid(2) },
+                new object[]
+                {
+                    "AllocateOneAndApplyGates", new GateGrid(new[]
+                    {
+                        new[]
+                        {
+                            new QuantumGate("H"),
+                            new QuantumGate("MResetZ"),
+                        },
+                    }),
+                },
+
+                // TODO: Quantum teleportation circuit with 'Controlled' functor support
+            };
+        }
+
+        [TestCaseSource(typeof(TestSources), nameof(TestSources.DeclaredOps))]
         public async Task ListsDeclaredOperations(string path, string[] operations)
         {
             // Arrange
@@ -24,24 +53,19 @@ namespace Compiler.Tests
             Assert.AreEqual(operations, gates.Keys.ToArray(), "All declared operations should be listed.");
         }
 
-        private class TestSources
+        [TestCaseSource(typeof(TestSources), nameof(TestSources.GateGrids))]
+        public async Task ExtractsQuantumGates(string operation, GateGrid grid)
         {
-            public static IEnumerable Sources
-            {
-                get
-                {
-                    (string, string[])[] testCases =
-                    {
-                        ("Library", new[] { "RandomBit", "RandomInt" }),
-                        ("MultipleOperations", new[] { "EntanglePair", "IdentityGate", "Noop", "RandomBit" }),
-                    };
+            // Arrange
+            string code = await Helpers.GetSourceFile("AllocatedQubitOps");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
 
-                    foreach (var (file, operations) in testCases)
-                    {
-                        yield return new TestCaseData(file, operations);
-                    }
-                }
-            }
+            // Act
+            await compiler.Compile(code);
+            var gates = AstToGateGrid.GetGrids(compiler.Compilation);
+
+            // Assert
+            Assert.AreEqual(grid, gates[operation], "Quantum circuit should be extracted correctly.");
         }
     }
 }
