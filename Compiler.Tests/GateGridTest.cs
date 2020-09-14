@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
@@ -9,41 +7,34 @@ namespace Compiler.Tests
     [Parallelizable]
     public class GateGridTest
     {
-        [DatapointSource]
-        private IEnumerable<(GateGrid Grid1, GateGrid Grid2)> Grids
+        private static class Sources
         {
-            get
+            public static GateGrid[] Cases => new[]
             {
-                const int howMany = 20;
-                var rng = new Random();
-
-                for (var i = 0; i < howMany; i++)
+                new GateGrid(1),
+                new GateGrid(5),
+                new GateGrid(new[]
                 {
-                    int qubits = rng.Next(10);
-
-                    var grid1 = new GateGrid(qubits);
-                    var grid2 = new GateGrid(qubits);
-
-                    for (var q = 0; q < qubits; q++)
+                    new[]
                     {
-                        int gates = rng.Next(10);
-                        for (var g = 0; g < gates; g++)
-                        {
-                            var gate = new QuantumGate("X");
-                            grid1.AddGate(q, gate);
-                            grid2.AddGate(q, gate);
-                        }
-                    }
-
-                    yield return (grid1, grid2);
-                }
-            }
+                        new QuantumGate("X"),
+                        new QuantumGate("H"),
+                        new QuantumGate("Z"),
+                    },
+                    new[]
+                    {
+                        new QuantumGate("MResetZ"),
+                        new QuantumGate("Y"),
+                    },
+                }),
+            };
         }
 
-        [Theory]
-        public void StructuralComparison((GateGrid Gate1, GateGrid Gate2) grid)
+        [TestCaseSource(typeof(Sources), nameof(Sources.Cases))]
+        public void CloningAndStructuralComparison(GateGrid grid)
         {
-            Assert.AreEqual(grid.Gate1, grid.Gate2, "Gate grids should be structurally equal");
+            var clone = grid.Clone();
+            Assert.AreEqual(grid, clone, "A gate grid and its clone should be structurally equal");
         }
 
         [Test]

@@ -1,14 +1,15 @@
 ﻿@page "/"
+@using Compiler
 @using Explorer.Utilities.ComponentTree
 @using Newtonsoft.Json
-@using Compiler
+@using AstTransformations
 @using System.Text
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 
 <div class="main">
     <div class="top-row px-4">
-        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze and pretty-print</button>
+        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze circuits</button>
     </div>
 
     <div class="content px-4">
@@ -46,12 +47,13 @@
         await Compiler.Compile(Editor.Component.Code);
 
         Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
-        Dictionary<string, GateGrid> ast = AstToGateGrid.GetGrids(Compiler.Compilation);
+        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
         var builder = new StringBuilder("Defined operations:" + Environment.NewLine);
-        foreach (string key in ast.Keys)
+        foreach ((string key, GateGrid grid) in ast)
         {
             builder.AppendLine(key);
+            builder.AppendLine(grid.ToString());
         }
         OutputEditor.Component.Code = builder.ToString();
     }
@@ -61,7 +63,7 @@
         if (!firstRender) return;
 
         await InitializePanels();
-        OutputEditor.Component.Code = "The pretty-printed code is going to show up here.";
+        OutputEditor.Component.Code = "The AST information is going to show up here.";
     }
 
     private async Task InitializePanels()

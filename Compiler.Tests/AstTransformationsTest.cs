@@ -1,13 +1,13 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AstTransformations;
 using NUnit.Framework;
 
 namespace Compiler.Tests
 {
     [TestFixture]
     [Parallelizable]
-    public class AstToGateGridTest
+    public class AstTransformationsTest
     {
         private class TestSources
         {
@@ -15,6 +15,11 @@ namespace Compiler.Tests
             {
                 new object[] { "Library", new[] { "RandomBit", "RandomInt" } },
                 new object[] { "MultipleOperations", new[] { "EntanglePair", "IdentityGate", "Noop", "RandomBit" } },
+                new object[]
+                {
+                    "AllocatedQubitOps",
+                    new[] { "AllocateOne", "AllocateOneAndApplyGates", "AllocateOneAndApplyH", "AllocateTwo", "QuantumTeleportation" },
+                },
             };
 
             internal static object[] GateGrids => new object[]
@@ -47,7 +52,7 @@ namespace Compiler.Tests
 
             // Act
             await compiler.Compile(code);
-            var gates = AstToGateGrid.GetGrids(compiler.Compilation);
+            var gates = FromQSharp.GetGates(compiler.Compilation);
 
             // Assert
             Assert.AreEqual(operations, gates.Keys.ToArray(), "All declared operations should be listed.");
@@ -62,7 +67,7 @@ namespace Compiler.Tests
 
             // Act
             await compiler.Compile(code);
-            var gates = AstToGateGrid.GetGrids(compiler.Compilation);
+            var gates = FromQSharp.GetGates(compiler.Compilation);
 
             // Assert
             Assert.AreEqual(grid, gates[operation], "Quantum circuit should be extracted correctly.");

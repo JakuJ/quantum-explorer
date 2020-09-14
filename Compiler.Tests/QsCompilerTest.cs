@@ -8,11 +8,13 @@ namespace Compiler.Tests
     [Parallelizable]
     public class QsCompilerTest
     {
-        [Test]
-        public async Task CompilesExampleCodeWithoutWarnings()
+        [TestCase("Library")]
+        [TestCase("MultipleOperations")]
+        [TestCase("AllocatedQubitOps")]
+        public async Task CompilesExampleCodeWithoutWarnings(string file)
         {
             // Arrange
-            string code = await Helpers.GetSourceFile("Library");
+            string code = await Helpers.GetSourceFile(file);
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
 
             // Act

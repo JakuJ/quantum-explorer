@@ -1,5 +1,8 @@
 namespace Allocations {
     
+    open Microsoft.Quantum.Intrinsic;
+    open Microsoft.Quantum.Measurement;
+
     // Single qubit, no gates
     operation AllocateOne() : Unit {
         using (q = Qubit()) {}
@@ -30,13 +33,13 @@ namespace Allocations {
         using (qs = Qubit[3]) {
             // Entangle qubit 1 and qubit 2
             H(qs[1]);
-            Controlled X(qs[1], qs[2]);
+            Controlled X([qs[1]], qs[2]);
 
             // Message is just |1>
             X(qs[0]);
             
             // Entangle qubit 0 and qubit 1
-            Controlled X(qs[0], qs[1]);
+            CNOT(qs[0], qs[1]);
 
             // Hadamard qubit 0
             H(qs[0]);
@@ -46,8 +49,13 @@ namespace Allocations {
             let m2 = MResetZ(qs[1]);
 
             // Decode the message
-            Controlled X(m1, qs[2]);
-            Controlled Z(m0, qs[2]);
+            if (m2 == One) {
+                X(qs[2]);
+            }
+
+            if (m1 == One) {
+                Z(qs[2]);
+            }
 
             // Should be One
             return MResetZ(qs[2]);

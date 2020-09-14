@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Helpers.fs" />
+        <Compile Include="FromQSharp.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20082513" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\Compiler\Compiler.csproj" />
+    </ItemGroup>
+
+</Project>
