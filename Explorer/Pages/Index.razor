@@ -4,6 +4,7 @@
 @using Newtonsoft.Json
 @using AstTransformations
 @using System.Text
+@using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 
@@ -42,6 +43,7 @@
         tree.AddPanel(sidePanel);
     }
 
+    [ExcludeFromCodeCoverage] // TODO: Integration tests
     private async Task OnCompile()
     {
         await Compiler.Compile(Editor.Component.Code);

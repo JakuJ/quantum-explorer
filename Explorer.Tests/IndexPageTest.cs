@@ -15,19 +15,13 @@ namespace Explorer.Tests
     [Parallelizable]
     public class IndexPageTest
     {
-        private static TestContext InitializeContext(bool mockCompiler = false)
+        private static TestContext InitializeContext()
         {
             var ctx = new TestContext();
             ctx.Services.AddMockJSRuntime();
 
-            if (mockCompiler)
-            {
-                ctx.Services.AddSingleton(container => Mock.Of<ICompiler>());
-            }
-            else
-            {
-                ctx.Services.AddSingleton<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
-            }
+            // Mock the compiler
+            ctx.Services.AddSingleton(container => Mock.Of<ICompiler>());
 
             ctx.Services.AddLogging(builder => builder.AddConsole());
             return ctx;
@@ -37,7 +31,7 @@ namespace Explorer.Tests
         public void Has3Panels()
         {
             // Arrange
-            using var ctx = InitializeContext(true);
+            using var ctx = InitializeContext();
 
             // Act
             var index = ctx.RenderComponent<Index>();

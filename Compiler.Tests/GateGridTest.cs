@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using NUnit.Framework;
 
@@ -31,10 +32,36 @@ namespace Compiler.Tests
         }
 
         [TestCaseSource(typeof(Sources), nameof(Sources.Cases))]
-        public void CloningAndStructuralComparison(GateGrid grid)
+        public void StructuralEqualityWithClone(GateGrid grid)
         {
-            var clone = grid.Clone();
+            // Arrange
+            object clone = grid.Clone();
+
+            // Act & Assert
+            Assert.AreSame(clone, clone, "A gate grid is reference-equal with itself");
             Assert.AreEqual(grid, clone, "A gate grid and its clone should be structurally equal");
+            Assert.True(grid == (GateGrid)clone, "Comparison operator should work");
+            Assert.True(grid.GetHashCode() != clone.GetHashCode(), "Structurally equal object should still have different hashes.");
+        }
+
+        [Test]
+        public void InequalityTests()
+        {
+            // Arrange
+            var grid1 = new GateGrid(3);
+            var grid2 = new GateGrid(4);
+            var grid3 = new GateGrid(4);
+
+            // Act & Assert
+            Assert.AreNotEqual(grid1, grid2, "Grids with different number of qubits should not compare equal.");
+            Assert.True(grid1 != grid2, "Inequality operator should work.");
+            Assert.AreNotEqual(grid1, null, "A grid can never be equal to null.");
+
+            grid2.AddGate(1, new QuantumGate("H"));
+            Assert.AreNotEqual(grid2, grid3, "Grids with different number of gates in a lane should not compare equal.");
+
+            grid3.AddGate(1, new QuantumGate("X"));
+            Assert.AreNotEqual(grid2, grid3, "Grids with different gates should not compare equal.");
         }
 
         [Test]
@@ -48,6 +75,19 @@ namespace Compiler.Tests
 
             // Assert
             Assert.IsEmpty(layers, "Empty grid should have no layers");
+        }
+
+        [Test]
+        public void QubitDoesNotExist()
+        {
+            // Arrange
+            var grid = new GateGrid(2);
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() =>
+            {
+                grid.AddGate(2, new QuantumGate("H")); // off by one
+            });
         }
 
         [TestCase(1, 3)]

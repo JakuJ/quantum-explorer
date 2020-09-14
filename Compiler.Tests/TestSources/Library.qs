@@ -6,6 +6,8 @@
     open Microsoft.Quantum.Convert;
     open Microsoft.Quantum.Math;
 
+    function DoNothing() : Unit {}
+    
     operation RandomBit () : Result {
         using (q = Qubit()) {
             H(q);

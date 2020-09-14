@@ -2,8 +2,9 @@ using System;
 
 namespace Compiler
 {
+    /// <inheritdoc />
     /// <summary>A simplified representation of a quantum gate meant to be used in the compositor.</summary>
-    public class QuantumGate
+    public class QuantumGate : IEquatable<QuantumGate>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="QuantumGate"/> class.
@@ -16,11 +17,11 @@ namespace Compiler
         public string Symbol { get; }
 
         /// <summary>Gets how many qubits this gate operates on.</summary>
-        public int Qubits { get; }
+        private int Qubits { get; }
 
         public static bool operator ==(QuantumGate? left, QuantumGate? right) => Equals(left, right);
 
-        public static bool operator !=(QuantumGate? left, QuantumGate? right) => !Equals(left, right);
+        public static bool operator !=(QuantumGate? left, QuantumGate? right) => !(left == right);
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(Symbol, Qubits);
@@ -41,6 +42,7 @@ namespace Compiler
             return obj.GetType() == GetType() && Equals((QuantumGate)obj);
         }
 
-        private bool Equals(QuantumGate other) => Symbol == other.Symbol && Qubits == other.Qubits;
+        /// <inheritdoc/>
+        public bool Equals(QuantumGate other) => Symbol == other.Symbol && Qubits == other.Qubits;
     }
 }

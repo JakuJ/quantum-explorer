@@ -6,8 +6,9 @@ using Common;
 
 namespace Compiler
 {
+    /// <inheritdoc cref="System.IEquatable{GateGrid}" />
     /// <summary>A simple class representing a grid of quantum gates.</summary>
-    public class GateGrid : ICloneable
+    public class GateGrid : ICloneable, IEquatable<GateGrid>
     {
         private readonly Queue<QuantumGate>[] lanes;
 
@@ -75,7 +76,7 @@ namespace Compiler
 
         public static bool operator ==(GateGrid? left, GateGrid? right) => Equals(left, right);
 
-        public static bool operator !=(GateGrid? left, GateGrid? right) => !Equals(left, right);
+        public static bool operator !=(GateGrid? left, GateGrid? right) => !(left == right);
 
         /// <summary>Add a gate to the grid.</summary>
         /// <param name="qubit">Zero-based index of the qubit this gate is supposed to be applied to.</param>
@@ -107,6 +108,7 @@ namespace Compiler
         }
 
         /// <inheritdoc/>
+        // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
         public override int GetHashCode() => base.GetHashCode();
 
         /// <inheritdoc/>
@@ -126,7 +128,8 @@ namespace Compiler
         /// <inheritdoc/>
         public object Clone() => new GateGrid(lanes.Select(x => x.ToArray()).ToArray());
 
-        private bool Equals(GateGrid other)
+        /// <inheritdoc/>
+        public bool Equals(GateGrid other)
         {
             if (Qubits != other.Qubits)
             {
