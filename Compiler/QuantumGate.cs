@@ -10,21 +10,17 @@ namespace Compiler
         /// Initializes a new instance of the <see cref="QuantumGate"/> class.
         /// </summary>
         /// <param name="symbol">The symbol for the gate.</param>
-        /// <param name="qubits">How many qubits this gate operates on. Defaults to 1.</param>
-        public QuantumGate(string symbol, int qubits = 1) => (Symbol, Qubits) = (symbol, qubits);
+        public QuantumGate(string symbol) => Symbol = symbol;
 
         /// <summary>Gets the symbol of the grid (e.g. "H" or "X").</summary>
         public string Symbol { get; }
-
-        /// <summary>Gets how many qubits this gate operates on.</summary>
-        private int Qubits { get; }
 
         public static bool operator ==(QuantumGate? left, QuantumGate? right) => Equals(left, right);
 
         public static bool operator !=(QuantumGate? left, QuantumGate? right) => !(left == right);
 
         /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(Symbol, Qubits);
+        public override int GetHashCode() => Symbol.GetHashCode();
 
         /// <inheritdoc/>
         public override bool Equals(object? obj)
@@ -43,6 +39,6 @@ namespace Compiler
         }
 
         /// <inheritdoc/>
-        public bool Equals(QuantumGate other) => Symbol == other.Symbol && Qubits == other.Qubits;
+        public bool Equals(QuantumGate? other) => Symbol == other?.Symbol;
     }
 }

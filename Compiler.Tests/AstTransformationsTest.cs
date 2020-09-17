@@ -18,15 +18,14 @@ namespace Compiler.Tests
                 new object[]
                 {
                     "AllocatedQubitOps",
-                    new[] { "AllocateOne", "AllocateOneAndApplyGates", "AllocateOneAndApplyH", "AllocateTwo", "QuantumTeleportation" },
+                    new[] { "AllocateFive", "AllocateFiveAndApplyGates", "AllocateOne", "AllocateOneAndApplyGates" },
                 },
             };
 
             internal static object[] GateGrids => new object[]
             {
                 new object[] { "AllocateOne", new GateGrid(1) },
-                new object[] { "AllocateOneAndApplyH", new GateGrid(new[] { new[] { new QuantumGate("H") } }) },
-                new object[] { "AllocateTwo", new GateGrid(2) },
+                new object[] { "AllocateFive", new GateGrid(5) },
                 new object[]
                 {
                     "AllocateOneAndApplyGates", new GateGrid(new[]
@@ -34,12 +33,23 @@ namespace Compiler.Tests
                         new[]
                         {
                             new QuantumGate("H"),
+                            new QuantumGate("Z"),
+                            new QuantumGate("X"),
                             new QuantumGate("MResetZ"),
                         },
                     }),
                 },
-
-                // TODO: Quantum teleportation circuit with 'Controlled' functor support
+                new object[]
+                {
+                    "AllocateFiveAndApplyGates", new GateGrid(new[]
+                    {
+                        new[] { new QuantumGate("H") },
+                        new[] { new QuantumGate("X"), new QuantumGate("Y") },
+                        new QuantumGate[] { },
+                        new QuantumGate[] { },
+                        new[] { new QuantumGate("Z") },
+                    }),
+                },
             };
         }
 

@@ -75,13 +75,39 @@ module FromQSharp =
 
         let prefixes: Set<string> = set [ "Microsoft.Quantum.Intrinsic"; "Microsoft.Quantum.Measurement" ]
 
-        override this.OnIdentifier(sym: Identifier, tArgs) =
-            match sym with
-            | GlobalCallable glob when Set.contains glob.Namespace.Value prefixes ->
-                if this.SharedState.Grid <> null then this.SharedState.Grid.AddGate(0, QuantumGate glob.Name.Value)
-            | _ -> ()
+        override this.OnOperationCall(lhs: TypedExpression, rhs: TypedExpression) =
+            let (gate: string option) =
+                match lhs.Expression with
+                | Identifier (var, _) ->
+                    match var with
+                    | GlobalCallable glob when Set.contains glob.Namespace.Value prefixes ->
+                        Some glob.Name.Value
+                    | _ -> None
+                | _ -> None
 
-            base.OnIdentifier(sym, tArgs)
+            // TODO: qubitID will be useful when we allow for passing qubits as arguments to operations
+            if gate.IsSome && this.SharedState.Grid <> null then
+                let (qubitID, index) =
+                    match rhs.Expression with
+                    | Identifier (var, _) ->
+                        match var with
+                        | LocalVariable local -> (local.Value, 0)
+                        | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
+                    | ArrayItem (indexable, index) ->
+                        match indexable.Expression with
+                        | Identifier (var, _) ->
+                            match var with
+                            | LocalVariable identifier ->
+                                match index.Expression with
+                                | IntLiteral lit -> (identifier.Value, int32 lit)
+                                | _ -> failwith "Array index is not an integer"
+                            | _ -> failwith "Global operation arguments not supported"
+                        | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
+                    | _ -> failwith "Invalid argument to a operation call"
+
+                this.SharedState.Grid.AddGate(index, QuantumGate gate.Value)
+
+            base.OnOperationCall(lhs, rhs)
 
     let GetGates (compilation: QsCompilation): Dictionary<string, GateGrid> =
         let transform = Transform()

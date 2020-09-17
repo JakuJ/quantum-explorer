@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\msbuild\Source.props" />
+
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
+        <LangVersion>4.7</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,7 +15,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20082513" />
     </ItemGroup>
-    
+
     <ItemGroup>
         <ProjectReference Include="..\Compiler\Compiler.csproj" />
     </ItemGroup>

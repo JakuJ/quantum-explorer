@@ -72,7 +72,7 @@ namespace Compiler
         }
 
         /// <summary>Gets the number of qubits in this grid.</summary>
-        private int Qubits => lanes.Length;
+        public int Qubits => lanes.Length;
 
         public static bool operator ==(GateGrid? left, GateGrid? right) => Equals(left, right);
 
@@ -129,9 +129,9 @@ namespace Compiler
         public object Clone() => new GateGrid(lanes.Select(x => x.ToArray()).ToArray());
 
         /// <inheritdoc/>
-        public bool Equals(GateGrid other)
+        public bool Equals(GateGrid? other)
         {
-            if (Qubits != other.Qubits)
+            if (Qubits != other?.Qubits)
             {
                 return false;
             }
