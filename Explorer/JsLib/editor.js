@@ -1,5 +1,6 @@
 import * as monaco from 'monaco-editor';
 
+
 export class Editor {
 
     static InitializeEditor(element) {
@@ -32,6 +33,11 @@ using System.Threading.Tasks;
 }`,
             language: "csharp"
         });
+
+
+        new ResizeObserver(function () {
+            window.editorsDict[id].layout();
+        }).observe(element);
 
         return id;
     }
