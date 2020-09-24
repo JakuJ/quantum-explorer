@@ -14,7 +14,7 @@ namespace Compiler.Tests
             internal static object[] DeclaredOps => new object[]
             {
                 new object[] { "Library", new[] { "RandomBit", "RandomInt" } },
-                new object[] { "MultipleOperations", new[] { "EntanglePair", "IdentityGate", "Noop", "RandomBit" } },
+                new object[] { "MultipleOperations", new[] { "EntanglePair", "IdentityGate", "NoOp", "RandomBit" } },
                 new object[]
                 {
                     "AllocatedQubitOps",
@@ -66,6 +66,23 @@ namespace Compiler.Tests
 
             // Assert
             Assert.AreEqual(operations, gates.Keys.ToArray(), "All declared operations should be listed.");
+        }
+
+        [TestCase("EmptyFile")]
+        [TestCase("EmptyNamespace")]
+        [TestCase("SingleEmptyFunction")]
+        public async Task FindsNoOperations(string path)
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile(path);
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+
+            // Act
+            await compiler.Compile(code);
+            var gates = FromQSharp.GetGates(compiler.Compilation);
+
+            // Assert
+            Assert.IsEmpty(gates, "Traversing the AST should find no operations.");
         }
 
         [TestCaseSource(typeof(TestSources), nameof(TestSources.GateGrids))]

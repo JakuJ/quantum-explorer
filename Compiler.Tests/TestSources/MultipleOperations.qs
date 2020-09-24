@@ -10,7 +10,7 @@ namespace MultipleOperations {
         }
     }
 
-    operation Noop(target : Qubit) : Unit {
+    operation NoOp() : Unit {
         // do absolutely nothing
     }
 

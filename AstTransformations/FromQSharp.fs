@@ -112,9 +112,13 @@ module FromQSharp =
     let GetGates (compilation: QsCompilation): Dictionary<string, GateGrid> =
         let transform = Transform()
 
-        compilation.Namespaces
-        |> Enumerable.First
-        |> transform.Namespaces.OnNamespace
-        |> ignore
+        let ns = Enumerable.First compilation.Namespaces
 
-        transform.SharedState.Operations |> Dictionary
+        if ns.Name.Value.StartsWith("Microsoft.Quantum") then
+            Map.empty // return an empty dictionary if there's no valid namespace
+        else
+            ns
+            |> transform.Namespaces.OnNamespace
+            |> ignore
+            transform.SharedState.Operations
+        |> Dictionary
