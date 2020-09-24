@@ -20,9 +20,9 @@
 
 @code {
 
-    private List<Diagnostic> diagnostics = new List<Diagnostic>();
+    private IEnumerable<Diagnostic> diagnostics = new List<Diagnostic>();
 
-    public List<Diagnostic> Diagnostics
+    public IEnumerable<Diagnostic> Diagnostics
     {
         get => diagnostics;
         set

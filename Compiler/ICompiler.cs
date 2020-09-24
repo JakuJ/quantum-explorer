@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Quantum.QsCompiler.SyntaxTree;
 using Microsoft.VisualStudio.LanguageServer.Protocol;
 
 namespace Compiler
@@ -10,22 +11,20 @@ namespace Compiler
     public interface ICompiler
     {
         /// <summary>
+        /// Gets all compiler diagnostics from the latest call to <see cref="Compile"/>.
+        /// </summary>
+        IEnumerable<Diagnostic> Diagnostics { get; }
+
+        /// <summary>
+        /// Gets the syntax tree of the last compilation.
+        /// </summary>
+        QsCompilation Compilation { get; }
+
+        /// <summary>
         /// Analyze provided Q# code.
         /// </summary>
         /// <param name="code">Q# code as a plain string.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
         Task Compile(string code);
-
-        /// <summary>
-        /// Get the Q# code that corresponds to the current AST.
-        /// </summary>
-        /// <returns>Q# code.</returns>
-        string GetCode();
-
-        /// <summary>
-        /// Return all compiler diagnostics from the latest call to <see cref="Compile"/>.
-        /// </summary>
-        /// <returns>A list of diagnostics.</returns>
-        List<Diagnostic> GetDiagnostics();
     }
 }

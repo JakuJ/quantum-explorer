@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
     <ProjectReference Include="..\Compiler\Compiler.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,5 @@
-using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Compiler.Tests
@@ -9,27 +8,20 @@ namespace Compiler.Tests
     [Parallelizable]
     public class QsCompilerTest
     {
-        private static readonly ILogger<QsCompiler> ConsoleLogger
-            = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<QsCompiler>();
-
-        [Test]
-        public async Task CompilesExampleCodeWithoutWarnings()
+        [TestCase("Library")]
+        [TestCase("MultipleOperations")]
+        [TestCase("AllocatedQubitOps")]
+        public async Task CompilesExampleCodeWithoutWarnings(string file)
         {
             // Arrange
-            string code = await GetSource("Library");
-            using var compiler = new QsCompiler(ConsoleLogger);
+            string code = await Helpers.GetSourceFile(file);
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
 
             // Act
             await compiler.Compile(code);
 
             // Assert
-            Assert.AreEqual(0, compiler.GetDiagnostics().Count, "There should be no warnings or errors");
-        }
-
-        private static async Task<string> GetSource(string baseName)
-        {
-            string path = Path.Combine(TestContext.CurrentContext.TestDirectory, $"TestSources/{baseName}.qs");
-            return await File.ReadAllTextAsync(path);
+            Assert.AreEqual(0, compiler.Diagnostics.Count(), "There should be no warnings or errors");
         }
     }
 }

@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler.Tests", "Compiler.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "Common.Tests\Common.Tests.csproj", "{9C755989-03F3-4A8D-BE66-CFAFE8FFC131}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AstTransformations", "AstTransformations\AstTransformations.fsproj", "{63DA55C3-0DEF-4503-9913-C42456CA7C98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -44,6 +46,10 @@ Global
 		{9C755989-03F3-4A8D-BE66-CFAFE8FFC131}.Debug|x64.Build.0 = Debug|Any CPU
 		{9C755989-03F3-4A8D-BE66-CFAFE8FFC131}.Release|x64.ActiveCfg = Release|Any CPU
 		{9C755989-03F3-4A8D-BE66-CFAFE8FFC131}.Release|x64.Build.0 = Release|Any CPU
+		{63DA55C3-0DEF-4503-9913-C42456CA7C98}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{63DA55C3-0DEF-4503-9913-C42456CA7C98}.Debug|x64.Build.0 = Debug|Any CPU
+		{63DA55C3-0DEF-4503-9913-C42456CA7C98}.Release|x64.ActiveCfg = Release|Any CPU
+		{63DA55C3-0DEF-4503-9913-C42456CA7C98}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

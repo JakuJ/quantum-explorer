@@ -3,6 +3,7 @@
   <Import Project="..\msbuild\Test.props" />
 
   <ItemGroup Label="Projects">
+    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
     <ProjectReference Include="..\Compiler\Compiler.csproj" />
   </ItemGroup>
 

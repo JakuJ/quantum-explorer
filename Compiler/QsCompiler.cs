@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.DataTypes;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
-using Microsoft.Quantum.QsCompiler.Transformations.QsCodeOutput;
 using Microsoft.VisualStudio.LanguageServer.Protocol;
 using Compilation = Microsoft.Quantum.QsCompiler.CompilationBuilder.CompilationUnitManager.Compilation;
 
@@ -18,13 +17,14 @@ namespace Compiler
 {
     /// <inheritdoc cref="System.IDisposable" />
     /// <summary>An instance of <see cref="T:Compiler.ICompiler" /> using the official Q# compiler.</summary>
-    public class QsCompiler : ICompiler, IDisposable
+    public sealed class QsCompiler : ICompiler
     {
         // These are cached references that we link with the compiled source files
         // Loading them takes 10-20 seconds, that's why.
         private static ImmutableDictionary<NonNullable<string>, References.Headers>? refPaths;
         private readonly ILogger<QsCompiler> logger;
         private readonly CompilationUnitManager manager;
+        private readonly Uri sourceUri = new Uri($"file:///tmp/{UniqueId.CreateUniqueId()}.qs");
         private Compilation? compilation;
 
         /// <summary>
@@ -47,13 +47,19 @@ namespace Compiler
             }
         }
 
+        /// <inheritdoc/>
+        public QsCompilation Compilation => CurrentCompilation.BuiltCompilation;
+
+        /// <inheritdoc/>
+        public IEnumerable<Diagnostic> Diagnostics => CurrentCompilation.Diagnostics().ToList();
+
         private Compilation CurrentCompilation
         {
             get
             {
                 if (compilation == null)
                 {
-                    throw new InvalidOperationException("There is no compilation");
+                    throw new InvalidOperationException("There is no compilation.");
                 }
 
                 return compilation;
@@ -64,18 +70,16 @@ namespace Compiler
         /// <inheritdoc/>
         public async Task Compile(string code)
         {
-            ImmutableHashSet<FileContentManager> files;
+            FileContentManager file;
 
             using (new ScopedTimer("Initializing the file manager", logger))
             {
-                // A dummy filename. It's constant, so we override any previous source files.
-                var sourceFiles = new Dictionary<Uri, string> { { new Uri("file:///tmp/TempFile.qs"), code } };
-                files = CompilationUnitManager.InitializeFileManagers(sourceFiles.ToImmutableDictionary());
+                file = CompilationUnitManager.InitializeFileManager(sourceUri, code);
             }
 
             using (new ScopedTimer("Updating source files", logger))
             {
-                await manager.AddOrUpdateSourceFilesAsync(files);
+                await manager.AddOrUpdateSourceFileAsync(file);
             }
 
             using (new ScopedTimer("Compiling", logger))
@@ -84,27 +88,9 @@ namespace Compiler
             }
         }
 
-        /// <inheritdoc/>
-        public string GetCode()
-        {
-            SyntaxTreeToQsharp st = SyntaxTreeToQsharp.Default;
-            QsCompilation comp = st.OnCompilation(CurrentCompilation.BuiltCompilation);
-            return st.ToCode(comp.Namespaces.FirstOrDefault());
-        }
-
-        /// <inheritdoc/>
-        public List<Diagnostic> GetDiagnostics() => CurrentCompilation.Diagnostics().ToList();
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            manager.Dispose();
-        }
-
         private static void PreloadReferences(ILogger logger)
         {
-            // TODO: Or just agree to a standard set of assemblies, cached for speed?
-            // TODO: Dynamically add necessary assemblies based on 'open' directives in the code?
+            // TODO: Add other DLLs we want to support here
             string[] assemblies =
             {
                 GetDllPath("Microsoft.Quantum.Standard.dll"),

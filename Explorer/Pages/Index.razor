@@ -1,13 +1,16 @@
 ﻿@page "/"
+@using Compiler
 @using Explorer.Utilities.ComponentTree
 @using Newtonsoft.Json
-@using Compiler
+@using AstTransformations
+@using System.Text
+@using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 
 <div class="main">
     <div class="top-row px-4">
-        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze and pretty-print</button>
+        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze circuits</button>
     </div>
 
     <div class="content px-4">
@@ -40,13 +43,21 @@
         tree.AddPanel(sidePanel);
     }
 
+    [ExcludeFromCodeCoverage] // TODO: Integration tests
     private async Task OnCompile()
     {
-        string code = Editor.Component.Code;
-        await Compiler.Compile(code);
+        await Compiler.Compile(Editor.Component.Code);
 
-        Diagnostics.Component.Diagnostics = Compiler.GetDiagnostics();
-        OutputEditor.Component.Code = Compiler.GetCode();
+        Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
+        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
+
+        var builder = new StringBuilder("Defined operations:" + Environment.NewLine);
+        foreach ((string key, GateGrid? grid) in ast)
+        {
+            builder.AppendLine(key);
+            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info");
+        }
+        OutputEditor.Component.Code = builder.ToString();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -54,14 +65,14 @@
         if (!firstRender) return;
 
         await InitializePanels();
-        OutputEditor.Component.Code = "The pretty-printed code is going to show up here.";
+        OutputEditor.Component.Code = "The AST information is going to show up here.";
     }
 
     private async Task InitializePanels()
     {
         string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
         {
-            TypeNameHandling = TypeNameHandling.Auto
+            TypeNameHandling = TypeNameHandling.Auto,
         });
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
     }
