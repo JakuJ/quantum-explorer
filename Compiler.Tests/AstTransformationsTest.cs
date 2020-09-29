@@ -87,13 +87,30 @@ namespace Compiler.Tests
             // Arrange
             string code = await Helpers.GetSourceFile(path);
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            var qualifiedNames = operations.Select(x => $"{path}.{x}").ToArray();
 
             // Act
             await compiler.Compile(code);
             var gates = FromQSharp.GetGates(compiler.Compilation);
 
             // Assert
-            Assert.AreEqual(operations, gates.Keys.ToArray(), "All declared operations should be listed.");
+            Assert.AreEqual(qualifiedNames, gates.Keys.ToArray(), "All declared operations should be listed.");
+        }
+
+        [Test]
+        public async Task ProcessesMultipleNamespaces()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("MultipleNamespaces");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            string[] qualifiedNames = new[] { "Ns1.Op1", "Ns2.Op1", "Ns2.Op2", "Ns3.Op2" };
+
+            // Act
+            await compiler.Compile(code);
+            var gates = FromQSharp.GetGates(compiler.Compilation);
+
+            // Assert
+            Assert.AreEqual(qualifiedNames, gates.Keys.ToArray(), "All declared operations should be listed.");
         }
 
         [TestCase("EmptyFile")]

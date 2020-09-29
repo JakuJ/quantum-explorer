@@ -21,7 +21,6 @@
 </div>
 
 @code {
-#nullable disable
     internal Panel<Editor> Editor;
     internal Panel<Editor> OutputEditor;
     internal Panel<DiagnosticList> Diagnostics;
@@ -50,8 +49,11 @@
         Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
-        var builder = new StringBuilder("Defined operations:" + Environment.NewLine);
-        foreach ((string key, GateGrid grid) in ast)
+        var builder = new StringBuilder("Defined namespaces: ");
+        builder.AppendLine(string.Join(' ', Compiler.Compilation.Namespaces.Select(x => x.Name.Value)));
+        builder.AppendLine("Defined operations:");
+
+        foreach ((string key, GateGrid? grid) in ast)
         {
             grid.Shrink();
             builder.AppendLine(key);

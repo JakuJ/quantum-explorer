@@ -13,21 +13,23 @@ module FromQSharp =
         class
             let mutable operation: string = null
 
-            member this.OpName
+            member this.Operation
                 with get () = operation
                 and set (value: string) =
                     operation <- value
                     this.Grid <- null // just add the key to the dictionary
 
+            member val Namespace: string = null with get, set
+
             member val Operations: Map<string, GateGrid> = Map.empty with get, set
-            member val QubitId: string = null with get, set
+            member val RegisterName: string = null with get, set
 
             member this.Grid
                 with get (): GateGrid =
-                    Map.tryFind this.OpName this.Operations
+                    Map.tryFind this.Operation this.Operations
                     |> flip defaultArg null
                 and set (value: GateGrid) =
-                    this.Operations <- Map.add this.OpName value this.Operations
+                    this.Operations <- Map.add this.Operation value this.Operations
         end
 
     type Transform(options: TransformationOptions) =
@@ -46,9 +48,13 @@ module FromQSharp =
     and NamespaceTransform(parent: Transform) =
         inherit NamespaceTransformation<State>(parent, TransformationOptions.NoRebuild)
 
+        override this.OnNamespace(ns: QsNamespace) =
+            this.SharedState.Namespace <- ns.Name.Value
+            base.OnNamespace ns
+
         override this.OnCallableDeclaration(callable: QsCallable) =
             match callable.Kind with
-            | Operation -> this.SharedState.OpName <- callable.FullName.Name.Value
+            | Operation -> this.SharedState.Operation <- this.SharedState.Namespace + "." + callable.FullName.Name.Value
             | _ -> ()
 
             base.OnCallableDeclaration callable
@@ -127,11 +133,10 @@ module FromQSharp =
     let GetGates (compilation: QsCompilation): Dictionary<string, GateGrid> =
         let transform = Transform()
 
-        let ns = Enumerable.First compilation.Namespaces
+        let namespaces =
+            List.filter (fun ns -> not (ns.Name.Value.StartsWith("Microsoft.Quantum")))
+                (List.ofArray (compilation.Namespaces.ToArray()))
 
-        if ns.Name.Value.StartsWith("Microsoft.Quantum") then
-            Map.empty // return an empty dictionary if there's no valid namespace
-        else
-            ns |> transform.Namespaces.OnNamespace |> ignore
-            transform.SharedState.Operations
-        |> Dictionary
+        List.iter (transform.Namespaces.OnNamespace >> ignore) namespaces
+
+        transform.SharedState.Operations |> Dictionary
