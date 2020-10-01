@@ -1,0 +1,24 @@
+.compositor {
+    width: inherit;
+    height: inherit;
+    overflow: auto;
+}
+
+.compositor .node {
+    display: flex;
+}
+
+.compositor .node .column {
+    flex-direction: column;
+}
+
+.compositor .node > span {
+    flex: auto;
+    margin: 5px;
+    color: white;
+    border-radius: 3px;
+}
+
+.draggable-source--is-dragging {
+    visibility: hidden;
+}
