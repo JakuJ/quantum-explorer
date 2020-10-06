@@ -58,7 +58,7 @@ namespace Compiler
                         }
                         else
                         {
-                            layer[index] = new QuantumGate("I");
+                            layer[index] = new QuantumGate(this, null, "I", "Microsoft.Intrinsic");
                         }
                     }
 
@@ -119,7 +119,7 @@ namespace Compiler
             foreach ((int qubit, var queue) in lanes.Enumerate())
             {
                 builder.Append($"Q{qubit}: ");
-                builder.AppendLine(string.Join(" ", queue.Select(x => x.Symbol)));
+                builder.AppendLine(string.Join(" ", queue.Select(x => x.Name)));
             }
 
             return builder.ToString();
@@ -143,7 +143,7 @@ namespace Compiler
                     return false;
                 }
 
-                foreach (var (gate1, gate2) in lane1.Zip(lane2))
+                foreach ((QuantumGate gate1, QuantumGate gate2) in lane1.Zip(lane2))
                 {
                     if (gate1 != gate2)
                     {
