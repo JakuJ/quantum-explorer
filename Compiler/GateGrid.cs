@@ -2,157 +2,158 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Common;
 
 namespace Compiler
 {
     /// <inheritdoc cref="System.IEquatable{GateGrid}" />
     /// <summary>A simple class representing a grid of quantum gates.</summary>
-    public class GateGrid : ICloneable, IEquatable<GateGrid>
+    public class GateGrid
     {
-        private readonly Queue<QuantumGate>[] lanes;
+        private QuantumGate?[,] grid;
 
         /// <summary>Initializes a new instance of the <see cref="GateGrid"/> class.</summary>
-        /// <param name="qubits">The number of qubits in this circuit.</param>
-        public GateGrid(int qubits)
+        /// <param name="width">The length of the longest lane in this circuit.</param>
+        /// <param name="height">The number of qubits in this circuit.</param>
+        public GateGrid(int height = 10, int width = 10)
         {
-            lanes = new Queue<QuantumGate>[qubits];
-
-            for (var i = 0; i < qubits; i++)
-            {
-                lanes[i] = new Queue<QuantumGate>();
-            }
+            grid = new QuantumGate?[width, height];
+            Names = Enumerable.Range(0, height).Select(x => $"Q{x}").ToArray();
         }
 
-        /// <summary>Initializes a new instance of the <see cref="GateGrid"/> class.</summary>
-        /// <param name="grid">A jagged 2D array of quantum gates.</param>
-        public GateGrid(QuantumGate[][] grid)
-        {
-            int qubits = grid.GetLength(0);
-            lanes = new Queue<QuantumGate>[qubits];
+        /// <summary>Gets the array of identifiers associated with the qubits.</summary>
+        public string[] Names { get; private set; }
 
-            for (var q = 0; q < qubits; q++)
-            {
-                lanes[q] = new Queue<QuantumGate>(grid[q]);
-            }
-        }
+        /// <summary>Gets the length of the longest lane in this grid.</summary>
+        public int Width => grid.GetLength(0);
 
-        /// <summary>Gets the layers of the circuit.</summary>
-        public IEnumerable<QuantumGate[]> Layers
+        /// <summary>Gets the number of qubits in this grid.</summary>
+        public int Height => grid.GetLength(1);
+
+        /// <summary>Gets all gates in this grid.</summary>
+        public IEnumerable<(QuantumGate Gate, int X, int Y)> Gates
         {
             get
             {
-                bool onlyIdentities;
-
-                do
+                var seen = new HashSet<QuantumGate>();
+                for (var y = 0; y < Height; y++)
                 {
-                    var layer = new QuantumGate[Qubits];
-                    onlyIdentities = true;
-
-                    foreach ((int index, Queue<QuantumGate> lane) in lanes.Enumerate())
+                    for (var x = 0; x < Width; x++)
                     {
-                        if (lane.Count > 0)
+                        QuantumGate? gate = grid[x, y];
+                        if (gate != null && !seen.Contains(gate))
                         {
-                            layer[index] = lane.Dequeue();
-                            onlyIdentities = false;
+                            yield return (gate, x, y);
+                            seen.Add(gate);
                         }
-                        else
-                        {
-                            layer[index] = new QuantumGate(this, null, "I", "Microsoft.Intrinsic");
-                        }
-                    }
-
-                    if (!onlyIdentities)
-                    {
-                        yield return layer;
                     }
                 }
-                while (!onlyIdentities);
             }
         }
 
-        /// <summary>Gets the number of qubits in this grid.</summary>
-        public int Qubits => lanes.Length;
+        /// <summary>Set an identifier of a qubit.</summary>
+        /// <param name="qubit">The index of the qubit.</param>
+        /// <param name="name">The identifier to assign to the qubit.</param>
+        public void SetName(int qubit, string name)
+        {
+            if (qubit <= 0 || qubit >= Height)
+            {
+                throw new ArgumentOutOfRangeException(nameof(qubit));
+            }
 
-        public static bool operator ==(GateGrid? left, GateGrid? right) => Equals(left, right);
-
-        public static bool operator !=(GateGrid? left, GateGrid? right) => !(left == right);
+            Names[qubit] = name;
+        }
 
         /// <summary>Add a gate to the grid.</summary>
-        /// <param name="qubit">Zero-based index of the qubit this gate is supposed to be applied to.</param>
-        /// <param name="gate">The name of the gate.</param>
-        public void AddGate(int qubit, QuantumGate gate)
+        /// <param name="y">Row (quit) index.</param>
+        /// <param name="gate">The gate to place on the grid.</param>
+        public void AddGate(int y, QuantumGate gate)
         {
-            if (qubit < 0 || qubit >= Qubits)
+            if (y >= Height)
             {
-                throw new ArgumentException("Qubit out of range of the grid");
+                Resize(Width, y + 1);
             }
 
-            lanes[qubit].Enqueue(gate);
+            for (var x = 0; x < Width; x++)
+            {
+                if (grid[x, y] == null)
+                {
+                    AddGate(x, y, gate);
+                    return;
+                }
+            }
+
+            AddGate(Width, y, gate);
         }
 
-        /// <inheritdoc/>
-        public override bool Equals(object? obj)
+        /// <summary>Add a gate to the grid.</summary>
+        /// <param name="x">Column index.</param>
+        /// <param name="y">Row (quit) index.</param>
+        /// <param name="gate">The gate to place on the grid.</param>
+        public void AddGate(int x, int y, QuantumGate gate)
         {
-            if (ReferenceEquals(this, obj))
+            if (x < 0 || y < 0)
             {
-                return true;
+                throw new ArgumentOutOfRangeException($"Position ({x}, {y}) is out of bounds of the grid");
             }
 
-            if (obj == null)
+            if (x >= Width || y + gate.Height - 1 >= Height)
             {
-                return false;
+                Resize(Math.Max(Width, x + 1), y + gate.Height);
             }
 
-            return obj.GetType() == typeof(GateGrid) && Equals((GateGrid)obj);
+            if (grid[x, y] != null)
+            {
+                throw new ArgumentException($"There already exists a gate at {x}, {y}");
+            }
+
+            for (var i = 0; i < gate.Height; i++)
+            {
+                grid[x, y + i] = gate;
+            }
         }
 
-        /// <inheritdoc/>
-        // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
-        public override int GetHashCode() => base.GetHashCode();
+        /// <summary>Shrinks the grid to occupy the least number of squares in each direction.</summary>
+        public void Shrink()
+        {
+            (int maxX, int maxY) = Gates.Aggregate((1, 1), (acc, p) => (Math.Max(acc.Item1, p.X + 1), Math.Max(acc.Item2, p.Y + 1)));
+            Resize(maxX, maxY);
+        }
 
         /// <inheritdoc/>
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
 
-            foreach ((int qubit, var queue) in lanes.Enumerate())
+            for (var y = 0; y < Height; y++)
             {
-                builder.Append($"Q{qubit}: ");
-                builder.AppendLine(string.Join(" ", queue.Select(x => x.Name)));
+                builder.Append($"{Names[y]}:");
+                for (var x = 0; x < Width; x++)
+                {
+                    builder.Append(" " + (grid[x, y]?.Name ?? "_"));
+                }
+
+                builder.AppendLine();
             }
 
             return builder.ToString();
         }
 
-        /// <inheritdoc/>
-        public object Clone() => new GateGrid(lanes.Select(x => x.ToArray()).ToArray());
-
-        /// <inheritdoc/>
-        public bool Equals(GateGrid? other)
+        private void Resize(int newWidth, int newHeight)
         {
-            if (Qubits != other?.Qubits)
-            {
-                return false;
-            }
+            var newGrid = new QuantumGate?[newWidth, newHeight];
+            var newNames = new string[newHeight];
 
-            foreach (var (lane1, lane2) in lanes.Zip(other.lanes))
+            for (var y = 0; y < newHeight; y++)
             {
-                if (lane1.Count != lane2.Count)
+                newNames[y] = y < Height ? Names[y] : $"Q {y}";
+                for (var x = 0; x < newWidth; x++)
                 {
-                    return false;
-                }
-
-                foreach ((QuantumGate gate1, QuantumGate gate2) in lane1.Zip(lane2))
-                {
-                    if (gate1 != gate2)
-                    {
-                        return false;
-                    }
+                    newGrid[x, y] = x < Width && y < Height ? grid[x, y] : null;
                 }
             }
 
-            return true;
+            Names = newNames;
+            grid = newGrid;
         }
     }
 }

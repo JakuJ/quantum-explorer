@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AstTransformations;
@@ -22,35 +23,36 @@ namespace Compiler.Tests
                 },
             };
 
-            internal static object[] GateGrids => new object[]
+            internal static IEnumerable<object> GateGrids
             {
-                new object[] { "AllocateOne", new GateGrid(1) },
-                new object[] { "AllocateFive", new GateGrid(5) },
-                new object[]
+                get
                 {
-                    "AllocateOneAndApplyGates", new GateGrid(new[]
+                    yield return new object[] { "AllocateOne", new (string, int, int)[] { } };
+                    yield return new object[] { "AllocateFive", new (string, int, int)[] { } };
+                    yield return new object[]
                     {
+                        "AllocateOneAndApplyGates",
                         new[]
                         {
-                            new QuantumGate("H"),
-                            new QuantumGate("Z"),
-                            new QuantumGate("X"),
-                            new QuantumGate("MResetZ"),
+                            ("H", 0, 0),
+                            ("Z", 1, 0),
+                            ("X", 2, 0),
+                            ("MResetZ", 3, 0),
                         },
-                    }),
-                },
-                new object[]
-                {
-                    "AllocateFiveAndApplyGates", new GateGrid(new[]
+                    };
+                    yield return new object[]
                     {
-                        new[] { new QuantumGate("H") },
-                        new[] { new QuantumGate("X"), new QuantumGate("Y") },
-                        new QuantumGate[] { },
-                        new QuantumGate[] { },
-                        new[] { new QuantumGate("Z") },
-                    }),
-                },
-            };
+                        "AllocateFiveAndApplyGates",
+                        new[]
+                        {
+                            ("H", 0, 0),
+                            ("X", 0, 1),
+                            ("Y", 1, 1),
+                            ("Z", 0, 4),
+                        },
+                    };
+                }
+            }
         }
 
         [TestCaseSource(typeof(TestSources), nameof(TestSources.DeclaredOps))]
@@ -86,7 +88,7 @@ namespace Compiler.Tests
         }
 
         [TestCaseSource(typeof(TestSources), nameof(TestSources.GateGrids))]
-        public async Task ExtractsQuantumGates(string operation, GateGrid grid)
+        public async Task ExtractsQuantumGates(string operation, (string, int, int)[] gates)
         {
             // Arrange
             string code = await Helpers.GetSourceFile("AllocatedQubitOps");
@@ -94,10 +96,13 @@ namespace Compiler.Tests
 
             // Act
             await compiler.Compile(code);
-            var gates = FromQSharp.GetGates(compiler.Compilation);
+            var grid = FromQSharp.GetGates(compiler.Compilation);
 
             // Assert
-            Assert.AreEqual(grid, gates[operation], "Quantum circuit should be extracted correctly.");
+            foreach ((QuantumGate gate, int x, int y) in grid[operation].Gates)
+            {
+                Assert.Contains((gate.Name, x, y), gates, "Gate should be present at a given position");
+            }
         }
     }
 }
