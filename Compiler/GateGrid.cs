@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -34,16 +35,19 @@ namespace Compiler
         {
             get
             {
-                var seen = new HashSet<QuantumGate>();
+                var seen = new bool[Width, Height];
                 for (var y = 0; y < Height; y++)
                 {
                     for (var x = 0; x < Width; x++)
                     {
                         QuantumGate? gate = grid[x, y];
-                        if (gate != null && !seen.Contains(gate))
+                        if (!seen[x, y] && gate != null)
                         {
                             yield return (gate, x, y);
-                            seen.Add(gate);
+                            for (var i = 0; i < gate.Height; i++)
+                            {
+                                seen[x, y + i] = true;
+                            }
                         }
                     }
                 }
@@ -55,7 +59,7 @@ namespace Compiler
         /// <param name="name">The identifier to assign to the qubit.</param>
         public void SetName(int qubit, string name)
         {
-            if (qubit <= 0 || qubit >= Height)
+            if (qubit < 0 || qubit >= Height)
             {
                 throw new ArgumentOutOfRangeException(nameof(qubit));
             }
@@ -98,7 +102,7 @@ namespace Compiler
 
             if (x >= Width || y + gate.Height - 1 >= Height)
             {
-                Resize(Math.Max(Width, x + 1), y + gate.Height);
+                Resize(Math.Max(Width, x + 1), Math.Max(Height, y + gate.Height));
             }
 
             if (grid[x, y] != null)
@@ -120,6 +124,7 @@ namespace Compiler
         }
 
         /// <inheritdoc/>
+        [ExcludeFromCodeCoverage] // Only used as a placeholder until the Compositor is done
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();

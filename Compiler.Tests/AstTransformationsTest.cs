@@ -96,10 +96,10 @@ namespace Compiler.Tests
 
             // Act
             await compiler.Compile(code);
-            var grid = FromQSharp.GetGates(compiler.Compilation);
+            Dictionary<string, GateGrid>? grids = FromQSharp.GetGates(compiler.Compilation);
 
             // Assert
-            foreach ((QuantumGate gate, int x, int y) in grid[operation].Gates)
+            foreach ((QuantumGate gate, int x, int y) in grids[operation].Gates)
             {
                 Assert.Contains((gate.Name, x, y), gates, "Gate should be present at a given position");
             }

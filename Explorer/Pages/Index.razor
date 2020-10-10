@@ -47,7 +47,6 @@
     private async Task OnCompile()
     {
         await Compiler.Compile(Editor.Component.Code);
-
         Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
