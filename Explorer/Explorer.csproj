@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <Import Project="..\msbuild\Source.props" />
 
@@ -7,6 +7,8 @@
     <JsLibRoot>JsLib</JsLibRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)\node_modules\**</DefaultItemExcludes>
     <NpmInstallStampFile>$(JsLibRoot)\node_modules\.install-stamp</NpmInstallStampFile>
+    <PreserveCompilationReferences>true</PreserveCompilationReferences>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,12 +17,17 @@
   </ItemGroup>
 
   <ItemGroup Label="Package references">
+    <PackageReference Include="FSharp.Core" Version="4.7.2" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
     <PackageReference Include="Microsoft.Quantum.Development.Kit" Version="0.12.20100504" />
+    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.7.97" />
+    <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
+    <PackageReference Include="StreamJsonRpc" Version="2.5.46" />
+    <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -29,12 +36,43 @@
     <ApplicationURL>https://localhost:8081;http://localhost:8080</ApplicationURL>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
   <!--  Below are settings for NPM and webpack -->
 
   <ItemGroup>
     <None Include="$(JsLibRoot)\*.json" />
     <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
     <Content Include="syntax\onigasm.wasm" CopyToOutputDirectory="PreserveNewest" />
+    <Reference Include="Microsoft.Quantum.QsCompilationManager">
+      <HintPath>..\extLib\Microsoft.Quantum.QsCompilationManager.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Quantum.QsCore">
+      <HintPath>..\extLib\Microsoft.Quantum.QsCore.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Quantum.QsDataStructures">
+      <HintPath>..\extLib\Microsoft.Quantum.QsDataStructures.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Quantum.QsDocumentationParser">
+      <HintPath>..\extLib\Microsoft.Quantum.QsDocumentationParser.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Quantum.QsLanguageServer">
+      <HintPath>..\extLib\Microsoft.Quantum.QsLanguageServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Quantum.QsOptimizations">
+      <HintPath>..\extLib\Microsoft.Quantum.QsOptimizations.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Quantum.QsSyntaxProcessor">
+      <HintPath>..\extLib\Microsoft.Quantum.QsSyntaxProcessor.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Quantum.QsTextProcessor">
+      <HintPath>..\extLib\Microsoft.Quantum.QsTextProcessor.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Quantum.QsTransformations">
+      <HintPath>..\extLib\Microsoft.Quantum.QsTransformations.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="EnsureNodeEnv"

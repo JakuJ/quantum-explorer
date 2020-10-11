@@ -1,5 +1,9 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
 using Compiler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -46,11 +50,23 @@ namespace Explorer
 
             app.UseRouting();
 
+            app.UseWebSockets()
+                .UseRouting()
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapStreamJsonRpc("/monaco-editor");
+                })
+                .Run(async (context) =>
+                {
+                     await context.Response.WriteAsync("-- Demo.AspNetCore.StreamJsonRpc.Server.WebSocket --");
+                });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
         }
 
         public void ConfigureServices(IServiceCollection services)

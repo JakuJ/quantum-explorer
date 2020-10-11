@@ -35,6 +35,16 @@ module.exports = {
             },
         ]
     },
+    node: {
+        net: 'mock'
+    },
+    resolve: { alias: { 'vscode': require.resolve('monaco-languageclient/lib/vscode-compatibility') } },
+    output: {
+        path: path.resolve(__dirname, '../wwwroot/js'),
+        publicPath: '/js/',
+        filename: "library.js",
+        library: "Library"
+    },
     plugins: [
         new CleanWebpackPlugin(),
         new MonacoWebpackPlugin({
