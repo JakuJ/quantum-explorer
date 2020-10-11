@@ -42,29 +42,6 @@ namespace Compiler
         /// <summary>Gets the AST element corresponding to the call of the underlying operation.</summary>
         public QsCallable? AstElement { get; }
 
-        public static bool operator ==(QuantumGate? left, QuantumGate? right) => Equals(left, right);
-
-        public static bool operator !=(QuantumGate? left, QuantumGate? right) => !(left == right);
-
-        /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(Namespace, Name, Height, ControlQubits, AstElement);
-
-        /// <inheritdoc/>
-        public override bool Equals(object? obj)
-        {
-            if (obj == null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            return obj.GetType() == GetType() && Equals((QuantumGate)obj);
-        }
-
         /// <inheritdoc/>
         public bool Equals(QuantumGate? other) => other != null && Namespace == other.Namespace && Name == other.Name &&
                                                   Height == other.Height && ControlQubits.SequenceEqual(other.ControlQubits) &&

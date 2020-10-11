@@ -43,12 +43,14 @@ namespace Compiler.Tests
             string msg = "Cannot add gates at negative index.";
 
             // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(
+            () =>
             {
                 grid.AddGate(1, -1, new QuantumGate("H"));
             }, msg);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(
+            () =>
             {
                 grid.AddGate(-2, 3, new QuantumGate("H"));
             }, msg);
@@ -99,6 +101,34 @@ namespace Compiler.Tests
         }
 
         [Test]
+        public void RemovingEmptyColumns()
+        {
+            // Arrange
+            var grid = new GateGrid(10, 10);
+            var gates = Enumerable.Range(0, 5).Select(_ => new QuantumGate("H")).ToArray();
+
+            // Act
+            grid.AddGate(1, 0, gates[0]);
+            grid.AddGate(3, 2, gates[1]);
+            grid.AddGate(4, 4, gates[2]);
+            grid.AddGate(7, 6, gates[3]);
+            grid.AddGate(9, 8, gates[4]);
+
+            grid.CollapseEmptyColumns(); // should remove columns [0, 2, 5, 6, 8]
+
+            var newGates = grid.Gates.ToArray();
+
+            // Assert
+            Assert.AreEqual((5, 10), (grid.Width, grid.Height), "Five columns should collapse");
+
+            Assert.Contains((gates[0], 0, 0), newGates, "Gate should change position");
+            Assert.Contains((gates[1], 1, 2), newGates, "Gate should change position");
+            Assert.Contains((gates[2], 2, 4), newGates, "Gate should change position");
+            Assert.Contains((gates[3], 3, 6), newGates, "Gate should change position");
+            Assert.Contains((gates[4], 4, 8), newGates, "Gate should change position");
+        }
+
+        [Test]
         public void ShrinkingUpToGateExtent()
         {
             // Arrange
@@ -135,15 +165,51 @@ namespace Compiler.Tests
             Assert.AreEqual("qs[1]", grid.Names[1], "An identifier once set should be persistent");
             Assert.AreEqual("SomeQ", grid.Names[2], "An identifier once set should be persistent");
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.DoesNotThrow(
+            () =>
             {
                 grid.SetName(10, "SomeOtherQ");
-            }, "Cannot set names to nonexistent qubits");
+            }, "Setting names to nonexistent qubits is a no-op");
 
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(
+            () =>
             {
                 grid.SetName(-1, "SomeOtherQ");
-            }, "Cannot set names to negative index qubits");
+            }, "Setting names at negative indices is an error");
+        }
+
+        [Test]
+        public void RemovingGates()
+        {
+            // Arrange
+            var grid = new GateGrid(1, 1);
+            var gates = Enumerable.Range(0, 5).Select(_ => new QuantumGate("H")).ToArray();
+
+            // Act
+            for (int i = 0; i < gates.Length; i++)
+            {
+                grid.AddGate(i, i, gates[i]);
+            }
+
+            // Assert
+            Assert.Throws<ArgumentOutOfRangeException>(
+            () =>
+            {
+                grid.RemoveAt(-1, 0);
+            }, "Removing at negative indices is an error.");
+
+            Assert.DoesNotThrow(
+            () =>
+            {
+                grid.RemoveAt(1, 3);
+            }, "Removing where there is no gate is a no-op.");
+
+            foreach (int i in new[] { 0, 3, 1, 4, 2 })
+            {
+                Assert.AreEqual(gates[i], grid.RemoveAt(i, i), "A correct gate should be removed.");
+            }
+
+            Assert.IsEmpty(grid.Gates, "There should be no gates left");
         }
     }
 }
