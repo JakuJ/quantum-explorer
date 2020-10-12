@@ -14,7 +14,7 @@ namespace Compiler
         /// <param name="symbol">The name of the underlying operation.</param>
         /// <param name="ns">The namespace of the underlying operation.</param>
         /// <param name="height">The number of affected qubits.</param>
-        public QuantumGate(string symbol, string ns, int height = 1, QsCallable? ast = null)
+        public QuantumGate(string symbol, string ns, int height = 1, TypedExpression? ast = null)
         {
             Name = symbol;
             Namespace = ns;
@@ -40,7 +40,7 @@ namespace Compiler
         public List<int> ControlQubits { get; }
 
         /// <summary>Gets the AST element corresponding to the call of the underlying operation.</summary>
-        public QsCallable? AstElement { get; }
+        public TypedExpression? AstElement { get; }
 
         /// <inheritdoc/>
         public bool Equals(QuantumGate? other) => other != null && Namespace == other.Namespace && Name == other.Name &&

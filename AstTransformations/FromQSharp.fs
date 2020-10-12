@@ -57,7 +57,7 @@ module FromQSharp =
         inherit StatementKindTransformation<State>(parent, TransformationOptions.NoRebuild)
 
         override this.OnAllocateQubits(scope: QsQubitScope) =
-            this.SharedState.QubitId <-
+            let qubitID =
                 match scope.Binding.Lhs with
                 | VariableName name -> name.Value
                 | _ -> failwith "Unknown SymbolTuple for the qubit binding"
@@ -69,7 +69,17 @@ module FromQSharp =
                    | SingleQubitAllocation -> 1L
                    | _ -> failwith "Invalid qubit allocation"
 
-            this.SharedState.Grid <- GateGrid(qubits, 1)
+            let grid = GateGrid()
+
+            if qubits = 1 then
+                grid.SetName(0, qubitID)
+            else
+                List.map (fun x -> (x, sprintf "%s[%d]" qubitID x)) [ 0 .. qubits - 1 ]
+                |> List.iter grid.SetName
+
+            this.SharedState.Grid <- grid
+            this.SharedState.QubitId <- qubitID
+
             base.OnAllocateQubits scope
 
     and ExpressionKindTransform(parent: Transform) =
@@ -80,21 +90,21 @@ module FromQSharp =
                   "Microsoft.Quantum.Measurement" ]
 
         override this.OnOperationCall(lhs: TypedExpression, rhs: TypedExpression) =
-            let (gate: string option) =
+            let (gate: (string * string) option) =
                 match lhs.Expression with
                 | Identifier (var, _) ->
                     match var with
-                    | GlobalCallable glob when Set.contains glob.Namespace.Value prefixes -> Some glob.Name.Value
+                    | GlobalCallable glob when Set.contains glob.Namespace.Value prefixes ->
+                        Some(glob.Namespace.Value, glob.Name.Value)
                     | _ -> None
                 | _ -> None
 
-            // TODO: qubitID will be useful when we allow for passing qubits as arguments to operations
             if gate.IsSome && not (isNull this.SharedState.Grid) then
-                let (qubitID, index) =
+                let qubitID =
                     match rhs.Expression with
                     | Identifier (var, _) ->
                         match var with
-                        | LocalVariable local -> (local.Value, 0)
+                        | LocalVariable local -> local.Value
                         | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
                     | ArrayItem (indexable, index) ->
                         match indexable.Expression with
@@ -102,14 +112,15 @@ module FromQSharp =
                             match var with
                             | LocalVariable identifier ->
                                 match index.Expression with
-                                | IntLiteral lit -> (identifier.Value, int32 lit)
+                                | IntLiteral lit -> sprintf "%s[%d]" identifier.Value lit
                                 | _ -> failwith "Array index is not an integer"
                             | _ -> failwith "Global operation arguments not supported"
                         | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
                     | _ -> failwith "Invalid argument to a operation call"
 
-                this.SharedState.Grid.AddGate(index, QuantumGate gate.Value)
-                this.SharedState.Grid.SetName(index, qubitID)
+                let (ns, name) = gate.Value;
+                let ix = this.SharedState.Grid.IndexOfName qubitID
+                this.SharedState.Grid.AddGate(ix, QuantumGate (name, ns, 1, lhs))
 
             base.OnOperationCall(lhs, rhs)
 

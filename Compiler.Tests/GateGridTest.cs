@@ -155,6 +155,10 @@ namespace Compiler.Tests
             Assert.AreEqual("qs[1]", grid.Names[1], "An identifier once set should be persistent");
             Assert.AreEqual("SomeQ", grid.Names[2], "An identifier once set should be persistent");
 
+            Assert.AreEqual(0, grid.IndexOfName("qs[0]"), "An identifier should map to its corresponding index");
+            Assert.AreEqual(1, grid.IndexOfName("qs[1]"), "An identifier should map to its corresponding index");
+            Assert.AreEqual(2, grid.IndexOfName("SomeQ"), "An identifier should map to its corresponding index");
+
             Assert.DoesNotThrow(
             () =>
             {
