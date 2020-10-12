@@ -126,7 +126,7 @@ namespace Compiler
         {
             if (!BoundsCheck(x, y))
             {
-                return null;
+                throw new ArgumentOutOfRangeException("Trying to remove a gate outside the grid");
             }
 
             var gate = At(x, y);

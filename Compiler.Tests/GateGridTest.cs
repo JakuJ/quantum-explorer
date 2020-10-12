@@ -194,6 +194,12 @@ namespace Compiler.Tests
                 grid.RemoveAt(-1, 0);
             }, "Removing at negative indices is an error.");
 
+            Assert.Throws<ArgumentOutOfRangeException>(
+            () =>
+            {
+                grid.RemoveAt(7, 2);
+            }, "Removing beyond the grid is an error.");
+
             Assert.Throws<ArgumentException>(
             () =>
             {
