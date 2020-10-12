@@ -56,13 +56,14 @@ namespace Compiler
         {
             get
             {
+                QuantumGate? gate;
                 var seen = new bool[Width, Height];
+
                 for (var y = 0; y < Height; y++)
                 {
                     for (var x = 0; x < Width; x++)
                     {
-                        QuantumGate? gate = At(x, y);
-                        if (!seen[x, y] && gate != null)
+                        if (!seen[x, y] && (gate = At(x, y)) != null)
                         {
                             yield return (gate, x, y);
                             for (var i = 0; i < gate.Height; i++)
@@ -122,7 +123,7 @@ namespace Compiler
         /// <param name="y">The index of the qubit.</param>
         /// <param name="shrink">Whether to normalize the grid afterwards.</param>
         /// <returns>The removed gate, if any.</returns>
-        public QuantumGate? RemoveAt(int x, int y, bool shrink = true)
+        public QuantumGate RemoveAt(int x, int y, bool shrink = true)
         {
             if (!BoundsCheck(x, y))
             {
@@ -167,14 +168,7 @@ namespace Compiler
         /// <param name="yTo">The index of target qubit.</param>
         public void MoveGate(int xFrom, int yFrom, int xTo, int yTo)
         {
-            // remove the gate from the grids
             var gate = RemoveAt(xFrom, yFrom, shrink: false);
-
-            if (gate == null)
-            {
-                return; // nothing to do
-            }
-
             AddGate(xTo, yTo, gate);
         }
 
