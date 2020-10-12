@@ -194,11 +194,11 @@ namespace Compiler.Tests
                 grid.RemoveAt(-1, 0);
             }, "Removing at negative indices is an error.");
 
-            Assert.DoesNotThrow(
+            Assert.Throws<ArgumentException>(
             () =>
             {
                 grid.RemoveAt(1, 3);
-            }, "Removing where there is no gate is a no-op.");
+            }, "Removing where there is no gate is an error.");
 
             Assert.AreEqual(gates[2], grid.RemoveAt(2, 2), "A correct gate should be removed.");
             Assert.AreEqual(gates[4], grid.RemoveAt(3, 4), "A correct gate should be removed.");
@@ -207,6 +207,31 @@ namespace Compiler.Tests
             Assert.AreEqual(gates[1], grid.RemoveAt(0, 1), "A correct gate should be removed.");
 
             Assert.IsEmpty(grid.Gates, "There should be no gates left");
+        }
+
+        [Test]
+        public void RemovingMultiQubitGates()
+        {
+            // Arrange
+            var grid = new GateGrid();
+            var gate = new QuantumGate("SomeBigOp", "SomeNs", 4);
+
+            // Act & Assert
+            grid.AddGate(0, 0, gate);
+            Assert.AreEqual((1, 4), (grid.Width, grid.Height), "4-qubit gate should take up 4 spaces");
+
+            for (int i = 1; i < 4; i++)
+            {
+                Assert.Throws<ArgumentException>(
+                () =>
+                {
+                    grid.RemoveAt(0, i);
+                }, "Trying to remove a middle part of a multi-qubit gate is an error.");
+            }
+
+            Assert.AreEqual(gate, grid.RemoveAt(0, 0), "A correct gate should be removed.");
+            Assert.IsEmpty(grid.Gates, "There should be no gates left");
+            Assert.AreEqual((0, 0), (grid.Width, grid.Height), "The grid should be empty");
         }
 
         [Test]

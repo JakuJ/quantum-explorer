@@ -130,7 +130,24 @@ namespace Compiler
             }
 
             var gate = At(x, y);
-            At(x, y) = null;
+
+            if (gate == null)
+            {
+                throw new ArgumentException($"There is no gate at location ({x}, {y})");
+            }
+
+            if (gate.Height > 1)
+            {
+                if (!BoundsCheck(x, y + gate.Height - 1) || At(x, y + gate.Height - 1) != gate)
+                {
+                    throw new ArgumentException($"Position ({x}, {y}) is not a start of a gate, but rather in a middle of a multi-qubit one");
+                }
+            }
+
+            for (int i = 0; i < gate.Height; i++)
+            {
+                At(x, y + i) = null;
+            }
 
             if (shrink)
             {
