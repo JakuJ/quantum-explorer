@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
@@ -13,13 +12,23 @@ namespace Compiler.Tests
         public void AddingGates()
         {
             // Arrange
-            var grid = new GateGrid(1, 1);
+            var grid = new GateGrid();
+            var gates = SampleGates(4);
+
             var toAdd = new (QuantumGate G, int X, int Y)[]
             {
-                (new QuantumGate("H", "Microsoft.Intrinsic"), 0, 0),
-                (new QuantumGate("X", "Microsoft.Intrinsic"), 2, 3),
-                (new QuantumGate("SomeOp", "Testing"), 5, 5),
-                (new QuantumGate("SomeOtherOp", "Ns2"), 10, 0),
+                (gates[0], 0, 0),
+                (gates[1], 2, 3),
+                (gates[2], 5, 5),
+                (gates[3], 10, 0),
+            };
+
+            var expected = new (QuantumGate G, int X, int Y)[]
+            {
+                (gates[0], 0, 0),
+                (gates[1], 1, 3),
+                (gates[2], 2, 5),
+                (gates[3], 3, 0),
             };
 
             // Act
@@ -30,7 +39,7 @@ namespace Compiler.Tests
 
             // Assert
             var outGates = grid.Gates.ToArray();
-            foreach (var tuple in toAdd)
+            foreach (var tuple in expected)
             {
                 Assert.Contains(tuple, outGates, "Gate at the correct position should be present in the grid.");
             }
@@ -58,38 +67,21 @@ namespace Compiler.Tests
         }
 
         [Test]
-        public void AddingOverlappingGatesFails()
-        {
-            // Arrange
-            var grid = new GateGrid(1, 1);
-            string msg = "Trying to place a gate that overlaps with another one should throw.";
-
-            // Act
-            grid.AddGate(0, 0, new QuantumGate("H"));
-            grid.AddGate(1, 0, new QuantumGate("SomeMultiQubitOperation", "SomeNamespace", 5));
-
-            // Assert
-            Assert.Throws<ArgumentException>(() => { grid.AddGate(0, 0, new QuantumGate("X")); }, msg);
-            Assert.Throws<ArgumentException>(() => { grid.AddGate(1, 2, new QuantumGate("X")); }, msg);
-            Assert.Throws<ArgumentException>(() => { grid.AddGate(1, 3, new QuantumGate("X", "Ns", 3)); }, msg);
-        }
-
-        [Test]
         public void ResizingOnGateAdded()
         {
             // Arrange
-            var grid = new GateGrid(1, 1);
+            var grid = new GateGrid();
 
             // Act & Assert
-            grid.AddGate(4, 4, new QuantumGate("SomeOperation")); // resizes to 5x5
-            Assert.AreEqual((5, 5), (grid.Width, grid.Height), "Grid should resize correctly");
+            grid.AddGate(4, 4, new QuantumGate("SomeOperation")); // resizes to 5x5 then shrinks to 1x5
+            Assert.AreEqual((1, 5), (grid.Width, grid.Height), "Grid should resize correctly");
 
-            grid.AddGate(0, 5, new QuantumGate("SomeOperation", "Test", 5)); // resizes to 5x10
-            Assert.AreEqual((5, 10), (grid.Width, grid.Height), "Grid should resize correctly");
+            grid.AddGate(0, 5, new QuantumGate("SomeOperation", "Test", 5)); // resizes to 1x10
+            Assert.AreEqual((1, 10), (grid.Width, grid.Height), "Grid should resize correctly");
         }
 
         [Test]
-        public void ShrinkingTo1By1()
+        public void ShrinkingTo0By0()
         {
             // Arrange
             var grid = new GateGrid(5, 5);
@@ -98,29 +90,27 @@ namespace Compiler.Tests
             grid.Shrink();
 
             // Assert
-            Assert.AreEqual((1, 1), (grid.Width, grid.Height), "Empty grid should shrink to 1x1");
+            Assert.AreEqual((0, 0), (grid.Width, grid.Height), "Empty grid should shrink to 0x0 (empty)");
         }
 
         [Test]
         public void RemovingEmptyColumns()
         {
             // Arrange
-            var grid = new GateGrid(10, 10);
+            var grid = new GateGrid();
             var gates = SampleGates(5);
 
             // Act
-            grid.AddGate(1, 0, gates[0]);
-            grid.AddGate(3, 2, gates[1]);
-            grid.AddGate(4, 4, gates[2]);
-            grid.AddGate(7, 6, gates[3]);
-            grid.AddGate(9, 8, gates[4]);
-
-            grid.CollapseEmptyColumns(); // should remove columns [0, 2, 5, 6, 8]
+            grid.AddGate(1, 0, gates[0]); // 0, 0
+            grid.AddGate(3, 2, gates[1]); // 1, 2
+            grid.AddGate(4, 4, gates[2]); // 2, 4
+            grid.AddGate(7, 6, gates[3]); // 3, 6
+            grid.AddGate(9, 8, gates[4]); // 4, 8
 
             var newGates = grid.Gates.ToArray();
 
             // Assert
-            Assert.AreEqual((5, 10), (grid.Width, grid.Height), "Five columns should collapse");
+            Assert.AreEqual((5, 9), (grid.Width, grid.Height), "Five columns should collapse");
 
             Assert.Contains((gates[0], 0, 0), newGates, "Gate should change position");
             Assert.Contains((gates[1], 1, 2), newGates, "Gate should change position");
@@ -133,17 +123,16 @@ namespace Compiler.Tests
         public void ShrinkingUpToGateExtent()
         {
             // Arrange
-            var grid = new GateGrid(10, 10);
+            var grid = new GateGrid();
 
             // Act
             grid.AddGate(1, 1, new QuantumGate("SomeOp"));
             grid.AddGate(5, 5, new QuantumGate("SomeOp"));
             grid.AddGate(3, 7, new QuantumGate("SomeOp"));
             grid.AddGate(6, 4, new QuantumGate("SomeOp"));
-            grid.Shrink();
 
             // Assert
-            Assert.AreEqual((7, 8), (grid.Width, grid.Height), "Empty grid should shrink to accomodate all gates");
+            Assert.AreEqual((4, 8), (grid.Width, grid.Height), "Empty grid should not be bigger than necessary");
         }
 
         [Test]
@@ -170,7 +159,9 @@ namespace Compiler.Tests
             () =>
             {
                 grid.SetName(10, "SomeOtherQ");
-            }, "Setting names to nonexistent qubits is a no-op");
+            }, "Setting names to nonexistent qubits works");
+
+            Assert.AreEqual(11, grid.Height, "Setting names to nonexistent qubits expands the grid");
 
             Assert.Throws<ArgumentOutOfRangeException>(
             () =>
@@ -183,7 +174,7 @@ namespace Compiler.Tests
         public void RemovingGates()
         {
             // Arrange
-            var grid = new GateGrid(1, 1);
+            var grid = new GateGrid();
             var gates = SampleGates(5);
 
             // Act
@@ -205,21 +196,20 @@ namespace Compiler.Tests
                 grid.RemoveAt(1, 3);
             }, "Removing where there is no gate is a no-op.");
 
-            foreach (int i in new[] { 0, 3, 1, 4, 2 })
-            {
-                Assert.AreEqual(gates[i], grid.RemoveAt(i, i), "A correct gate should be removed.");
-            }
+            Assert.AreEqual(gates[2], grid.RemoveAt(2, 2), "A correct gate should be removed.");
+            Assert.AreEqual(gates[4], grid.RemoveAt(3, 4), "A correct gate should be removed.");
+            Assert.AreEqual(gates[0], grid.RemoveAt(0, 0), "A correct gate should be removed.");
+            Assert.AreEqual(gates[3], grid.RemoveAt(1, 3), "A correct gate should be removed.");
+            Assert.AreEqual(gates[1], grid.RemoveAt(0, 1), "A correct gate should be removed.");
 
             Assert.IsEmpty(grid.Gates, "There should be no gates left");
         }
-
-        #region Moving gates
 
         [Test]
         public void MovingSingleGate()
         {
             // Arrange
-            var grid = new GateGrid(5, 5);
+            var grid = new GateGrid();
             var gate = new QuantumGate("SomeOp", "Testing");
 
             // Act & Assert
@@ -227,18 +217,18 @@ namespace Compiler.Tests
 
             // different row and column
             grid.MoveGate(0, 0, 1, 1);
-            Assert.AreEqual((gate, 1, 1), grid.Gates.First(), "Gate should be moved to a new position");
+            Assert.AreEqual((gate, 0, 1), grid.Gates.First(), "Gate should be moved to a new position");
 
             // same row
-            grid.MoveGate(1, 1, 3, 1);
-            Assert.AreEqual((gate, 3, 1), grid.Gates.First(), "Gate should be moved to a new position");
+            grid.MoveGate(0, 1, 3, 1);
+            Assert.AreEqual((gate, 0, 1), grid.Gates.First(), "Gate should be moved to a new position");
 
             // same column
-            grid.MoveGate(3, 1, 3, 4);
-            Assert.AreEqual((gate, 3, 4), grid.Gates.First(), "Gate should be moved to a new position");
+            grid.MoveGate(0, 1, 3, 4);
+            Assert.AreEqual((gate, 0, 4), grid.Gates.First(), "Gate should be moved to a new position");
 
             // and back
-            grid.MoveGate(3, 4, 0, 0);
+            grid.MoveGate(0, 4, 0, 0);
             Assert.AreEqual((gate, 0, 0), grid.Gates.First(), "Gate should be moved to a new position");
         }
 
@@ -246,23 +236,28 @@ namespace Compiler.Tests
         public void MovingOutOfBoundsResizesTheGrid()
         {
             // Arrange
-            var grid = new GateGrid(1, 1);
-            var gate = new QuantumGate("SomeOp", "Testing");
+            var grid = new GateGrid();
+            var gates = SampleGates(2);
 
             // Act
-            grid.AddGate(0, 0, gate);
-            grid.MoveGate(0, 0, 3, 4);
+            grid.AddGate(0, 0, gates[0]);
+            grid.AddGate(0, 1, gates[1]);
+            grid.MoveGate(0, 1, 1, 0);
+
+            var outGates = grid.Gates.ToArray();
 
             // Assert
-            Assert.AreEqual((gate, 3, 4), grid.Gates.First(), "Gate should be moved to a new position");
-            Assert.AreEqual((4, 5), (grid.Width, grid.Height), "Grid should resize");
+            Assert.AreEqual((gates[0], 0, 0), outGates[0], "First gate should not move");
+            Assert.AreEqual((gates[1], 1, 0), outGates[1], "Gate should be moved to a new position");
+            Assert.AreEqual((2, 1), (grid.Width, grid.Height), "Grid should resize");
         }
 
         [TestCase(0, "01234")]
-        [TestCase(1, "10234")]
-        [TestCase(2, "12034")]
-        [TestCase(3, "12304")]
-        [TestCase(4, "12340")]
+        [TestCase(1, "01234")]
+        [TestCase(2, "10234")]
+        [TestCase(3, "12034")]
+        [TestCase(4, "12304")]
+        [TestCase(5, "12340")]
         public void CanInsertBetweenTwoGatesOnTheSameRow(int targetColumn, string expected)
         {
             // Arrange
@@ -276,13 +271,13 @@ namespace Compiler.Tests
             }
 
             grid.MoveGate(0, 0, targetColumn, 0);
-
             var newGates = grid.Gates.ToArray();
+
             // Assert
             for (int i = 0; i < gates.Length; i++)
             {
                 // assuming left-to-right, top-to-bottom order of grid.Gates
-                Assert.AreSame(gates[expected[i] - '0'], newGates[i], "Gates should be in correct order");
+                Assert.AreEqual((gates[expected[i] - '0'], i, 0), newGates[i], "Gates should be in correct order");
             }
         }
 
@@ -307,14 +302,6 @@ namespace Compiler.Tests
         [Test]
         public void ComplexMovingScenarios()
         {
-            // 0 1 2
-            // _ 3 _
-            // _ 4 _
-            // to
-            // 0 2 1
-            // _ _ 3
-            // _ _ 4
-
             // Arrange
             var grid = new GateGrid(3, 3);
             var gates = SampleGates(5);
@@ -329,45 +316,47 @@ namespace Compiler.Tests
             grid.AddGate(1, 1, gates[3]);
             grid.AddGate(1, 2, gates[4]);
 
+            /* 0 1 2
+               _ 3 _
+               _ 4 _ */
             grid.MoveGate(2, 0, 1, 0);
+            /* 0 2 1
+               _ _ 3
+               _ _ 4 */
 
             // Assert
             Assert.AreEqual(expected1, grid.Gates.ToArray(), "Gates should be in a new order");
             Assert.AreEqual((3, 3), (grid.Width, grid.Height), "Grid size should remain unchanged");
 
-            // 0 2 1
-            // _ _ 3
-            // _ _ 4
-            // to
-            // 1 0 2 _
-            // _ _ _ 3
-            // _ _ _ 4
-
             // Act
+
+            /* 0 2 1
+               _ _ 3
+               _ _ 4 */
             grid.MoveGate(2, 0, 0, 0);
+            /* 1 0 2 _
+               _ _ _ 3
+               _ _ _ 4 */
 
             // Assert
             Assert.AreEqual(expected2, grid.Gates.ToArray(), "Gates should be in a new order");
             Assert.AreEqual((4, 3), (grid.Width, grid.Height), "Grid should expand to accomodate a new column");
 
-            // 1 0 2 _
-            // _ _ _ 3
-            // _ _ _ 4
-            // to
-            // 0 2 1
-            // _ _ 3
-            // _ _ 4
-
             // Act
-            grid.MoveGate(0, 0, 2, 0);
+
+            /* 1 0 2 _
+               _ _ _ 3
+               _ _ _ 4 */
+            grid.MoveGate(0, 0, 3, 0);
+            /* 0 2 1
+               _ _ 3
+               _ _ 4 */
 
             // Assert
             Assert.AreEqual(expected1, grid.Gates.ToArray(), "Gates should be back in the previous order");
             Assert.AreEqual((3, 3), (grid.Width, grid.Height), "Grid size should go back to 3 by 3");
         }
 
-        #endregion
-
-        private QuantumGate[] SampleGates(int howMany) => Enumerable.Range(0, howMany).Select(_ => new QuantumGate("SomeOp")).ToArray();
+        private QuantumGate[] SampleGates(int howMany) => Enumerable.Range(0, howMany).Select(i => new QuantumGate($"Op{i}")).ToArray();
     }
 }

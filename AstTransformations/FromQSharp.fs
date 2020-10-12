@@ -24,7 +24,8 @@ module FromQSharp =
 
             member this.Grid
                 with get (): GateGrid =
-                    Map.tryFind this.OpName this.Operations |> flip defaultArg null
+                    Map.tryFind this.OpName this.Operations
+                    |> flip defaultArg null
                 and set (value: GateGrid) =
                     this.Operations <- Map.add this.OpName value this.Operations
         end
@@ -62,31 +63,33 @@ module FromQSharp =
                 | _ -> failwith "Unknown SymbolTuple for the qubit binding"
 
             let qubits =
-                int32 <| match scope.Binding.Rhs.Resolution with
-                         | QubitRegisterAllocation { Expression = IntLiteral num } -> num
-                         | SingleQubitAllocation -> 1L
-                         | _ -> failwith "Invalid qubit allocation"
+                int32
+                <| match scope.Binding.Rhs.Resolution with
+                   | QubitRegisterAllocation { Expression = IntLiteral num } -> num
+                   | SingleQubitAllocation -> 1L
+                   | _ -> failwith "Invalid qubit allocation"
 
-            this.SharedState.Grid <- GateGrid qubits
+            this.SharedState.Grid <- GateGrid(qubits, 1)
             base.OnAllocateQubits scope
 
     and ExpressionKindTransform(parent: Transform) =
         inherit ExpressionKindTransformation<State>(parent, TransformationOptions.NoRebuild)
 
-        let prefixes: Set<string> = set [ "Microsoft.Quantum.Intrinsic"; "Microsoft.Quantum.Measurement" ]
+        let prefixes: Set<string> =
+            set [ "Microsoft.Quantum.Intrinsic"
+                  "Microsoft.Quantum.Measurement" ]
 
         override this.OnOperationCall(lhs: TypedExpression, rhs: TypedExpression) =
             let (gate: string option) =
                 match lhs.Expression with
                 | Identifier (var, _) ->
                     match var with
-                    | GlobalCallable glob when Set.contains glob.Namespace.Value prefixes ->
-                        Some glob.Name.Value
+                    | GlobalCallable glob when Set.contains glob.Namespace.Value prefixes -> Some glob.Name.Value
                     | _ -> None
                 | _ -> None
 
             // TODO: qubitID will be useful when we allow for passing qubits as arguments to operations
-            if gate.IsSome && this.SharedState.Grid <> null then
+            if gate.IsSome && not (isNull this.SharedState.Grid) then
                 let (qubitID, index) =
                     match rhs.Expression with
                     | Identifier (var, _) ->
@@ -106,6 +109,7 @@ module FromQSharp =
                     | _ -> failwith "Invalid argument to a operation call"
 
                 this.SharedState.Grid.AddGate(index, QuantumGate gate.Value)
+                this.SharedState.Grid.SetName(index, qubitID)
 
             base.OnOperationCall(lhs, rhs)
 
@@ -117,8 +121,6 @@ module FromQSharp =
         if ns.Name.Value.StartsWith("Microsoft.Quantum") then
             Map.empty // return an empty dictionary if there's no valid namespace
         else
-            ns
-            |> transform.Namespaces.OnNamespace
-            |> ignore
+            ns |> transform.Namespaces.OnNamespace |> ignore
             transform.SharedState.Operations
         |> Dictionary

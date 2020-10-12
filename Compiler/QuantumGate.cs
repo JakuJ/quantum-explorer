@@ -46,5 +46,8 @@ namespace Compiler
         public bool Equals(QuantumGate? other) => other != null && Namespace == other.Namespace && Name == other.Name &&
                                                   Height == other.Height && ControlQubits.SequenceEqual(other.ControlQubits) &&
                                                   ReferenceEquals(AstElement, other.AstElement);
+
+        /// <inheritdoc/>
+        public override string ToString() => Namespace + "." + Name;
     }
 }
