@@ -231,19 +231,29 @@ namespace Compiler
 
         private void Expand(int plusWidth, int plusHeight)
         {
-            Names = Names
+            if (plusHeight == 0)
+            {
+                for (int i = 0; i < plusWidth; i++)
+                {
+                    grid.Add(new QuantumGate?[Height]);
+                }
+            }
+            else
+            {
+                Names = Names
                     .Concat(Enumerable
                             .Repeat<string?>(null, plusHeight))
                     .ToArray();
 
-            grid = grid
-                    .Select(col => col
-                                    .Concat(Enumerable.Repeat<QuantumGate?>(null, plusHeight))
-                                    .ToArray())
-                    .Concat(Enumerable
-                            .Range(0, plusWidth)
-                            .Select(_ => new QuantumGate?[Height + plusHeight]))
-                    .ToList();
+                grid = grid
+                        .Select(col => col
+                                        .Concat(Enumerable.Repeat<QuantumGate?>(null, plusHeight))
+                                        .ToArray())
+                        .Concat(Enumerable
+                                .Range(0, plusWidth)
+                                .Select(_ => new QuantumGate?[Height + plusHeight]))
+                        .ToList();
+            }
         }
     }
 }
