@@ -9,3 +9,4 @@ node_modules/
 *.DotSettings.user
 TestResults/
 *.DotSettings
+.ionide/
