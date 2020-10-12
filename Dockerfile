@@ -20,17 +20,6 @@ COPY AstTransformations/ AstTransformations/
 WORKDIR /source/Explorer
 RUN dotnet build -c release --no-restore
 
-# Test stage -- exposes optional entrypoint
-# target entrypoint with: docker build --target test
-FROM build AS test
-WORKDIR /source/tests
-
-COPY Explorer.Tests/ ./Explorer.Tests
-COPY Compiler.Tests/ ./Compiler.Tests
-COPY Common.Tests/ ./Common.Tests
-
-ENTRYPOINT dotnet test --logger:trx
-
 # Publish endpoint
 FROM build AS publish
 RUN dotnet publish -c release --no-build -o /app
@@ -39,5 +28,4 @@ RUN dotnet publish -c release --no-build -o /app
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
 WORKDIR /app
 COPY --from=publish /app .
-EXPOSE 80
-ENTRYPOINT dotnet Explorer.dll
+ENTRYPOINT ["dotnet", "Explorer.dll"]
