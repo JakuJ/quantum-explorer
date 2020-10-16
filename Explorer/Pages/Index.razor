@@ -47,13 +47,13 @@
     private async Task OnCompile()
     {
         await Compiler.Compile(Editor.Component.Code);
-
         Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
         var builder = new StringBuilder("Defined operations:" + Environment.NewLine);
-        foreach ((string key, GateGrid? grid) in ast)
+        foreach ((string key, GateGrid grid) in ast)
         {
+            grid.Shrink();
             builder.AppendLine(key);
             builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info");
         }

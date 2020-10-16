@@ -5,7 +5,7 @@ namespace Allocations {
 
     // Single qubit, no gates
     operation AllocateOne() : Unit {
-        using (q = Qubit()) {}
+        using (qubit = Qubit()) {}
     }
     
     // Single qubit, three gates
