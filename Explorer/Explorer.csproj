@@ -17,16 +17,20 @@
   </ItemGroup>
 
   <ItemGroup Label="Package references">
-    <PackageReference Include="FSharp.Core" Version="4.7.2" />
+    <PackageReference Include="FParsec" Version="1.1.1" />
+    <PackageReference Include="FSharp.Core" Version="4.7.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
     <PackageReference Include="Microsoft.Quantum.Development.Kit" Version="0.12.20100504" />
+    <PackageReference Include="Microsoft.Build" Version="16.7.0" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.7.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
     <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.7.97" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
-    <PackageReference Include="StreamJsonRpc" Version="2.5.46" />
+    <PackageReference Include="StreamJsonRpc" Version="2.2.34" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 
@@ -34,6 +38,7 @@
     <StartAction>Project</StartAction>
     <ExternalConsole>true</ExternalConsole>
     <ApplicationURL>https://localhost:8081;http://localhost:8080</ApplicationURL>
+    <UserSecretsId>93aa2ed6-7792-44a1-91d4-eb3619cba424</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
