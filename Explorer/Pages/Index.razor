@@ -49,15 +49,12 @@
         Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
-        var builder = new StringBuilder("Defined namespaces: ");
-        builder.AppendLine(string.Join(' ', Compiler.Compilation.Namespaces.Select(x => x.Name.Value)));
-        builder.AppendLine("Defined operations:");
-
+        var builder = new StringBuilder("Defined operations:");
         foreach ((string key, GateGrid? grid) in ast)
         {
-            grid.Shrink();
+            grid?.Shrink();
             builder.AppendLine(key);
-            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info");
+            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
         }
         await OutputEditor.Component.SetCode(builder.ToString());
     }

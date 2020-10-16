@@ -84,7 +84,7 @@ module FromQSharp =
                 |> List.iter grid.SetName
 
             this.SharedState.Grid <- grid
-            this.SharedState.QubitId <- qubitID
+            this.SharedState.RegisterName <- qubitID
 
             base.OnAllocateQubits scope
 

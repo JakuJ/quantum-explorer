@@ -135,6 +135,7 @@ namespace Compiler.Tests
         {
             // Arrange (& Act)
             var grids = TestSources.AllocatedQubitOpsGrids;
+            operation = $"AllocatedQubitOps.{operation}";
 
             // Assert
             foreach ((QuantumGate gate, int x, int y) in grids[operation].Gates)
