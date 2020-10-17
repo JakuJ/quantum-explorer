@@ -145,5 +145,23 @@ namespace Compiler.Tests
 
             Assert.AreEqual(names, grids[operation].Names, "Assigned qubit identifiers should be correct");
         }
+
+        [Test]
+        public async Task LocallyDeclaredOperations()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("LocalOps");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+
+            // Act
+            await compiler.Compile(code);
+            GateGrid? grid = FromQSharp.GetGates(compiler.Compilation)["LocalOps.MotherOp"];
+
+            // Assert
+            Assert.AreEqual(1, grid.Gates.Count(), "There should be 1 gate in the grid");
+            
+            (var gate, int x, int y) = grid.Gates.First();
+            Assert.AreEqual(("DoesSomethingWithASingleQubit", 0, 0), (gate.Name, x, y), "A local gate should be detected");
+        }
     }
 }

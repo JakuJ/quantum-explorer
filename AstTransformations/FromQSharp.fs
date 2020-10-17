@@ -22,7 +22,7 @@ module FromQSharp =
             member val Namespace: string = null with get, set
 
             member val Operations: Map<string, GateGrid> = Map.empty with get, set
-            member val RegisterName: string = null with get, set
+            member val KnownQubitIDs: Set<string> = Set.empty with get, set
 
             member this.Grid
                 with get (): GateGrid =
@@ -54,7 +54,8 @@ module FromQSharp =
 
         override this.OnCallableDeclaration(callable: QsCallable) =
             match callable.Kind with
-            | Operation -> this.SharedState.Operation <- this.SharedState.Namespace + "." + callable.FullName.Name.Value
+            | Operation ->
+                this.SharedState.Operation <- sprintf "%s.%s" this.SharedState.Namespace callable.FullName.Name.Value
             | _ -> ()
 
             base.OnCallableDeclaration callable
@@ -84,49 +85,65 @@ module FromQSharp =
                 |> List.iter grid.SetName
 
             this.SharedState.Grid <- grid
-            this.SharedState.RegisterName <- qubitID
+            this.SharedState.KnownQubitIDs <- Set.add qubitID this.SharedState.KnownQubitIDs
 
             base.OnAllocateQubits scope
 
     and ExpressionKindTransform(parent: Transform) =
         inherit ExpressionKindTransformation<State>(parent, TransformationOptions.NoRebuild)
 
-        let prefixes: Set<string> =
-            set [ "Microsoft.Quantum.Intrinsic"
-                  "Microsoft.Quantum.Measurement" ]
+        member this.ArgsToNames(rhs: TypedExpression): string list =
+            match rhs.Expression with
+            | Identifier (var, _) ->
+                match var with
+                | LocalVariable local ->
+                    if this.SharedState.KnownQubitIDs.Contains local.Value
+                    then [ local.Value ]
+                    else []
+                | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
+            | ArrayItem (indexable, index) ->
+                match indexable.Expression with
+                | Identifier (var, _) ->
+                    match var with
+                    | LocalVariable identifier ->
+                        match index.Expression with
+                        | IntLiteral lit -> [ sprintf "%s[%d]" identifier.Value lit ]
+                        | _ -> failwith "Array index is not an integer"
+                    | _ -> failwith "Global operation arguments not supported"
+                | _ -> failwith "Only local variable identifiers supported as arguments to operation calls"
+            | ValueArray args ->
+                if isQubit <| arrayType rhs.ResolvedType then
+                    List.ofArray (args.ToArray())
+                    |> List.collect this.ArgsToNames
+                else
+                    []
+            | ValueTuple args -> // multiple arguments
+                List.ofArray (args.ToArray())
+                |> List.collect this.ArgsToNames
+            | UnitValue -> [] // no arguments
+            | x ->
+                failwithf "Unexpected argument to an operation call: %s"
+                <| string x
 
         override this.OnOperationCall(lhs: TypedExpression, rhs: TypedExpression) =
             let (gate: (string * string) option) =
                 match lhs.Expression with
                 | Identifier (var, _) ->
                     match var with
-                    | GlobalCallable glob when Set.contains glob.Namespace.Value prefixes ->
-                        Some(glob.Namespace.Value, glob.Name.Value)
+                    | GlobalCallable glob -> Some(glob.Namespace.Value, glob.Name.Value)
                     | _ -> None
                 | _ -> None
 
             if gate.IsSome && not (isNull this.SharedState.Grid) then
-                let qubitID =
-                    match rhs.Expression with
-                    | Identifier (var, _) ->
-                        match var with
-                        | LocalVariable local -> local.Value
-                        | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
-                    | ArrayItem (indexable, index) ->
-                        match indexable.Expression with
-                        | Identifier (var, _) ->
-                            match var with
-                            | LocalVariable identifier ->
-                                match index.Expression with
-                                | IntLiteral lit -> sprintf "%s[%d]" identifier.Value lit
-                                | _ -> failwith "Array index is not an integer"
-                            | _ -> failwith "Global operation arguments not supported"
-                        | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
-                    | _ -> failwith "Invalid argument to a operation call"
+                let qubitIDs = this.ArgsToNames rhs
+                if not (List.isEmpty qubitIDs) then
+                    let (ns, name) = gate.Value
 
-                let (ns, name) = gate.Value;
-                let ix = this.SharedState.Grid.IndexOfName qubitID
-                this.SharedState.Grid.AddGate(ix, QuantumGate (name, ns, 1, lhs))
+                    let ix =
+                        this.SharedState.Grid.IndexOfName
+                        <| List.head qubitIDs
+
+                    this.SharedState.Grid.AddGate(ix, QuantumGate(name, ns, List.length qubitIDs, lhs))
 
             base.OnOperationCall(lhs, rhs)
 
