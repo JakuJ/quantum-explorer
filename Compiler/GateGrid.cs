@@ -37,18 +37,8 @@ namespace Compiler
 
         /// <summary>Return which row on the grid corresponds to a given qubit identifier.</summary>
         /// <param name="name">The identifier to look for.</param>
-        /// <returns>Index of the qubit corresponding to this name.</returns>
-        public int IndexOfName(string name)
-        {
-            int ix = Array.IndexOf(Names, name);
-
-            if (ix == -1)
-            {
-                throw new ArgumentException(nameof(name));
-            }
-
-            return ix;
-        }
+        /// <returns>Index of the qubit corresponding to this name (-1 if not found).</returns>
+        public int IndexOfName(string name) => Array.IndexOf(Names, name);
 
         /// <summary>Gets all gates in this grid.</summary>
         public IEnumerable<(QuantumGate Gate, int X, int Y)> Gates

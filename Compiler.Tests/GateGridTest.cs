@@ -159,11 +159,7 @@ namespace Compiler.Tests
             Assert.AreEqual(1, grid.IndexOfName("qs[1]"), "An identifier should map to its corresponding index");
             Assert.AreEqual(2, grid.IndexOfName("SomeQ"), "An identifier should map to its corresponding index");
 
-            Assert.Throws<ArgumentException>(
-            () =>
-            {
-                grid.IndexOfName("SomeNoneexistentQubit");
-            }, "Trying to get the index of a qubit that does not exist results in an error.");
+            Assert.AreEqual(-1, grid.IndexOfName("SomeNoneexistentQubit"), "Trying to get the index of a qubit that does not exist returns -1.");
 
             Assert.DoesNotThrow(
             () =>

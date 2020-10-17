@@ -18,7 +18,7 @@ module Helpers =
         | Qubit -> true
         | _ -> false
 
-    let isRegister (resType: ResolvedType): bool =
-        match resType.Resolution with
-        | ArrayType arr -> isQubit arr
-        | _ -> false
+    let symbolName (symbol: QsLocalSymbol): string =
+        match symbol with
+        | ValidName name -> name.Value
+        | InvalidName -> failwith "Invalid symbol name"

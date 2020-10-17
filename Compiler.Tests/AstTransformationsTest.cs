@@ -11,9 +11,9 @@ namespace Compiler.Tests
     [Parallelizable]
     public class AstTransformationsTest
     {
-        private static class TestSources
+        private static class DeclarationSources
         {
-            internal static object[] DeclaredOps => new object[]
+            internal static object[] Sources => new object[]
             {
                 new object[] { "Library", new[] { "RandomBit", "RandomInt" } },
                 new object[] { "MultipleOperations", new[] { "EntanglePair", "IdentityGate", "NoOp", "RandomBit" } },
@@ -23,8 +23,11 @@ namespace Compiler.Tests
                     new[] { "AllocateFive", "AllocateFiveAndApplyGates", "AllocateOne", "AllocateOneAndApplyGates" },
                 },
             };
+        }
 
-            internal static IEnumerable<object> GateGrids
+        private static class AllocationSources
+        {
+            internal static IEnumerable<object> Sources
             {
                 get
                 {
@@ -69,9 +72,9 @@ namespace Compiler.Tests
                 }
             }
 
-            internal static Dictionary<string, GateGrid> AllocatedQubitOpsGrids { get; } = ProcessAllocatedQubitOps().WaitAndUnwrapException();
+            internal static Dictionary<string, GateGrid> Grids { get; } = Process().WaitAndUnwrapException();
 
-            private static async Task<Dictionary<string, GateGrid>> ProcessAllocatedQubitOps()
+            private static async Task<Dictionary<string, GateGrid>> Process()
             {
                 string code = await Helpers.GetSourceFile("AllocatedQubitOps");
                 var compiler = new QsCompiler(Helpers.ConsoleLogger);
@@ -81,7 +84,80 @@ namespace Compiler.Tests
             }
         }
 
-        [TestCaseSource(typeof(TestSources), nameof(TestSources.DeclaredOps))]
+        private static class ArgumentSources
+        {
+            internal static IEnumerable<object> Sources
+            {
+                get
+                {
+                    yield return new object[]
+                    {
+                        "Op1",
+                        new (string, int, int)[] { ("H", 0, 0) },
+                        new[] { "target" },
+                    };
+
+                    yield return new object[]
+                    {
+                        "Op2",
+                        new (string, int, int)[] { ("H", 0, 1), ("H", 1, 0) },
+                        new[] { "target1", "target2" },
+                    };
+
+                    yield return new object[]
+                    {
+                        "OpReg1",
+                        new (string, int, int)[] { ("H", 0, 0) },
+                        new[] { "targets[0]" },
+                    };
+
+                    yield return new object[]
+                    {
+                        "OpReg2",
+                        new (string, int, int)[]
+                        {
+                            ("H", 0, 0),
+                            ("H", 1, 1),
+                        },
+                        new[] { "targets[0]", "targets[1]" },
+                    };
+
+                    yield return new object[]
+                    {
+                        "OpReg5",
+                        new (string, int, int)[]
+                        {
+                            ("H", 0, 0),
+                            ("H", 1, 1),
+                            ("H", 2, 2),
+                            ("H", 3, 3),
+                            ("H", 4, 4),
+                        },
+                        new[]
+                        {
+                            "targets[2]",
+                            "targets[4]",
+                            "targets[1]",
+                            "targets[3]",
+                            "targets[0]",
+                        },
+                    };
+                }
+            }
+
+            internal static Dictionary<string, GateGrid> Grids { get; } = Process().WaitAndUnwrapException();
+
+            private static async Task<Dictionary<string, GateGrid>> Process()
+            {
+                string code = await Helpers.GetSourceFile("QubitArguments");
+                var compiler = new QsCompiler(Helpers.ConsoleLogger);
+
+                await compiler.Compile(code);
+                return FromQSharp.GetGates(compiler.Compilation);
+            }
+        }
+
+        [TestCaseSource(typeof(DeclarationSources), nameof(DeclarationSources.Sources))]
         public async Task ListsDeclaredOperations(string path, string[] operations)
         {
             // Arrange
@@ -130,11 +206,11 @@ namespace Compiler.Tests
             Assert.IsEmpty(gates, "Traversing the AST should find no operations.");
         }
 
-        [TestCaseSource(typeof(TestSources), nameof(TestSources.GateGrids))]
+        [TestCaseSource(typeof(AllocationSources), nameof(AllocationSources.Sources))]
         public void ExtractsQuantumGates(string operation, (string, int, int)[] gates, string[] names)
         {
             // Arrange (& Act)
-            var grids = TestSources.AllocatedQubitOpsGrids;
+            var grids = AllocationSources.Grids;
             operation = $"AllocatedQubitOps.{operation}";
 
             // Assert
@@ -159,9 +235,25 @@ namespace Compiler.Tests
 
             // Assert
             Assert.AreEqual(1, grid.Gates.Count(), "There should be 1 gate in the grid");
-            
+
             (var gate, int x, int y) = grid.Gates.First();
             Assert.AreEqual(("DoesSomethingWithASingleQubit", 0, 0), (gate.Name, x, y), "A local gate should be detected");
+        }
+
+        [TestCaseSource(typeof(ArgumentSources), nameof(ArgumentSources.Sources))]
+        public void QubitArguments(string operation, (string, int, int)[] gates, string[] names)
+        {
+            // Arrange (& Act)
+            var grids = ArgumentSources.Grids;
+            operation = $"QubitArguments.{operation}";
+
+            // Assert
+            foreach ((QuantumGate gate, int x, int y) in grids[operation].Gates)
+            {
+                Assert.Contains((gate.Name, x, y), gates, "Gate should be present at a given position");
+            }
+
+            Assert.AreEqual(names, grids[operation].Names, "Assigned qubit identifiers should be correct");
         }
     }
 }

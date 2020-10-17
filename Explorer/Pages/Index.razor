@@ -49,7 +49,7 @@
         Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
-        var builder = new StringBuilder("Defined operations:");
+        var builder = new StringBuilder();
         foreach ((string key, GateGrid? grid) in ast)
         {
             grid?.Shrink();
