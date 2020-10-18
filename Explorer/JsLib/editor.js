@@ -4,13 +4,16 @@ import { Registry } from 'monaco-textmate'
 import { wireTmGrammars } from 'monaco-editor-textmate'
 import * as path from 'path'
 
+const LIGHT_THEME_NAME = 'vs-code-custom-light-theme'
+const DARK_THEME_NAME = 'vs-code-custom-dark-theme'
+
 const SYNTAX_FILES_FOLDER = 'syntaxFiles'
 
 const [
     ONIGASM_FILE,
     TM_LANGUAGE,
-    LIGHT_THEME,
-    DARK_THEME,
+    LIGHT_THEME_JSON,
+    DARK_THEME_JSON,
 ] = [
     'onigasm.wasm',
     'qsharp.tmLanguage.json',
@@ -58,19 +61,42 @@ export class Editor {
 
         const grammars = new Map([['qsharp', 'source.qsharp']]);
 
-        monaco.editor.defineTheme('vs-code-theme-converted',
-            await fetch(LIGHT_THEME).then(x => x.json())
+        monaco.editor.defineTheme(LIGHT_THEME_NAME,
+            await fetch(LIGHT_THEME_JSON).then(x => x.json())
+        );
+
+        monaco.editor.defineTheme(DARK_THEME_NAME,
+            await fetch(DARK_THEME_JSON).then(x => x.json())
         );
 
         window.editorsDict[id] = monaco.editor.create(element, {
             value: INIT_CODE,
             language: 'qsharp',
-            theme: 'vs-code-theme-converted'
+            theme: LIGHT_THEME_NAME
         });
 
         await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
 
         new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
+
+        window.editorsDict[id].addAction({
+            id: 'change-custom-theme',
+            label: 'Switch Light/Dark Theme',
+            precondition: null,
+            keybindingContext: null,
+            contextMenuGroupId: 'editorOptions',
+            contextMenuOrder: 0,
+            run: function (ed) {
+                var currTheme = ed._themeService.getTheme().themeName;
+                console.log(currTheme)
+                if (currTheme == LIGHT_THEME_NAME) {
+                    monaco.editor.setTheme(DARK_THEME_NAME)
+                }
+                else {
+                    monaco.editor.setTheme(LIGHT_THEME_NAME)
+                }
+            }
+        });
 
         return id;
     }
