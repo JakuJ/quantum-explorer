@@ -1,5 +1,4 @@
 @inject IJSRuntime JSRuntime
-@using Microsoft.AspNetCore.Components.Rendering
 
 <div class="editor-textarea" @ref="editorRootRef">
 
@@ -9,26 +8,17 @@
 
     private string editorId = "";
 
-    private async Task InitWebComponentAsync()
-    {
-        editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef);
-    }
+    public async Task<string> GetCode() 
+        => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
 
-    public async Task<string> GetCode()
-    {
-        return await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
-    }
-
-    public async Task SetCode(string code)
-    {
-        await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code);
-    }
+    public async Task SetCode(string code) 
+        => await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await InitWebComponentAsync();
+            editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef);
         }
     }
 

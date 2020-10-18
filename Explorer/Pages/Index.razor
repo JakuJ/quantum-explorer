@@ -57,7 +57,7 @@
             builder.AppendLine(key);
             builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info");
         }
-        OutputEditor.Component.SetCode(builder.ToString());
+        await OutputEditor.Component.SetCode(builder.ToString());
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

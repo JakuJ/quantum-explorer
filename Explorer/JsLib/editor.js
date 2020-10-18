@@ -5,12 +5,20 @@ import { wireTmGrammars } from 'monaco-editor-textmate'
 import * as path from 'path'
 
 const SYNTAX_FILES_FOLDER = 'syntaxFiles'
-const ONIGASM_FILE = 'onigasm.wasm'
-const TM_LANGUAGE = 'qsharp.tmLanguage.json'
-const DARK_THEME = 'darkTheme.json'
-const LIGHT_THEME = 'lightTheme.json'
 
-const INIT_CODE = `namespace HelloWorldOperations {
+const [
+    ONIGASM_FILE,
+    TM_LANGUAGE,
+    LIGHT_THEME,
+    DARK_THEME,
+] = [
+    'onigasm.wasm',
+    'qsharp.tmLanguage.json',
+    'lightTheme.json',
+    'darkTheme.json',
+].map(x => path.join(SYNTAX_FILES_FOLDER, x))
+
+const INIT_CODE = `namespace HelloWorld {
 
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Measurement;
@@ -31,31 +39,27 @@ export class Editor {
         window.editorsDict = window.editorsDict || {};
         window.editorsCounter = window.editorsCounter || 0;
 
-        var id = "id" + window.editorsCounter;
-        window.editorsCounter = window.editorsCounter + 1;
+        var id = "id" + (window.editorsCounter++);
 
         monaco.languages.register({
             id: 'qsharp',
             extensions: ['qs'],
             aliases: ['Q#', 'qsharp']
-        })
+        });
 
-        await loadWASM(path.join(SYNTAX_FILES_FOLDER, ONIGASM_FILE))
+        await loadWASM(ONIGASM_FILE);
 
         const registry = new Registry({
-            getGrammarDefinition: async (scopeName) => {
-                return {
-                    format: 'json',
-                    content: await (await fetch(path.join(SYNTAX_FILES_FOLDER, TM_LANGUAGE))).text()
-                }
-            }
-        })
+            getGrammarDefinition: async _ => ({
+                format: 'json',
+                content: await fetch(TM_LANGUAGE).then(x => x.text())
+            })
+        });
 
-        const grammars = new Map()
-        grammars.set('qsharp', 'source.qsharp')
+        const grammars = new Map([['qsharp', 'source.qsharp']]);
 
         monaco.editor.defineTheme('vs-code-theme-converted',
-            await (await fetch(path.join(SYNTAX_FILES_FOLDER, LIGHT_THEME))).json()
+            await fetch(LIGHT_THEME).then(x => x.json())
         );
 
         window.editorsDict[id] = monaco.editor.create(element, {
@@ -64,19 +68,15 @@ export class Editor {
             theme: 'vs-code-theme-converted'
         });
 
-        await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id])
+        await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
 
-        new ResizeObserver(function () {
-            window.editorsDict[id].layout();
-        }).observe(element);
+        new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
 
         return id;
     }
 
-
     static GetCode(id) {
-        var text = window.editorsDict[id].getValue();
-        return text;
+        return window.editorsDict[id].getValue();
     }
 
     static SetCode(id, code) {

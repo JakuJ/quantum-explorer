@@ -6,6 +6,3 @@ export function InitializeSplitPanes(panelJSON) {
 }
 
 export { Editor } 
-
-
-
