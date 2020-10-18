@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -43,7 +45,7 @@ namespace Common.Tests
         }
 
         [Test]
-        public void EnumerateACollection()
+        public void EnumerateCollection()
         {
             // Arrange
             string[] collection = { "Zero", "One", "Two", "Three" };
@@ -56,6 +58,24 @@ namespace Common.Tests
                 Assert.AreEqual(value, collection[index], "Values should be enumerated in the right order.");
                 index++;
             }
+        }
+
+        [Test]
+        public void TruncateList()
+        {
+            // Arrange
+            List<int> list = Enumerable.Range(0, 10).ToList();
+
+            // Act & Assert
+            list.Truncate(10);
+            Assert.AreEqual(10, list.Count, "List should not be changed");
+
+            list.Truncate(5);
+            Assert.AreEqual(5, list.Count, "List should be truncated to the correct length");
+            Assert.IsTrue(list.SequenceEqual(Enumerable.Range(0, 5)), "Correct elements should remain in the list");
+
+            list.Truncate(0);
+            Assert.AreEqual(0, list.Count, "List should be empty");
         }
     }
 }

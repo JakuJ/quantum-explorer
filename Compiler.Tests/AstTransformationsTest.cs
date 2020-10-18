@@ -25,6 +25,18 @@ namespace Compiler.Tests
             };
         }
 
+        private static class SourceClass
+        {
+            public static async Task<Dictionary<string, GateGrid>> Process(string path)
+            {
+                string code = await Helpers.GetSourceFile(path);
+                var compiler = new QsCompiler(Helpers.ConsoleLogger);
+
+                await compiler.Compile(code);
+                return FromQSharp.GetGates(compiler.Compilation);
+            }
+        }
+
         private static class AllocationSources
         {
             internal static IEnumerable<object> Sources
@@ -72,16 +84,7 @@ namespace Compiler.Tests
                 }
             }
 
-            internal static Dictionary<string, GateGrid> Grids { get; } = Process().WaitAndUnwrapException();
-
-            private static async Task<Dictionary<string, GateGrid>> Process()
-            {
-                string code = await Helpers.GetSourceFile("AllocatedQubitOps");
-                var compiler = new QsCompiler(Helpers.ConsoleLogger);
-
-                await compiler.Compile(code);
-                return FromQSharp.GetGates(compiler.Compilation);
-            }
+            internal static Dictionary<string, GateGrid> Grids { get; } = SourceClass.Process("AllocatedQubitOps").WaitAndUnwrapException();
         }
 
         private static class ArgumentSources
@@ -145,16 +148,57 @@ namespace Compiler.Tests
                 }
             }
 
-            internal static Dictionary<string, GateGrid> Grids { get; } = Process().WaitAndUnwrapException();
+            internal static Dictionary<string, GateGrid> Grids { get; } = SourceClass.Process("QubitArguments").WaitAndUnwrapException();
+        }
 
-            private static async Task<Dictionary<string, GateGrid>> Process()
+        private static class MixedSources
+        {
+            internal static IEnumerable<object> Sources
             {
-                string code = await Helpers.GetSourceFile("QubitArguments");
-                var compiler = new QsCompiler(Helpers.ConsoleLogger);
+                get
+                {
+                    yield return new object[]
+                    {
+                        "Mixed1",
+                        new (string, int, int)[]
+                        {
+                            ("X", 0, 0),
+                            ("H", 1, 1),
+                            ("Y", 2, 2),
+                        },
+                        new[] { "q", "qs[0]", "qs[3]" },
+                    };
 
-                await compiler.Compile(code);
-                return FromQSharp.GetGates(compiler.Compilation);
+                    yield return new object[]
+                    {
+                        "Mixed2",
+                        new (string, int, int)[]
+                        {
+                            ("H", 0, 1),
+                            ("X", 1, 0),
+                            ("Z", 2, 2),
+                        },
+                        new[] { "q", "qs[1]", "qs[2]" },
+                    };
+
+                    yield return new object[]
+                    {
+                        "Mixed3",
+                        new (string, int, int)[]
+                        {
+                            ("X", 0, 0),
+                            ("Y", 1, 3),
+                            ("X", 2, 1),
+                            ("Y", 3, 4),
+                            ("X", 4, 2),
+                            ("Y", 5, 5),
+                        },
+                        new[] { "reg1[0]", "reg1[1]", "reg1[2]", "reg2[0]", "reg2[1]", "reg2[2]" },
+                    };
+                }
             }
+
+            internal static Dictionary<string, GateGrid> Grids { get; } = SourceClass.Process("MixedSources").WaitAndUnwrapException();
         }
 
         [TestCaseSource(typeof(DeclarationSources), nameof(DeclarationSources.Sources))]
@@ -246,6 +290,22 @@ namespace Compiler.Tests
             // Arrange (& Act)
             var grids = ArgumentSources.Grids;
             operation = $"QubitArguments.{operation}";
+
+            // Assert
+            foreach ((QuantumGate gate, int x, int y) in grids[operation].Gates)
+            {
+                Assert.Contains((gate.Name, x, y), gates, "Gate should be present at a given position");
+            }
+
+            Assert.AreEqual(names, grids[operation].Names, "Assigned qubit identifiers should be correct");
+        }
+
+        [TestCaseSource(typeof(MixedSources), nameof(MixedSources.Sources))]
+        public void MixedQubitSources(string operation, (string, int, int)[] gates, string[] names)
+        {
+            // Arrange (& Act)
+            var grids = MixedSources.Grids;
+            operation = $"MixedSources.{operation}";
 
             // Assert
             foreach ((QuantumGate gate, int x, int y) in grids[operation].Gates)
