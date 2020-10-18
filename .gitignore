@@ -8,3 +8,5 @@ node_modules/
 /Explorer/wwwroot/js/
 *.DotSettings.user
 TestResults/
+*.DotSettings
+.ionide/

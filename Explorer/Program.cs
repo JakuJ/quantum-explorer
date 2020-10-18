@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +30,10 @@ namespace Explorer
                     logBuilder.AddDebug();
                     logBuilder.AddEventSourceLogger();
                 })
-               .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+               .ConfigureWebHostDefaults(webBuilder =>
+               {
+                   var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+                   webBuilder.UseStartup<Startup>().UseUrls($"http://*:{port}");
+               });
     }
 }
