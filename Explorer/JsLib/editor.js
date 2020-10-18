@@ -2,7 +2,24 @@ import * as monaco from 'monaco-editor';
 import { loadWASM } from 'onigasm'
 import { Registry } from 'monaco-textmate'
 import { wireTmGrammars } from 'monaco-editor-textmate'
+import * as path from 'path'
 
+const SYNTAX_FILES_FOLDER = 'syntaxFiles'
+const ONIGASM_FILE = 'onigasm.wasm'
+const TM_LANGUAGE = 'qsharp.tmLanguage.json'
+const DARK_THEME = 'darkTheme.json'
+const LIGHT_THEME = 'lightTheme.json'
+
+const INIT_CODE = `namespace Bell {
+    open Microsoft.Quantum.Intrinsic;
+    open Microsoft.Quantum.Canon;
+
+    operation SetQubitState(desired : Result, q1 : Qubit) : Unit {
+        if (desired != M(q1)) {
+            X(q1);
+        }
+    }
+}`
 
 export class Editor {
 
@@ -21,24 +38,13 @@ export class Editor {
             aliases: ['Q#', 'qsharp']
         })
 
-        var startCode =`namespace Bell {
-    open Microsoft.Quantum.Intrinsic;
-    open Microsoft.Quantum.Canon;
-
-    operation SetQubitState(desired : Result, q1 : Qubit) : Unit {
-        if (desired != M(q1)) {
-            X(q1);
-        }
-    }
-}`
-
-        await loadWASM('syntaxFiles/onigasm.wasm')
+        await loadWASM(path.join(SYNTAX_FILES_FOLDER, ONIGASM_FILE))
 
         const registry = new Registry({
             getGrammarDefinition: async (scopeName) => {
                 return {
                     format: 'json',
-                    content: await (await fetch('syntaxFiles/qsharp.tmLanguage.json')).text()
+                    content: await (await fetch(path.join(SYNTAX_FILES_FOLDER, TM_LANGUAGE))).text()
                 }
             }
         })
@@ -47,11 +53,11 @@ export class Editor {
         grammars.set('qsharp', 'source.qsharp')
 
         monaco.editor.defineTheme('vs-code-theme-converted',
-            await (await fetch('syntaxFiles/newTheme.json')).json()
+            await (await fetch(path.join(SYNTAX_FILES_FOLDER, LIGHT_THEME))).json()
         );
 
         window.editorsDict[id] = monaco.editor.create(element, {
-            value: startCode,
+            value: INIT_CODE,
             language: 'qsharp',
             theme: 'vs-code-theme-converted'
         });
