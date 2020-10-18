@@ -394,6 +394,38 @@ namespace Compiler.Tests
             Assert.AreEqual((3, 3), (grid.Width, grid.Height), "Grid size should go back to 3 by 3");
         }
 
+        [Test]
+        public void InsertingRows()
+        {
+            // Arrange
+            var grid = new GateGrid();
+            var gates = SampleGates(3);
+
+            grid.SetName(0, "q0");
+            grid.SetName(1, "q1");
+            grid.SetName(2, "q2");
+
+            grid.AddGate(1, gates[0]);
+            grid.AddGate(2, gates[1]);
+            grid.AddGate(0, gates[2]);
+
+            var expected = new[]
+            {
+                (gates[2], 2, 0),
+                (gates[0], 0, 2),
+                (gates[1], 1, 3),
+            };
+
+            // Act
+            grid.InsertRow(1, "someQ");
+
+            // Assert
+            Assert.IsTrue(grid.Names.SequenceEqual(new[] { "q0", "someQ", "q1", "q2" }), "Qubit should be inserted at the right position");
+            Assert.AreEqual(expected, grid.Gates.ToArray(), "Gates should in the correct positions");
+            Assert.AreEqual((3, 4), (grid.Width, grid.Height), "Grid height should increase");
+
+        }
+
         private QuantumGate[] SampleGates(int howMany) => Enumerable.Range(0, howMany).Select(i => new QuantumGate($"Op{i}")).ToArray();
     }
 }

@@ -1,12 +1,12 @@
 namespace AstTransformations
 
-open Microsoft.FSharp.Quotations.Patterns
-open Microsoft.FSharp.Reflection
 open Microsoft.Quantum.QsCompiler.SyntaxTokens
 open Microsoft.Quantum.QsCompiler.SyntaxTree
 
 module Helpers =
     let flip = fun f a b -> f b a
+    let curry = fun f a b -> f (a, b)
+    let uncurry = fun f (a, b) -> f a b
 
     let arrayType (resType: ResolvedType) =
         match resType.Resolution with

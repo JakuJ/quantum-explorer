@@ -9,9 +9,9 @@ namespace MixedSources {
     }
 
     operation Mixed2(qs: Qubit[], q: Qubit): Unit {
-        H(qs[1]);   // second
-        X(q);       // first
-        Z(qs[2]);   // third
+        H(qs[1]);   // first
+        X(q);       // third
+        Z(qs[2]);   // second
     }
 
     operation Mixed3(reg1: Qubit[], reg2: Qubit[]): Unit {

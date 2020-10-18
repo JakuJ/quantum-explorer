@@ -174,11 +174,11 @@ namespace Compiler.Tests
                         "Mixed2",
                         new (string, int, int)[]
                         {
-                            ("H", 0, 1),
-                            ("X", 1, 0),
-                            ("Z", 2, 2),
+                            ("H", 0, 0),
+                            ("X", 1, 2),
+                            ("Z", 2, 1),
                         },
-                        new[] { "q", "qs[1]", "qs[2]" },
+                        new[] { "qs[1]", "qs[2]", "q" },
                     };
 
                     yield return new object[]
