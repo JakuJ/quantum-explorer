@@ -1,5 +1,5 @@
 {
-  "name": "jslib",
+  "name": "library",
   "version": "1.0.0",
   "description": "External scripts used by the Blazor application",
   "main": "index.js",
@@ -18,20 +18,22 @@
   },
   "homepage": "https://github.com/JakuJ/quantum-explorer#readme",
   "dependencies": {
-    "split.js": "^1.6.2",
     "monaco-editor": "^0.20.0",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.12",
-    "monaco-editor-webpack-plugin": "^1.9.0",
     "monaco-editor-textmate": "^2.2.2",
+    "monaco-editor-webpack-plugin": "^1.9.0",
     "monaco-textmate": "^3.0.1",
-    "onigasm": "^2.2.5"
+    "onigasm": "^2.2.5",
+    "split.js": "^1.6.2",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
     "babel-loader": "^8.1.0",
-    "style-loader": "^1.2.1",
+    "clean-webpack-plugin": "^3.0.0",
     "css-loader": "^4.2.2",
-    "file-loader": "^6.1.0"
+    "file-loader": "^6.1.0",
+    "style-loader": "^1.2.1",
+    "webpack-bundle-analyzer": "^3.9.0"
   }
 }
