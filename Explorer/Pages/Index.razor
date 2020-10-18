@@ -46,7 +46,7 @@
     [ExcludeFromCodeCoverage] // TODO: Integration tests
     private async Task OnCompile()
     {
-        await Compiler.Compile(Editor.Component.Code);
+        await Compiler.Compile(await Editor.Component.GetCode());
         Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
@@ -57,7 +57,7 @@
             builder.AppendLine(key);
             builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info");
         }
-        OutputEditor.Component.Code = builder.ToString();
+        OutputEditor.Component.SetCode(builder.ToString());
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -65,7 +65,6 @@
         if (!firstRender) return;
 
         await InitializePanels();
-        OutputEditor.Component.Code = "The AST information is going to show up here.";
     }
 
     private async Task InitializePanels()

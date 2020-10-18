@@ -10,15 +10,17 @@ const TM_LANGUAGE = 'qsharp.tmLanguage.json'
 const DARK_THEME = 'darkTheme.json'
 const LIGHT_THEME = 'lightTheme.json'
 
-const INIT_CODE = `namespace Bell {
-    open Microsoft.Quantum.Intrinsic;
-    open Microsoft.Quantum.Canon;
+const INIT_CODE = `namespace HelloWorldOperations {
 
-    operation SetQubitState(desired : Result, q1 : Qubit) : Unit {
-        if (desired != M(q1)) {
-            X(q1);
+    open Microsoft.Quantum.Intrinsic;
+    open Microsoft.Quantum.Measurement;
+
+    operation RandomBit () : Result {
+        using (q = Qubit()) {
+            H(q);
+            return MResetZ(q);
         }
-    }
+    }   
 }`
 
 export class Editor {
