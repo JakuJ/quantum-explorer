@@ -18,6 +18,10 @@ module.exports = {
             }, {
                 test: /\.ttf$/,
                 use: ['file-loader']
+            }, {
+                test: /\.wasm$/,
+                loader: "file-loader",
+                type: "javascript/auto",
             }
 
         ]
@@ -29,8 +33,6 @@ module.exports = {
         library: "Library"
     },
     plugins: [
-        new MonacoWebpackPlugin({
-            languages: ['csharp']
-        })
+        new MonacoWebpackPlugin()
     ]
 };

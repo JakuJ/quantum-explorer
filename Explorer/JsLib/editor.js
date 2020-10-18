@@ -1,9 +1,12 @@
 import * as monaco from 'monaco-editor';
+import { loadWASM } from 'onigasm'
+import { Registry } from 'monaco-textmate'
+import { wireTmGrammars } from 'monaco-editor-textmate'
 
 
 export class Editor {
 
-    static InitializeEditor(element) {
+    static async InitializeEditor(element) {
         element.innerHTML = "";
 
         window.editorsDict = window.editorsDict || {};
@@ -12,28 +15,48 @@ export class Editor {
         var id = "id" + window.editorsCounter;
         window.editorsCounter = window.editorsCounter + 1;
 
-        window.editorsDict[id] = monaco.editor.create(element, {
-            value: `using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+        monaco.languages.register({
+            id: 'qsharp',
+            extensions: ['qs'],
+            aliases: ['Q#', 'qsharp']
+        })
 
-        namespace CSharpTutorials
-{
-            class Program
-    {
-            static void Main(string[] args)
-        {
-            string message = "Hello World!!";
+        var startCode =`namespace Bell {
+    open Microsoft.Quantum.Intrinsic;
+    open Microsoft.Quantum.Canon;
 
-            Console.WriteLine(message);
+    operation SetQubitState(desired : Result, q1 : Qubit) : Unit {
+        if (desired != M(q1)) {
+            X(q1);
         }
     }
-}`,
-            language: "csharp"
+}`
+
+        await loadWASM('syntaxFiles/onigasm.wasm')
+
+        const registry = new Registry({
+            getGrammarDefinition: async (scopeName) => {
+                return {
+                    format: 'json',
+                    content: await (await fetch('syntaxFiles/qsharp.tmLanguage.json')).text()
+                }
+            }
+        })
+
+        const grammars = new Map()
+        grammars.set('qsharp', 'source.qsharp')
+
+        monaco.editor.defineTheme('vs-code-theme-converted',
+            await (await fetch('syntaxFiles/newTheme.json')).json()
+        );
+
+        window.editorsDict[id] = monaco.editor.create(element, {
+            value: startCode,
+            language: 'qsharp',
+            theme: 'vs-code-theme-converted'
         });
 
+        await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id])
 
         new ResizeObserver(function () {
             window.editorsDict[id].layout();
@@ -45,12 +68,10 @@ using System.Threading.Tasks;
 
     static GetCode(id) {
         var text = window.editorsDict[id].getValue();
-        console.log(text);
         return text;
     }
 
     static SetCode(id, code) {
-        console.log(code);
         window.editorsDict[id].setValue(code);
     }
 }
