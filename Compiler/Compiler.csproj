@@ -16,13 +16,13 @@
     <PackageReference Include="Microsoft.Quantum.Simulators" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.CsharpGeneration" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.EntryPointDriver" Version="0.12.20100504" />
+    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.7.97" />
   </ItemGroup>
 
   <ItemGroup Label="References for the Q# compiler">
     <PackageReference Include="Microsoft.Quantum.QSharp.Core" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.Runtime.Core" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.Standard" Version="0.12.20100504" />
-    <PackageReference Include="Microsoft.Quantum.QSharp.Core" Version="0.12.20100504" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,21 +34,6 @@
     </Reference>
     <Reference Include="Microsoft.Quantum.QsDataStructures">
       <HintPath>..\extLib\Microsoft.Quantum.QsDataStructures.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsDocumentationParser">
-      <HintPath>..\extLib\Microsoft.Quantum.QsDocumentationParser.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsLanguageServer">
-      <HintPath>..\extLib\Microsoft.Quantum.QsLanguageServer.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsOptimizations">
-      <HintPath>..\extLib\Microsoft.Quantum.QsOptimizations.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsSyntaxProcessor">
-      <HintPath>..\extLib\Microsoft.Quantum.QsSyntaxProcessor.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsTextProcessor">
-      <HintPath>..\extLib\Microsoft.Quantum.QsTextProcessor.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsTransformations">
       <HintPath>..\extLib\Microsoft.Quantum.QsTransformations.dll</HintPath>
