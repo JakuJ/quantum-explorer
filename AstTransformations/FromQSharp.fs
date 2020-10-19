@@ -4,40 +4,48 @@ open System.Collections.Generic
 open System.Linq
 open Compiler
 open Helpers
+open Sectors
 open Microsoft.Quantum.QsCompiler.SyntaxTokens
 open Microsoft.Quantum.QsCompiler.SyntaxTree
 open Microsoft.Quantum.QsCompiler.Transformations.Core
 
 module FromQSharp =
-    type Sectors = (string * string list) list
-
-    let rec addUnique (v: 'a) =
-        function
-        | x :: xs when x = v -> x :: xs
-        | x :: xs -> x :: addUnique v xs
-        | [] -> [ v ]
-
-    let rec addToSector (sectors: Sectors) (secName: string) (qName: string): Sectors =
-        match sectors with
-        | (x, xs) :: rest when x = secName -> (x, addUnique qName xs) :: rest
-        | x :: xs -> x :: addToSector xs secName qName
-        | [] -> [ (secName, [ qName ]) ]
-
+    /// Am identifier that resolves to a Qubit
+    /// Either a Qubit itself, or Qubit[] with index
     type QubitRef =
         | Single of string
         | Register of string * int
 
+    /// State shared by all AST traversal classes/methods
     type State() =
         class
+            /// Currently processed namespace
             member val Namespace: string = null with get, set
+
+            /// Currently processed operation declaration
             member val Operation: string = null with get, set
 
+            /// Maps fully qualified operation names to GateGrids
             member val Operations: Map<string, GateGrid> = Map.empty with get, set
 
+            /// Set this to a GateGrid to save it in the output dictionary
+            member this.Grid
+                with set x =
+                    let fullName =
+                        sprintf "%s.%s" this.Namespace this.Operation
+
+                    this.Operations <- Map.add fullName x this.Operations
+
+            /// A set of known qubit identifiers
             member val KnownQubits: Set<string> = Set.empty with get, set
+
+            /// A set of known qubit register identifiers
             member val KnownRegisters: Set<string> = Set.empty with get, set
 
-            member val Sectors: Sectors = List.empty with get, set
+            /// A list of qubit sectors, used to keep rows in order
+            member val Sectors: Sector list = List.empty with get, set
+
+            /// An ordered list that determines where to add gates in the grid.
             member val GateQueue: (QubitRef * QuantumGate) list = List.empty with get, set
         end
 
@@ -80,7 +88,7 @@ module FromQSharp =
                 this.SharedState.KnownRegisters <- Set.empty
                 this.SharedState.Sectors <- List.empty
                 this.SharedState.GateQueue <- List.empty
-                this.SharedState.Operation <- sprintf "%s.%s" this.SharedState.Namespace callable.FullName.Name.Value
+                this.SharedState.Operation <- callable.FullName.Name.Value
 
                 // parse qubit and register arguments
                 let argNames = parseArgs callable.ArgumentTuple
@@ -91,7 +99,7 @@ module FromQSharp =
                         this.SharedState.Sectors <- this.SharedState.Sectors @ [ (name, []) ] // add an empty sector
                     else
                         this.SharedState.KnownQubits <- this.SharedState.KnownQubits.Add name
-                        this.SharedState.Sectors <- addToSector this.SharedState.Sectors name name
+                        this.SharedState.Sectors <- addSingle name this.SharedState.Sectors
 
                 // traverse the rest of the AST
                 let retValue = base.OnCallableDeclaration callable
@@ -112,7 +120,7 @@ module FromQSharp =
                 this.SharedState.GateQueue
                 |> List.map (fst >> (fun x -> (refToSector x, refToString x)))
                 |> List.iter (fun (reg, full) ->
-                    this.SharedState.Sectors <- addToSector this.SharedState.Sectors reg full)
+                    this.SharedState.Sectors <- addToRegister reg full this.SharedState.Sectors)
 
                 this.SharedState.Sectors
                 |> List.collect snd
@@ -123,13 +131,11 @@ module FromQSharp =
                 |> List.map (fun (i, g) -> (grid.IndexOfName(refToString i), g))
                 |> List.iter grid.AddGate
 
-                this.SharedState.Operations <- Map.add this.SharedState.Operation grid this.SharedState.Operations
+                this.SharedState.Grid <- grid
 
                 // return the value obtained from the traversal
                 retValue
             | _ -> base.OnCallableDeclaration callable
-
-
 
     and StatementKindTransform(parent: Transform) =
         inherit StatementKindTransformation<State>(parent, TransformationOptions.NoRebuild)
@@ -149,11 +155,11 @@ module FromQSharp =
 
             if qubits = 1 then
                 this.SharedState.KnownQubits <- this.SharedState.KnownQubits.Add qubitID
-                this.SharedState.Sectors <- addToSector this.SharedState.Sectors qubitID qubitID
+                this.SharedState.Sectors <- addSingle qubitID this.SharedState.Sectors
             else
                 this.SharedState.KnownRegisters <- this.SharedState.KnownRegisters.Add qubitID
                 this.SharedState.Sectors <-
-                    List.fold (fun acc x -> addToSector acc qubitID x) this.SharedState.Sectors
+                    List.fold (fun acc x -> addToRegister qubitID x acc) this.SharedState.Sectors
                     <| List.map (sprintf "%s[%d]" qubitID) [ 0 .. qubits - 1 ]
 
             base.OnAllocateQubits scope
@@ -213,7 +219,6 @@ module FromQSharp =
 
                     let g =
                         QuantumGate(name, ns, List.length qubitIDs, lhs)
-
 
                     this.SharedState.GateQueue <-
                         this.SharedState.GateQueue

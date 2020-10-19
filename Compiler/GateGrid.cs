@@ -243,7 +243,7 @@ namespace Compiler
             {
                 grid.Add(EmptyColumn());
             }
-            
+
             if (plusHeight > 0)
             {
                 Names.AddRange(Enumerable.Repeat<string?>(null, plusHeight));

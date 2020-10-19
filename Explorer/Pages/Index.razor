@@ -21,9 +21,9 @@
 </div>
 
 @code {
-    internal Panel<Editor> Editor;
-    internal Panel<Editor> OutputEditor;
-    internal Panel<DiagnosticList> Diagnostics;
+    internal Panel<Editor>? Editor;
+    internal Panel<Editor>? OutputEditor;
+    internal Panel<DiagnosticList>? Diagnostics;
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -45,8 +45,8 @@
     [ExcludeFromCodeCoverage] // TODO: Integration tests
     private async Task OnCompile()
     {
-        await Compiler.Compile(await Editor.Component.GetCode());
-        Diagnostics.Component.Diagnostics = Compiler.Diagnostics;
+        await Compiler.Compile(await Editor!.Component.GetCode());
+        Diagnostics!.Component.Diagnostics = Compiler.Diagnostics;
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
         var builder = new StringBuilder();
@@ -56,7 +56,7 @@
             builder.AppendLine(key);
             builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
         }
-        await OutputEditor.Component.SetCode(builder.ToString());
+        await OutputEditor!.Component.SetCode(builder.ToString());
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

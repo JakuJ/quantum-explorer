@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <Compile Include="Helpers.fs" />
+        <Compile Include="Sectors.fs" />
         <Compile Include="FromQSharp.fs" />
     </ItemGroup>
 

@@ -423,7 +423,6 @@ namespace Compiler.Tests
             Assert.IsTrue(grid.Names.SequenceEqual(new[] { "q0", "someQ", "q1", "q2" }), "Qubit should be inserted at the right position");
             Assert.AreEqual(expected, grid.Gates.ToArray(), "Gates should in the correct positions");
             Assert.AreEqual((3, 4), (grid.Width, grid.Height), "Grid height should increase");
-
         }
 
         private QuantumGate[] SampleGates(int howMany) => Enumerable.Range(0, howMany).Select(i => new QuantumGate($"Op{i}")).ToArray();
