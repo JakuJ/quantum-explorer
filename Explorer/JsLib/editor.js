@@ -88,7 +88,6 @@ export class Editor {
             contextMenuOrder: 0,
             run: function (ed) {
                 var currTheme = ed._themeService.getTheme().themeName;
-                console.log(currTheme)
                 if (currTheme == LIGHT_THEME_NAME) {
                     monaco.editor.setTheme(DARK_THEME_NAME)
                 }
@@ -109,5 +108,4 @@ export class Editor {
         window.editorsDict[id].setValue(code);
     }
 }
-
 
