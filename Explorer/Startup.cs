@@ -40,8 +40,7 @@ namespace Explorer
 
             app.UseStaticFiles(new StaticFileOptions()
             {
-                FileProvider = new PhysicalFileProvider(
-                        Path.Combine(Directory.GetCurrentDirectory(), @"syntax")),
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "syntax")),
                 RequestPath = new PathString("/syntaxFiles"),
             });
 
