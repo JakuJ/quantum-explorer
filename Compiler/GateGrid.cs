@@ -6,7 +6,6 @@ using System.Text;
 
 namespace Compiler
 {
-    /// <inheritdoc cref="System.IEquatable{GateGrid}" />
     /// <summary>A simple class representing a grid of quantum gates.</summary>
     public class GateGrid
     {
