@@ -1,8 +1,6 @@
 import Split from 'split.js';
 
-function equalSizes(num) {
-  return new Array(num).fill(100 / num);
-}
+const equalSizes = num => new Array(num).fill(100 / num);
 
 export function initializeSplitPanes(panel) {
 

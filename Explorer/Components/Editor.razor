@@ -1,16 +1,24 @@
-<textarea @bind="Code" class="editor-textarea"></textarea>
+@inject IJSRuntime JSRuntime
 
+<div class="editor-textarea" @ref="editorRootRef">
+
+</div>
 @code {
+    private ElementReference editorRootRef;
 
-    private string code = "This is the Q# code editor for now.";
+    private string editorId = "";
 
-    public string Code
+    public async Task<string> GetCode() 
+        => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
+
+    public async Task SetCode(string code) 
+        => await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        get => code;
-        set
+        if (firstRender)
         {
-            code = value;
-            InvokeAsync(StateHasChanged);
+            editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef);
         }
     }
 

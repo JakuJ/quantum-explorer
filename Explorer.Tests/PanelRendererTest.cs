@@ -1,4 +1,5 @@
 using Bunit;
+using Bunit.TestDoubles.JSInterop;
 using Explorer.Components;
 using Explorer.Templates;
 using Explorer.Utilities.ComponentTree;
@@ -22,6 +23,7 @@ namespace Explorer.Tests
         public void RendersAnEmptyTree()
         {
             using var ctx = new TestContext();
+            ctx.Services.AddMockJSRuntime();
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
             var page = RenderTree(ctx, tree);
             page.MarkupMatches("<div class=\"resizable\"></div>", "There should be no components");
@@ -31,6 +33,7 @@ namespace Explorer.Tests
         public void RendersASingleComponent()
         {
             using var ctx = new TestContext();
+            ctx.Services.AddMockJSRuntime();
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
             tree.AddPanel<Editor>();
             var page = RenderTree(ctx, tree);
@@ -41,6 +44,7 @@ namespace Explorer.Tests
         public void RendersANestedStructure()
         {
             using var ctx = new TestContext();
+            ctx.Services.AddMockJSRuntime();
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
             tree.AddPanel<Editor>();
 
@@ -72,6 +76,7 @@ namespace Explorer.Tests
         public void AllowsAccessToTheRenderedComponentInstance()
         {
             using var ctx = new TestContext();
+            ctx.Services.AddMockJSRuntime();
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
 
             Panel<Editor> editor = tree.AddPanel<Editor>();

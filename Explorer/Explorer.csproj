@@ -18,6 +18,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
     <PackageReference Include="Microsoft.Quantum.Development.Kit" Version="0.12.20070124" />
   </ItemGroup>
 
@@ -33,6 +34,9 @@
     <Content Remove="$(JsLibRoot)**" />
     <None Remove="$(JsLibRoot)**" />
     <None Include="$(JsLibRoot)**" Exclude="$(JsLibRoot)node_modules\**" />
+    <None Include="syntax\newTheme.json" />
+    <None Include="syntax\onigasm.wasm" />
+    <None Include="syntax\qsharp.tmLanguage.json" />
     <Content Update="Components\DiagnosticList.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
