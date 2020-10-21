@@ -315,5 +315,42 @@ namespace Compiler.Tests
 
             Assert.AreEqual(names, grids[operation].Names, "Assigned qubit identifiers should be correct");
         }
+
+        [Test]
+        public async Task MultiArgumentGates()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("Arguments");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            var expected = new[]
+            {
+                ("X", 0, 0, 0, false),
+
+                ("TwoArgs", 1, 0, 0, false),
+                ("TwoArgs", 1, 1, 1, false),
+
+                ("TwoArgs", 2, 4, 0, false),
+                ("TwoArgs", 3, 4, 1, false),
+
+                ("RegArg", 4, 0, 0, true),
+                ("RegArg", 4, 1, 0, true),
+                ("RegArg", 4, 3, 0, true),
+
+                ("SingleAndRegArgs", 5, 1, 2, false),
+                ("SingleAndRegArgs", 5, 2, 1, true),
+                ("SingleAndRegArgs", 5, 3, 1, true),
+                ("SingleAndRegArgs", 5, 4, 0, false),
+            };
+
+            // Act
+            await compiler.Compile(code);
+            GateGrid? grid = FromQSharp.GetGates(compiler.Compilation)["Arguments.TestOp"];
+
+            // Assert
+            foreach ((QuantumGate gate, int x, int y) in grid.Gates)
+            {
+                Assert.Contains((gate.Name, x, y, gate.ArgIndex, gate.ArgArray), expected, "Gate should be present at a given position");
+            }
+        }
     }
 }

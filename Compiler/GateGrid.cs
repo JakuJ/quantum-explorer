@@ -219,7 +219,7 @@ namespace Compiler
                     var gate = grid[x][y];
                     if (gate != null)
                     {
-                        builder.Append($"[{gate} arg{gate.ArgIndex}");
+                        builder.Append($"[{gate.Name} arg{gate.ArgIndex}");
                         if (gate.ArgArray)
                         {
                             builder.Append(" A");
@@ -229,7 +229,7 @@ namespace Compiler
                     }
                     else
                     {
-                        builder.Append("[      ]");
+                        builder.Append("_");
                     }
                 }
 

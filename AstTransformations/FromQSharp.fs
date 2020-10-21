@@ -16,6 +16,16 @@ module FromQSharp =
         | Single of string
         | Register of string * int
 
+    let refToString =
+        function
+        | Single q -> q
+        | Register (reg, ix) -> sprintf "%s[%d]" reg ix
+
+    let refToSector =
+        function
+        | Single q -> q
+        | Register (reg, _) -> reg
+
     /// State shared by all AST traversal classes/methods
     type State() =
         class
@@ -46,7 +56,7 @@ module FromQSharp =
             member val Sectors: Sector list = List.empty with get, set
 
             /// An ordered list that determines where to add gates in the grid.
-            member val GateQueue: (QubitRef * QuantumGate) list = List.empty with get, set
+            member val GateQueue: ((QubitRef * QuantumGate) list) list = List.empty with get, set
         end
 
     type Transform(options: TransformationOptions) =
@@ -107,18 +117,11 @@ module FromQSharp =
                 // create and save the grid to the dictionary
                 let grid = GateGrid()
 
-                let refToString =
-                    function
-                    | Single q -> q
-                    | Register (reg, ix) -> sprintf "%s[%d]" reg ix
-
-                let refToSector =
-                    function
-                    | Single q -> q
-                    | Register (reg, _) -> reg
-
                 this.SharedState.GateQueue
-                |> List.map (fst >> (fun x -> (refToSector x, refToString x)))
+                |> List.collect
+                    (List.map
+                        (fst
+                         >> fun x -> (refToSector x, refToString x)))
                 |> List.iter (fun (reg, full) ->
                     this.SharedState.Sectors <- addToRegister reg full this.SharedState.Sectors)
 
@@ -127,9 +130,11 @@ module FromQSharp =
                 |> fun x -> List.zip [ 0 .. x.Length - 1 ] x
                 |> List.iter grid.SetName
 
-                this.SharedState.GateQueue
-                |> List.map (fun (i, g) -> (grid.IndexOfName(refToString i), g))
-                |> List.iter grid.AddGate
+                for column in this.SharedState.GateQueue do
+                    let col = grid.Width
+                    for (i, g) in List.rev column do
+                        let y = grid.IndexOfName(refToString i)
+                        grid.AddGate(col, y, g)
 
                 this.SharedState.Grid <- grid
 
@@ -167,14 +172,14 @@ module FromQSharp =
     and ExpressionKindTransform(parent: Transform) =
         inherit ExpressionKindTransformation<State>(parent, TransformationOptions.NoRebuild)
 
-        member this.ArgsToNames(rhs: TypedExpression): QubitRef list =
+        member this.PrimToRefs(rhs: TypedExpression): QubitRef =
             match rhs.Expression with
             | Identifier (var, _) ->
                 match var with
                 | LocalVariable local ->
                     if this.SharedState.KnownQubits.Contains local.Value
-                    then [ Single local.Value ]
-                    else failwith "Unknown qubit identifier"
+                    then Single local.Value
+                    else failwithf "Unknown qubit identifier: %s" local.Value
                 | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
             | ArrayItem (indexable, index) ->
                 match indexable.Expression with
@@ -183,16 +188,25 @@ module FromQSharp =
                     | LocalVariable identifier ->
                         if this.SharedState.KnownRegisters.Contains identifier.Value then
                             match index.Expression with
-                            | IntLiteral lit -> [ Register(identifier.Value, int32 lit) ]
+                            | IntLiteral lit -> Register(identifier.Value, int32 lit)
                             | _ -> failwith "Array index is not an integer"
                         else
-                            failwith "Unknown register identifier"
+                            failwithf "Unknown register identifier: %s" identifier.Value
                     | _ -> failwith "Global operation arguments not supported"
                 | _ -> failwith "Only local variable identifiers supported as arguments to operation calls"
+            | x ->
+                failwithf "Unexpected argument to an operation call: %s"
+                <| string x
+
+        member this.ArgsToNames(rhs: TypedExpression): (QubitRef list * bool) list =
+            match rhs.Expression with
+            | Identifier _
+            | ArrayItem _ -> [ [ this.PrimToRefs rhs ], false ]
             | ValueArray args ->
                 if isQubit <| arrayType rhs.ResolvedType then
                     List.ofArray (args.ToArray())
-                    |> List.collect this.ArgsToNames
+                    |> List.map this.PrimToRefs
+                    |> fun x -> [ x, true ]
                 else
                     []
             | ValueTuple args -> // multiple arguments
@@ -217,12 +231,13 @@ module FromQSharp =
                 if not (List.isEmpty qubitIDs) then
                     let (ns, name) = gate.Value
 
-                    let gs =
-                        QuantumGate(name, ns, 0, false, lhs)
+                    let columnsToAdd =
+                        qubitIDs
+                        |> List.zip [ 0 .. qubitIDs.Length - 1 ]
+                        |> List.collect (fun (i, (refs, isArr)) ->
+                            List.map (fun ref -> (ref, QuantumGate(name, ns, i, isArr, lhs))) refs)
 
-                    this.SharedState.GateQueue <-
-                        this.SharedState.GateQueue
-                        @ [ (qubitIDs.Head, gs) ]
+                    this.SharedState.GateQueue <- this.SharedState.GateQueue @ [ columnsToAdd ]
 
             base.OnOperationCall(lhs, rhs)
 
