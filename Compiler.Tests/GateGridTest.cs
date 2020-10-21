@@ -1,5 +1,8 @@
 using System;
 using System.Linq;
+using Common;
+using Microsoft.Quantum.QsCompiler.SyntaxTree;
+using Moq;
 using NUnit.Framework;
 
 namespace Compiler.Tests
@@ -398,6 +401,35 @@ namespace Compiler.Tests
             Assert.IsTrue(grid.Names.SequenceEqual(new[] { "q0", "someQ", "q1", "q2" }), "Qubit should be inserted at the right position");
             Assert.AreEqual(expected, grid.Gates.ToArray(), "Gates should in the correct positions");
             Assert.AreEqual((3, 4), (grid.Width, grid.Height), "Grid height should increase");
+        }
+
+        [Test]
+        public void RemovingMultiQubitGates()
+        {
+            // Arrange
+            var grid = new GateGrid();
+
+            TypedExpression? exp = null;
+
+            var gates = new[]
+            {
+                new QuantumGate("Test", "TestNs", 0, false, exp),
+                new QuantumGate("Test", "TestNs", 1, true, exp),
+                new QuantumGate("Test", "TestNs", 1, true, exp),
+                new QuantumGate("Test", "TestNs", 2, false, exp),
+            };
+
+            foreach ((int i, QuantumGate gate) in gates.Enumerate())
+            {
+                grid.AddGate(0, i, gate);
+            }
+
+            // Act & Assert
+            grid.RemoveAt(0, 1);
+            Assert.AreEqual(3, grid.Gates.Count(), "There should still be 3 arguments left");
+
+            grid.RemoveAt(0, 0);
+            Assert.IsEmpty(grid.Gates, "There should be no more gates in the grid");
         }
 
         private QuantumGate[] SampleGates(int howMany) => Enumerable.Range(0, howMany).Select(i => new QuantumGate($"Op{i}")).ToArray();

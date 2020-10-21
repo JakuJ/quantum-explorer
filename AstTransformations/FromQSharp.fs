@@ -16,16 +16,6 @@ module FromQSharp =
         | Single of string
         | Register of string * int
 
-    let refToString =
-        function
-        | Single q -> q
-        | Register (reg, ix) -> sprintf "%s[%d]" reg ix
-
-    let refToSector =
-        function
-        | Single q -> q
-        | Register (reg, _) -> reg
-
     /// State shared by all AST traversal classes/methods
     type State() =
         class
@@ -114,6 +104,16 @@ module FromQSharp =
                 // traverse the rest of the AST
                 let retValue = base.OnCallableDeclaration callable
 
+                let refToString =
+                    function
+                    | Single q -> q
+                    | Register (reg, ix) -> sprintf "%s[%d]" reg ix
+
+                let refToSector =
+                    function
+                    | Single q -> q
+                    | Register (reg, _) -> reg
+
                 // create and save the grid to the dictionary
                 let grid = GateGrid()
 
@@ -172,40 +172,44 @@ module FromQSharp =
     and ExpressionKindTransform(parent: Transform) =
         inherit ExpressionKindTransformation<State>(parent, TransformationOptions.NoRebuild)
 
-        member this.PrimToRefs(rhs: TypedExpression): QubitRef =
-            match rhs.Expression with
-            | Identifier (var, _) ->
-                match var with
-                | LocalVariable local ->
-                    if this.SharedState.KnownQubits.Contains local.Value
-                    then Single local.Value
-                    else failwithf "Unknown qubit identifier: %s" local.Value
-                | _ -> failwith "Only local variable identifiers supported arguments to operation calls"
-            | ArrayItem (indexable, index) ->
-                match indexable.Expression with
+        member this.PrimToRefs(rhs: TypedExpression): QubitRef option =
+            if not (isQubit rhs.ResolvedType) then
+                None
+            else
+                match rhs.Expression with
                 | Identifier (var, _) ->
                     match var with
-                    | LocalVariable identifier ->
-                        if this.SharedState.KnownRegisters.Contains identifier.Value then
-                            match index.Expression with
-                            | IntLiteral lit -> Register(identifier.Value, int32 lit)
-                            | _ -> failwith "Array index is not an integer"
-                        else
-                            failwithf "Unknown register identifier: %s" identifier.Value
-                    | _ -> failwith "Global operation arguments not supported"
-                | _ -> failwith "Only local variable identifiers supported as arguments to operation calls"
-            | x ->
-                failwithf "Unexpected argument to an operation call: %s"
-                <| string x
+                    | LocalVariable local ->
+                        if this.SharedState.KnownQubits.Contains local.Value
+                        then Some(Single local.Value)
+                        else failwithf "Unknown qubit identifier: %s" local.Value
+                    | _ -> None
+                | ArrayItem (indexable, index) ->
+                    match indexable.Expression with
+                    | Identifier (var, _) ->
+                        match var with
+                        | LocalVariable identifier ->
+                            if this.SharedState.KnownRegisters.Contains identifier.Value then
+                                match index.Expression with
+                                | IntLiteral lit -> Some(Register(identifier.Value, int32 lit))
+                                | _ -> None
+                            else
+                                failwithf "Unknown register identifier: %s" identifier.Value
+                        | _ -> None
+                    | _ -> None
+                | _ -> None
 
         member this.ArgsToNames(rhs: TypedExpression): (QubitRef list * bool) list =
             match rhs.Expression with
             | Identifier _
-            | ArrayItem _ -> [ [ this.PrimToRefs rhs ], false ]
+            | ArrayItem _ ->
+                match this.PrimToRefs rhs with
+                | Some v -> [ [ v ], false ]
+                | None -> []
             | ValueArray args ->
                 if isQubit <| arrayType rhs.ResolvedType then
                     List.ofArray (args.ToArray())
-                    |> List.map this.PrimToRefs
+                    |> List.choose this.PrimToRefs
                     |> fun x -> [ x, true ]
                 else
                     []

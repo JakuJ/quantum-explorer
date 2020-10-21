@@ -4,7 +4,9 @@
 @using Newtonsoft.Json
 @using AstTransformations
 @using System.Text
+@using System.Linq
 @using System.Diagnostics.CodeAnalysis
+@using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 
@@ -47,16 +49,25 @@
     {
         await Compiler.Compile(await Editor!.Component.GetCode());
         Diagnostics!.Component.Diagnostics = Compiler.Diagnostics;
-        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
-        var builder = new StringBuilder();
-        foreach ((string key, GateGrid? grid) in ast)
+        if (Compiler.Diagnostics.Where(x => x.Severity == DiagnosticSeverity.Error).Count() == 0)
         {
-            grid?.Shrink();
-            builder.AppendLine(key);
-            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
+            Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
+
+            // Text representation of the GateGrid (until we have the compositor)
+            var builder = new StringBuilder();
+            foreach ((string key, GateGrid? grid) in ast)
+            {
+                grid?.Shrink();
+                builder.AppendLine(key);
+                builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
+            }
+            await OutputEditor!.Component.SetCode(builder.ToString());
         }
-        await OutputEditor!.Component.SetCode(builder.ToString());
+        else
+        {
+            await OutputEditor!.Component.SetCode("Build failed");
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

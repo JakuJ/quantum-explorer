@@ -53,12 +53,7 @@ namespace Compiler
 
         /// <inheritdoc/>
         public bool Equals(QuantumGate? other)
-            => other != null
-            && Namespace == other.Namespace
-            && Name == other.Name
-            && ArgIndex == other.ArgIndex
-            && ArgArray == other.ArgArray
-            && ReferenceEquals(AstElement, other.AstElement);
+            => other != null && ReferenceEquals(AstElement, other.AstElement);
 
         /// <inheritdoc/>
         public override string ToString() => Namespace + "." + Name;

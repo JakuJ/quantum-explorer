@@ -21,10 +21,11 @@ namespace Compiler
     {
         // These are cached references that we link with the compiled source files
         // Loading them takes 10-20 seconds, that's why.
+        private static Task? preloadingTask;
         private static ImmutableDictionary<NonNullable<string>, References.Headers>? refPaths;
         private readonly ILogger<QsCompiler> logger;
-        private readonly CompilationUnitManager manager;
         private readonly Uri sourceUri = new Uri($"file:///tmp/{UniqueId.CreateUniqueId()}.qs");
+        private CompilationUnitManager? manager;
         private Compilation? compilation;
 
         /// <summary>
@@ -37,13 +38,20 @@ namespace Compiler
 
             if (refPaths == null)
             {
-                PreloadReferences(logger);
+                preloadingTask = Task.Run(() =>
+                {
+                    PreloadReferences(logger);
+                });
             }
+        }
 
+        private void Initialize()
+        {
+            preloadingTask!.WaitAndUnwrapException();
             using (new ScopedTimer("Loading cached references", logger))
             {
                 manager = new CompilationUnitManager();
-                manager.UpdateReferencesAsync(new References(refPaths)).WaitAndUnwrapException();
+                manager.UpdateReferencesAsync(new References(refPaths!)).WaitAndUnwrapException();
             }
         }
 
@@ -70,6 +78,11 @@ namespace Compiler
         /// <inheritdoc/>
         public async Task Compile(string code)
         {
+            if (this.manager == null)
+            {
+                this.Initialize();
+            }
+
             FileContentManager file;
 
             using (new ScopedTimer("Initializing the file manager", logger))
@@ -79,7 +92,7 @@ namespace Compiler
 
             using (new ScopedTimer("Updating source files", logger))
             {
-                await manager.AddOrUpdateSourceFileAsync(file);
+                await manager!.AddOrUpdateSourceFileAsync(file);
             }
 
             using (new ScopedTimer("Compiling", logger))
