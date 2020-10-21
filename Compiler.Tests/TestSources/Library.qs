@@ -1,4 +1,4 @@
-﻿namespace QSharpTestSources {
+﻿namespace Library {
 
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Intrinsic;

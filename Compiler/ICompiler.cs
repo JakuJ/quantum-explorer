@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
@@ -26,5 +27,8 @@ namespace Compiler
         /// <param name="code">Q# code as a plain string.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
         Task Compile(string code);
+
+        /// <summary>An event raised when the compiler is ready for use.</summary>
+        event EventHandler Ready;
     }
 }

@@ -1,4 +1,4 @@
-namespace Allocations {
+namespace AllocatedQubitOps {
     
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Measurement;

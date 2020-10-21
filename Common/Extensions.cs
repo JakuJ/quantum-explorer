@@ -33,5 +33,11 @@ namespace Common
                 yield return (index++, item);
             }
         }
+
+        /// <summary>Truncate a <see cref="List{T}"/> removing elements from the end.</summary>
+        /// <param name="list">The list to truncate.</param>
+        /// <param name="length">The target list length.</param>
+        /// <typeparam name="T">The type of the elements of the list.</typeparam>
+        public static void Truncate<T>(this List<T> list, int length) => list.RemoveRange(length, list.Count - length);
     }
 }
