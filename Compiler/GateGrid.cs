@@ -47,19 +47,14 @@ namespace Compiler
             get
             {
                 QuantumGate? gate;
-                var seen = new bool[Width, Height];
 
                 for (var y = 0; y < Height; y++)
                 {
                     for (var x = 0; x < Width; x++)
                     {
-                        if (!seen[x, y] && (gate = grid[x][y]) != null)
+                        if ((gate = grid[x][y]) != null)
                         {
                             yield return (gate, x, y);
-                            for (var i = 0; i < gate.Height; i++)
-                            {
-                                seen[x, y + i] = true;
-                            }
                         }
                     }
                 }
@@ -90,9 +85,9 @@ namespace Compiler
         /// <param name="gate">The gate to place on the grid.</param>
         public void AddGate(int x, int y, QuantumGate gate)
         {
-            if (!BoundsCheck(x, y + gate.Height - 1))
+            if (!BoundsCheck(x, y))
             {
-                Expand(Math.Max(Width, x + 1) - Width, Math.Max(Height, y + gate.Height) - Height);
+                Expand(Math.Max(Width, x + 1) - Width, Math.Max(Height, y + 1) - Height);
             }
 
             if (grid[x][y] != null)
@@ -100,18 +95,15 @@ namespace Compiler
                 grid.Insert(x, EmptyColumn());
             }
 
-            for (var i = 0; i < gate.Height; i++)
-            {
-                grid[x][y + i] = gate;
-            }
+            grid[x][y] = gate;
 
             Shrink();
         }
 
         /// <summary>Insert an empty row above the one with the provided index.</summary>
         /// <param name="rowBelow">Index of the row directly below the inserted one.</param>
-        /// <param name="qubitID">Optional identifier for the inserted row.</param>
-        public void InsertRow(int rowBelow, string? qubitID = null)
+        /// <param name="qubitID">Identifier for the inserted row.</param>
+        public void InsertRow(int rowBelow, string qubitID)
         {
             Names.Insert(rowBelow, qubitID);
             grid.ForEach(col => col.Insert(rowBelow, null));
@@ -120,9 +112,9 @@ namespace Compiler
         /// <summary>Removes the gate at a given position.</summary>
         /// <param name="x">The index of the column.</param>
         /// <param name="y">The index of the qubit.</param>
-        /// <param name="shrink">Whether to normalize the grid afterwards.</param>
+        /// <param name="moving">Whether this removal is part of a moving action.</param>
         /// <returns>The removed gate, if any.</returns>
-        public QuantumGate RemoveAt(int x, int y, bool shrink = true)
+        public QuantumGate RemoveAt(int x, int y, bool moving = false)
         {
             if (!BoundsCheck(x, y))
             {
@@ -136,21 +128,25 @@ namespace Compiler
                 throw new ArgumentException($"There is no gate at location ({x}, {y})");
             }
 
-            if (gate.Height > 1)
+            grid[x][y] = null;
+
+            if (!moving)
             {
-                if (!BoundsCheck(x, y + gate.Height - 1) || grid[x][y + gate.Height - 1] != gate)
+                // Remove all other gates of the same operation if this one was not part of an array
+                if (!gate.ArgArray)
                 {
-                    throw new ArgumentException($"Position ({x}, {y}) is not a start of a gate, but rather in a middle of a multi-qubit one");
+                    for (x = 0; x < Width; x++)
+                    {
+                        for (y = 0; y < Height; y++)
+                        {
+                            if (gate.SameOperation(grid[x][y]))
+                            {
+                                grid[x][y] = null;
+                            }
+                        }
+                    }
                 }
-            }
 
-            for (int i = 0; i < gate.Height; i++)
-            {
-                grid[x][y + i] = null;
-            }
-
-            if (shrink)
-            {
                 Shrink();
             }
 
@@ -167,7 +163,7 @@ namespace Compiler
         /// <param name="yTo">The index of target qubit.</param>
         public void MoveGate(int xFrom, int yFrom, int xTo, int yTo)
         {
-            var gate = RemoveAt(xFrom, yFrom, shrink: false);
+            var gate = RemoveAt(xFrom, yFrom, moving: true);
             AddGate(xTo, yTo, gate);
         }
 
@@ -218,7 +214,23 @@ namespace Compiler
                 builder.Append($"{Names[y]}:");
                 for (var x = 0; x < Width; x++)
                 {
-                    builder.Append(" " + (grid[x][y]?.Name ?? "_"));
+                    builder.Append(" ");
+
+                    var gate = grid[x][y];
+                    if (gate != null)
+                    {
+                        builder.Append($"[{gate} arg{gate.ArgIndex}");
+                        if (gate.ArgArray)
+                        {
+                            builder.Append(" A");
+                        }
+
+                        builder.Append(']');
+                    }
+                    else
+                    {
+                        builder.Append("[      ]");
+                    }
                 }
 
                 builder.AppendLine();

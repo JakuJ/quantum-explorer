@@ -217,12 +217,12 @@ module FromQSharp =
                 if not (List.isEmpty qubitIDs) then
                     let (ns, name) = gate.Value
 
-                    let g =
-                        QuantumGate(name, ns, List.length qubitIDs, lhs)
+                    let gs =
+                        QuantumGate(name, ns, 0, false, lhs)
 
                     this.SharedState.GateQueue <-
                         this.SharedState.GateQueue
-                        @ [ (qubitIDs.Head, g) ]
+                        @ [ (qubitIDs.Head, gs) ]
 
             base.OnOperationCall(lhs, rhs)
 

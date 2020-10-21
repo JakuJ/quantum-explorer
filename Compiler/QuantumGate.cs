@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
 
 namespace Compiler
@@ -13,14 +11,15 @@ namespace Compiler
         /// <param name="ast">The AST element corresponding to the call to the underlying operation.</param>
         /// <param name="symbol">The name of the underlying operation.</param>
         /// <param name="ns">The namespace of the underlying operation.</param>
-        /// <param name="height">The number of affected qubits.</param>
-        public QuantumGate(string symbol, string ns, int height = 1, TypedExpression? ast = null)
+        /// <param name="argIndex">The index of the argument in the operation call.</param>
+        /// <param name="argArray">Whether this gate is a part of an array-like argument.</param>
+        public QuantumGate(string symbol, string ns, int argIndex = 0, bool argArray = false, TypedExpression? ast = null)
         {
             Name = symbol;
             Namespace = ns;
-            Height = height;
+            ArgIndex = argIndex;
+            ArgArray = argArray;
             AstElement = ast;
-            ControlQubits = new List<int>();
         }
 
         /// <summary>Initializes a new instance of the <see cref="QuantumGate" /> class.</summary>
@@ -33,19 +32,33 @@ namespace Compiler
         /// <summary>Gets the name of the represented operation.</summary>
         public string Name { get; }
 
-        /// <summary>Gets the number of qubits this gate takes as input.</summary>
-        public int Height { get; }
+        /// <summary>Gets the index of the argument to the operation call this gate represents.</summary>
+        public int ArgIndex { get; }
 
-        /// <summary>Gets a list of qubits in the parent grid that are used as control for this gate.</summary>
-        public List<int> ControlQubits { get; }
+        /// <summary>Gets a value indicating whether this gate representa an argument that is part of an array.</summary>
+        public bool ArgArray { get; }
 
         /// <summary>Gets the AST element corresponding to the call of the underlying operation.</summary>
         public TypedExpression? AstElement { get; }
 
+        /// <summary>Returns whether two gates represent different arguments of the same operation call.</summary>
+        /// <param name="other">The other gate.</param>
+        /// <returns>Whether this and the other gate are part of the same operation call.</returns>
+        public bool SameOperation(QuantumGate? other)
+            => other != null
+            && Namespace == other.Namespace
+            && Name == other.Name
+            && ArgIndex != other.ArgIndex
+            && ReferenceEquals(AstElement, other.AstElement);
+
         /// <inheritdoc/>
-        public bool Equals(QuantumGate? other) => other != null && Namespace == other.Namespace && Name == other.Name &&
-                                                  Height == other.Height && ControlQubits.SequenceEqual(other.ControlQubits) &&
-                                                  ReferenceEquals(AstElement, other.AstElement);
+        public bool Equals(QuantumGate? other)
+            => other != null
+            && Namespace == other.Namespace
+            && Name == other.Name
+            && ArgIndex == other.ArgIndex
+            && ArgArray == other.ArgArray
+            && ReferenceEquals(AstElement, other.AstElement);
 
         /// <inheritdoc/>
         public override string ToString() => Namespace + "." + Name;
