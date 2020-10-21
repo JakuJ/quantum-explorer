@@ -217,9 +217,7 @@ module FromQSharp =
                 List.ofArray (args.ToArray())
                 |> List.collect this.ArgsToNames
             | UnitValue -> [] // no arguments
-            | x ->
-                failwithf "Unexpected argument to an operation call: %s"
-                <| string x
+            | _ -> [] // ignore other arguments
 
         override this.OnOperationCall(lhs: TypedExpression, rhs: TypedExpression) =
             let (gate: (string * string) option) =

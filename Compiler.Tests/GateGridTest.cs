@@ -409,7 +409,7 @@ namespace Compiler.Tests
             // Arrange
             var grid = new GateGrid();
 
-            TypedExpression? exp = null;
+            TypedExpression? exp = null; // ReferenceEquals(null, null) is true
 
             var gates = new[]
             {
