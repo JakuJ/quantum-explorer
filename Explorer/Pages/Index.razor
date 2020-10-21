@@ -12,7 +12,7 @@
 
 <div class="main">
     <div class="top-row px-4">
-        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze circuits</button>
+        <button id="compile" @ref="compileButton" class="btn btn-primary" @onclick="OnCompile" disabled>Analyze circuits</button>
     </div>
 
     <div class="content px-4">
@@ -23,9 +23,13 @@
 </div>
 
 @code {
+    private static bool compilerLoaded = false;
+
     internal Panel<Editor>? Editor;
     internal Panel<Editor>? OutputEditor;
     internal Panel<DiagnosticList>? Diagnostics;
+
+    private ElementReference compileButton;
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -34,6 +38,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
         Editor = tree.AddPanel<Editor>();
 
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
@@ -74,15 +79,24 @@
     {
         if (!firstRender) return;
 
-        await InitializePanels();
-    }
+        if (!compilerLoaded)
+        {
+            Compiler.Ready += (sender, e) =>
+            {
+                JsRuntime.InvokeVoidAsync("Library.enable", compileButton, true);
+                compilerLoaded = true;
+            };
+        }
+        else
+        {
+            await JsRuntime.InvokeVoidAsync("Library.enable", compileButton, true);
+        }
 
-    private async Task InitializePanels()
-    {
         string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Auto,
         });
+
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
     }
 

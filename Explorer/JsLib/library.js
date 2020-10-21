@@ -5,4 +5,8 @@ export function InitializeSplitPanes(panelJSON) {
   initializeSplitPanes(JSON.parse(panelJSON));
 }
 
+export function enable(element, state) {
+  element.disabled = !state;
+}
+
 export { Editor }

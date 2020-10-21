@@ -28,6 +28,9 @@ namespace Compiler
         private CompilationUnitManager? manager;
         private Compilation? compilation;
 
+        /// <inheritdoc/>
+        public event EventHandler? Ready;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="QsCompiler"/> class.
         /// </summary>
@@ -41,9 +44,12 @@ namespace Compiler
                 preloadingTask = Task.Run(() =>
                 {
                     PreloadReferences(logger);
+                    OnReady(EventArgs.Empty);
                 });
             }
         }
+
+        private void OnReady(EventArgs e) => Ready?.Invoke(this, e);
 
         private void Initialize()
         {
