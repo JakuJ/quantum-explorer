@@ -16,6 +16,7 @@
     <link href="css/site.css" rel="stylesheet"/>
     <link href="css/split.css" rel="stylesheet"/>
     <link href="css/components.css" rel="stylesheet"/>
+    @await Html.PartialAsync("_Favicons")
 </head>
 <body>
 <app>
@@ -33,7 +34,7 @@
     <a class="dismiss">🗙</a>
 </div>
 
-<script src="_framework/blazor.server.js"></script>
 <script src="js/library.bundle.js"></script>
+<script src="_framework/blazor.server.js"></script>
 </body>
 </html>
