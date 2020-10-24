@@ -1,4 +1,4 @@
-@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+@import url('../lib/open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 html, body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -43,6 +43,10 @@ a, .btn-link {
   flex: 1 1 auto;
   box-sizing: border-box;
   background-color: #F6F6F6;
+}
+
+.toast {
+  margin: 0.75rem 1.5rem;
 }
 
 .valid.modified:not([type=checkbox]) {

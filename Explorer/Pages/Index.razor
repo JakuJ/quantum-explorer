@@ -12,6 +12,7 @@
 
 <div class="main">
     <div class="top-row px-4">
+        <Toasts/>
         <button id="compile" @ref="compileButton" class="btn btn-primary" @onclick="OnCompile" disabled>Analyze circuits</button>
     </div>
 
@@ -23,7 +24,7 @@
 </div>
 
 @code {
-    private static bool compilerLoaded = false;
+    private static bool compilerLoaded;
 
     internal Panel<Editor>? Editor;
     internal Panel<Editor>? OutputEditor;
@@ -55,7 +56,7 @@
         await Compiler.Compile(await Editor!.Component.GetCode());
         Diagnostics!.Component.Diagnostics = Compiler.Diagnostics;
 
-        if (Compiler.Diagnostics.Where(x => x.Severity == DiagnosticSeverity.Error).Count() == 0)
+        if (Compiler.Diagnostics.All(x => x.Severity != DiagnosticSeverity.Error))
         {
             Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
