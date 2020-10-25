@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.Logging;
@@ -21,30 +22,25 @@ namespace Compiler
     public class QsCompiler : ICompiler
     {
         private readonly ILogger<QsCompiler> logger;
+        private readonly string filename = $"__{UniqueId.CreateUniqueId()}__.qs";
+        private readonly List<FilesEmittedArgs> eventQueue = new List<FilesEmittedArgs>();
 
         /// <summary>Initializes a new instance of the <see cref="QsCompiler"/> class.</summary>
         /// <param name="logger">A <see cref="Logger"/> instance to log compilation messages with.</param>
         public QsCompiler(ILogger<QsCompiler> logger) => this.logger = logger;
 
-        /// <inheritdoc />
-        public event EventHandler<OutputReadyArgs>? OutputReady;
+        /// <inheritdoc/>
+        public event EventHandler<string>? OnDiagnostics;
 
         /// <inheritdoc/>
-        public QsCompilation? Compilation { get; private set; }
+        public event EventHandler<QsCompilation>? OnCompilation;
 
         /// <inheritdoc/>
-        public async Task Compile(string code)
-        {
-            string? diagnostics, output;
-            (Compilation, diagnostics, output) = await Simulate(code, logger);
-            OnOutputReady(new OutputReadyArgs(diagnostics, output));
-        }
+        public event EventHandler<string>? OnOutput;
 
-        private static async Task<(QsCompilation?, string?, string?)> Simulate(string qsharpCode, ILogger<QsCompiler> logger)
+        /// <inheritdoc/>
+        public async Task Compile(string qsharpCode)
         {
-            string? diagnostics = null;
-            string? output = null;
-
             // necessary references to compile our Q# program
             IEnumerable<string> qsharpReferences = new[]
             {
@@ -65,29 +61,43 @@ namespace Compiler
                 },
             };
 
+            void Handler(object sender, FilesEmittedArgs args)
+            {
+                eventQueue.Add(args);
+            }
+
+            eventQueue.Clear();
+
+            InMemoryEmitter.FilesGenerated += Handler;
+
             // compile Q# code
             var compilationLoader = new CompilationLoader(
-                _ => new Dictionary<Uri, string> { { new Uri(Path.GetFullPath("__CODE_SNIPPET__.qs")), qsharpCode } }.ToImmutableDictionary(),
+                _ => new Dictionary<Uri, string> { { new Uri(Path.GetFullPath(filename)), qsharpCode } }
+                   .ToImmutableDictionary(),
                 qsharpReferences,
                 config,
                 new ConsoleLogger(logger));
 
-            // remember the QsCompilation
-            QsCompilation? compilation = compilationLoader.CompilationOutput;
+            InMemoryEmitter.FilesGenerated -= Handler;
 
             // print any diagnostics
             if (compilationLoader.LoadDiagnostics.Any())
             {
-                diagnostics = string.Join(
+                var diagnostics = string.Join(
                     Environment.NewLine,
                     compilationLoader.LoadDiagnostics.Select(d => $"{d.Severity} {d.Code} {d.Message}"));
+
+                OnDiagnostics?.Invoke(this, diagnostics);
 
                 // if there are any errors, exit
                 if (compilationLoader.LoadDiagnostics.Any(d => d.Severity == Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity.Error))
                 {
-                    return (null, diagnostics, output);
+                    return;
                 }
             }
+
+            // communicate that the Q# compilation was successful
+            OnCompilation?.Invoke(this, compilationLoader.CompilationOutput);
 
             // necessary references to compile C# simulation of the Q# compilation
             IEnumerable<string> csharpReferences = new[]
@@ -103,8 +113,25 @@ namespace Compiler
                 typeof(object).Assembly.FullName,
             }.Select(x => Assembly.Load(new AssemblyName(x!))).Select(a => a.Location);
 
+            // find our generated files
+            Dictionary<string, string>? generatedFiles = null;
+            foreach (var args in eventQueue)
+            {
+                if (args.CompilationHash == compilationLoader.CompilationOutput.GetHashCode())
+                {
+                    generatedFiles = args.FileContents;
+                    break;
+                }
+            }
+
+            if (generatedFiles == null)
+            {
+                logger.LogError("Couldn't find generated files in the event queue");
+                return;
+            }
+
             // we captured the emitted C# syntax trees into a static variable in the rewrite step
-            IEnumerable<SyntaxTree> syntaxTrees = InMemoryEmitter.GeneratedFiles.Select(x => CSharpSyntaxTree.ParseText(x.Value));
+            IEnumerable<SyntaxTree> syntaxTrees = generatedFiles.Select(x => CSharpSyntaxTree.ParseText(x.Value));
 
             // compile C# code
             // make sure to pass in the C# references as Roslyn's metadata references
@@ -115,13 +142,15 @@ namespace Compiler
             List<Diagnostic> csharpDiagnostics = csharpCompilation.GetDiagnostics().Where(d => d.Severity != DiagnosticSeverity.Hidden).ToList();
             if (csharpDiagnostics.Any())
             {
-                logger.LogDebug("C# Diagnostics:" + Environment.NewLine +
-                                  string.Join(Environment.NewLine, csharpDiagnostics.Select(d => $"{d.Severity} {d.Id} {d.GetMessage()}")));
+                string? diagnostics = "C# Diagnostics:" + Environment.NewLine +
+                                      string.Join(Environment.NewLine, csharpDiagnostics.Select(d => $"{d.Severity} {d.Id} {d.GetMessage()}"));
+
+                OnDiagnostics?.Invoke(this, diagnostics);
 
                 // if there are any errors, exit
                 if (csharpDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
                 {
-                    return (compilation, diagnostics, output);
+                    return;
                 }
             }
 
@@ -141,7 +170,7 @@ namespace Compiler
             if (entryPoint?.Invoke(null, new object?[] { null }) is Task<int> entryPointTask)
             {
                 // intercept the standard output
-                TextWriter? oldOut = Console.Out;
+                TextWriter oldOut = Console.Out;
 
                 var sb = new StringBuilder();
                 var writer = new StringWriter(sb);
@@ -150,15 +179,12 @@ namespace Compiler
                 // run the program
                 await entryPointTask;
 
-                output = sb.ToString();
                 Console.SetOut(oldOut);
+
+                OnOutput?.Invoke(this, sb.ToString());
             }
 
             qsharpLoadContext.Unload();
-
-            return (compilation, diagnostics, output);
         }
-
-        private void OnOutputReady(OutputReadyArgs args) => OutputReady?.Invoke(this, args);
     }
 }

@@ -9,13 +9,16 @@ namespace Compiler
     /// </summary>
     public interface ICompiler
     {
-        /// <summary>An event raised when the compiler has finished the simulation.</summary>
-        event EventHandler<OutputReadyArgs> OutputReady;
+        /// <summary>An event invoked when the compiler has diagnostics.</summary>
+        event EventHandler<string> OnDiagnostics;
 
-        /// <summary>Gets the syntax tree of the last compilation.</summary>
-        QsCompilation? Compilation { get; }
+        /// <summary>An event raised when the compilation object is ready.</summary>
+        event EventHandler<QsCompilation> OnCompilation;
 
-        /// <summary>Analyze provided Q# code.</summary>
+        /// <summary>An event raised when there's been some output printed by the simulation.</summary>
+        event EventHandler<string> OnOutput;
+
+        /// <summary>Compile and run provided Q# code.</summary>
         /// <param name="code">Q# code as a plain string.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
         Task Compile(string code);

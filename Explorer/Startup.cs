@@ -59,7 +59,7 @@ namespace Explorer
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
+            services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
         }
     }
 }

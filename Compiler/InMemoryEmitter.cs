@@ -11,9 +11,10 @@ using Microsoft.Quantum.QsCompiler.Transformations.BasicTransformations;
 namespace Compiler
 {
     /// <inheritdoc />
+    // ReSharper disable once ClassNeverInstantiated.Global
     internal class InMemoryEmitter : IRewriteStep
     {
-        public static Dictionary<string, string> GeneratedFiles { get; } = new Dictionary<string, string>();
+        public static event EventHandler<FilesEmittedArgs>? FilesGenerated;
 
         public string Name => "InMemoryCsharpGeneration";
 
@@ -34,10 +35,12 @@ namespace Compiler
             var context = CodegenContext.Create(compilation, AssemblyConstants);
             ImmutableHashSet<NonNullable<string>>? sources = GetSourceFiles.Apply(compilation.Namespaces);
 
+            var generatedFiles = new Dictionary<string, string>();
+
             foreach (NonNullable<string> source in sources.Where(s => !s.Value.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
             {
                 string? content = SimulationCode.generate(source, context);
-                GeneratedFiles.Add(source.Value, content);
+                generatedFiles.Add(source.Value, content);
             }
 
             if (!compilation.EntryPoints.IsEmpty)
@@ -45,8 +48,10 @@ namespace Compiler
                 QsCallable? callable = context.allCallables.First(c => c.Key.Equals(compilation.EntryPoints.First())).Value;
                 string? content = EntryPoint.generate(context, callable);
                 NonNullable<string> entryPointName = NonNullable<string>.New(callable.SourceFile.Value + ".EntryPoint");
-                GeneratedFiles.Add(entryPointName.Value, content);
+                generatedFiles.Add(entryPointName.Value, content);
             }
+
+            FilesGenerated?.Invoke(this, new FilesEmittedArgs(compilation.GetHashCode(), generatedFiles));
 
             transformed = compilation;
             return true;

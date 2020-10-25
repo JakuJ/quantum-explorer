@@ -4,9 +4,11 @@
 @using Newtonsoft.Json
 @using AstTransformations
 @using System.Text
-@using System.Diagnostics.CodeAnalysis
+@using Microsoft.Extensions.Logging
+@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
+@inject ILogger<Index> Logger;
 
 <div class="main">
     <div class="top-row px-4">
@@ -22,8 +24,6 @@
 </div>
 
 @code {
-    private static bool compilerLoaded;
-
     internal Panel<Editor>? Editor;
     internal Panel<Editor>? OutputEditor;
     internal Panel<Output>? Output;
@@ -35,6 +35,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        Logger.LogInformation("New index page initialized");
 
         Editor = tree.AddPanel<Editor>();
 
@@ -45,29 +46,16 @@
 
         tree.AddPanel(sidePanel);
 
-        Compiler.OutputReady += (sender, args) => { Output.Component.Value = $"{args.Diagnostics}\n\n{args.Output}"; };
+        Compiler.OnDiagnostics += (sender, val) => { Output.Component.Value += val + "\n\n"; };
+        Compiler.OnOutput += (sender, val) => { Output.Component.Value += "\n\n===========\n\n" + val; };
+        Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
     }
 
-    [ExcludeFromCodeCoverage] // TODO: Integration tests
     private async Task OnCompile()
     {
+        Output!.Component.Value = "";
         string code = await Editor!.Component.GetCode();
         await Compiler.Compile(code);
-
-        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
-
-    // Text representation of the GateGrid (until we have the compositor)
-        var builder = new StringBuilder();
-        foreach ((string key, GateGrid? grid) in ast)
-        {
-            grid?.Shrink();
-            builder.AppendLine(key);
-            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
-        }
-        await OutputEditor!.Component.SetCode(builder.ToString());
-
-    // Output from the simulation
-    // TODO
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -80,6 +68,20 @@
         });
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
+    }
+
+    private async Task ProcessCompilation(QsCompilation compilation)
+    {
+        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(compilation);
+
+        var builder = new StringBuilder();
+        foreach ((string key, GateGrid? grid) in ast)
+        {
+            grid?.Shrink();
+            builder.AppendLine(key);
+            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
+        }
+        await OutputEditor!.Component.SetCode(builder.ToString());
     }
 
 }
