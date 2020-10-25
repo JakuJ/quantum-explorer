@@ -1,7 +1,7 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
-import { loadWASM } from 'onigasm';
-import { Registry } from 'monaco-textmate';
-import { wireTmGrammars } from 'monaco-editor-textmate';
+import {loadWASM} from 'onigasm';
+import {Registry} from 'monaco-textmate';
+import {wireTmGrammars} from 'monaco-editor-textmate';
 import * as path from 'path';
 import {saveCode, loadCode} from './storage';
 
@@ -32,7 +32,7 @@ const INIT_CODE = `namespace HelloWorld {
             H(q);
             return MResetZ(q);
         }
-    }   
+    }
 }`;
 
 export class Editor {
@@ -76,6 +76,10 @@ export class Editor {
       theme: LIGHT_THEME_NAME,
       minimap: {
         enabled: false
+      },
+      scrollbar: {
+        vertical: 'hidden',
+        horizontal: 'auto'
       }
     });
 
@@ -90,18 +94,17 @@ export class Editor {
       keybindingContext: null,
       contextMenuGroupId: 'editorOptions',
       contextMenuOrder: 0,
-      run: function (ed) {
+      run: ed => {
         const currTheme = ed._themeService.getTheme().themeName;
-        if (currTheme == LIGHT_THEME_NAME) {
+        if (currTheme === LIGHT_THEME_NAME) {
           monaco.editor.setTheme(DARK_THEME_NAME);
-        }
-        else {
+        } else {
           monaco.editor.setTheme(LIGHT_THEME_NAME);
         }
       }
     });
 
-    window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, function() {
+    window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
       saveCode(window.editorsDict[id].getValue());
     });
 
