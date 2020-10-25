@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
-using Microsoft.VisualStudio.LanguageServer.Protocol;
 
 namespace Compiler
 {
@@ -11,24 +9,15 @@ namespace Compiler
     /// </summary>
     public interface ICompiler
     {
-        /// <summary>
-        /// Gets all compiler diagnostics from the latest call to <see cref="Compile"/>.
-        /// </summary>
-        IEnumerable<Diagnostic> Diagnostics { get; }
+        /// <summary>An event raised when the compiler has finished the simulation.</summary>
+        event EventHandler<OutputReadyArgs> OutputReady;
 
-        /// <summary>
-        /// Gets the syntax tree of the last compilation.
-        /// </summary>
-        QsCompilation Compilation { get; }
+        /// <summary>Gets the syntax tree of the last compilation.</summary>
+        QsCompilation? Compilation { get; }
 
-        /// <summary>
-        /// Analyze provided Q# code.
-        /// </summary>
+        /// <summary>Analyze provided Q# code.</summary>
         /// <param name="code">Q# code as a plain string.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
         Task Compile(string code);
-
-        /// <summary>An event raised when the compiler is ready for use.</summary>
-        event EventHandler Ready;
     }
 }

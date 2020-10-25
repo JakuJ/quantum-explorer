@@ -4,16 +4,14 @@
 @using Newtonsoft.Json
 @using AstTransformations
 @using System.Text
-@using System.Linq
 @using System.Diagnostics.CodeAnalysis
-@using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 
 <div class="main">
     <div class="top-row px-4">
         <Toasts/>
-        <button id="compile" @ref="compileButton" class="btn btn-primary" @onclick="OnCompile" disabled>Analyze circuits</button>
+        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze circuits</button>
     </div>
 
     <div class="content px-4">
@@ -28,9 +26,7 @@
 
     internal Panel<Editor>? Editor;
     internal Panel<Editor>? OutputEditor;
-    internal Panel<DiagnosticList>? Diagnostics;
-
-    private ElementReference compileButton;
+    internal Panel<Output>? Output;
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -45,53 +41,38 @@
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
 
         OutputEditor = sidePanel.AddPanel<Editor>();
-        Diagnostics = sidePanel.AddPanel<DiagnosticList>();
+        Output = sidePanel.AddPanel<Output>();
 
         tree.AddPanel(sidePanel);
+
+        Compiler.OutputReady += (sender, args) => { Output.Component.Value = $"{args.Diagnostics}\n\n{args.Output}"; };
     }
 
     [ExcludeFromCodeCoverage] // TODO: Integration tests
     private async Task OnCompile()
     {
-        await Compiler.Compile(await Editor!.Component.GetCode());
-        Diagnostics!.Component.Diagnostics = Compiler.Diagnostics;
+        string code = await Editor!.Component.GetCode();
+        await Compiler.Compile(code);
 
-        if (Compiler.Diagnostics.All(x => x.Severity != DiagnosticSeverity.Error))
-        {
-            Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
+        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
 
-            // Text representation of the GateGrid (until we have the compositor)
-            var builder = new StringBuilder();
-            foreach ((string key, GateGrid? grid) in ast)
-            {
-                grid?.Shrink();
-                builder.AppendLine(key);
-                builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
-            }
-            await OutputEditor!.Component.SetCode(builder.ToString());
-        }
-        else
+    // Text representation of the GateGrid (until we have the compositor)
+        var builder = new StringBuilder();
+        foreach ((string key, GateGrid? grid) in ast)
         {
-            await OutputEditor!.Component.SetCode("Build failed");
+            grid?.Shrink();
+            builder.AppendLine(key);
+            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
         }
+        await OutputEditor!.Component.SetCode(builder.ToString());
+
+    // Output from the simulation
+    // TODO
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-
-        if (!compilerLoaded)
-        {
-            Compiler.Ready += (sender, e) =>
-            {
-                JsRuntime.InvokeVoidAsync("Library.enable", compileButton, true);
-                compilerLoaded = true;
-            };
-        }
-        else
-        {
-            await JsRuntime.InvokeVoidAsync("Library.enable", compileButton, true);
-        }
 
         string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
         {
