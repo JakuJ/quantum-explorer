@@ -16,11 +16,15 @@ namespace Compiler
         event EventHandler<QsCompilation> OnCompilation;
 
         /// <summary>An event raised when there's been some output printed by the simulation.</summary>
-        event EventHandler<string> OnOutput;
+        event EventHandler<(int, string)> OnOutput;
+
+        /// <summary>Gets the last compilation if successful, otherwise null.</summary>
+        QsCompilation? Compilation { get; }
 
         /// <summary>Compile and run provided Q# code.</summary>
         /// <param name="code">Q# code as a plain string.</param>
+        /// <param name="execute">Whether to also run the code in a quantum simulator.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        Task Compile(string code);
+        Task Compile(string code, bool execute = false);
     }
 }

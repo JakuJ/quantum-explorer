@@ -25,8 +25,10 @@
 
 @code {
     internal Panel<Editor>? Editor;
-    internal Panel<Editor>? OutputEditor;
-    internal Panel<Output>? Output;
+    internal Panel<Editor>? CompositorPlaceholder;
+    internal Panel<Editor>? ExecutionOutput;
+
+    private readonly StringBuilder outputSb = new StringBuilder();
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -35,27 +37,49 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        Logger.LogInformation("New index page initialized");
 
         Editor = tree.AddPanel<Editor>();
 
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
 
-        OutputEditor = sidePanel.AddPanel<Editor>();
-        Output = sidePanel.AddPanel<Output>();
+        CompositorPlaceholder = sidePanel.AddPanel<Editor>();
+        ExecutionOutput = sidePanel.AddPanel<Editor>();
 
         tree.AddPanel(sidePanel);
 
-        Compiler.OnDiagnostics += (sender, val) => { Output.Component.Value += val + "\n\n"; };
-        Compiler.OnOutput += (sender, val) => { Output.Component.Value += "\n\n===========\n\n" + val; };
+        Compiler.OnDiagnostics += async (sender, val) =>
+        {
+            outputSb.AppendLine(val);
+            await ExecutionOutput.Component.SetCode(outputSb.ToString());
+        };
+
+        Compiler.OnOutput += async (sender, val) =>
+        {
+            if (outputSb.Length != 0)
+            {
+                outputSb.AppendLine();
+            }
+
+            (int code, string stdout) = val;
+
+            outputSb.AppendLine(stdout);
+            outputSb.Append($"Program returned: {code}");
+
+            await ExecutionOutput.Component.SetCode(outputSb.ToString());
+        };
+
         Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
     }
 
     private async Task OnCompile()
     {
-        Output!.Component.Value = "";
+        outputSb.Clear();
+
+        await CompositorPlaceholder!.Component.SetCode("<compiling>");
+        await ExecutionOutput!.Component.SetCode("<compiling>");
+
         string code = await Editor!.Component.GetCode();
-        await Compiler.Compile(code);
+        await Compiler.Compile(code, true);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -72,7 +96,22 @@
 
     private async Task ProcessCompilation(QsCompilation compilation)
     {
-        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(compilation);
+        if (outputSb.Length == 0) // no diagnostics
+        {
+            await ExecutionOutput!.Component.SetCode("<executing>");
+        }
+
+        Dictionary<string, GateGrid> ast;
+
+        try
+        {
+            ast = FromQSharp.GetGates(compilation);
+        }
+        catch (Exception e)
+        {
+            await CompositorPlaceholder!.Component.SetCode($"Failed to analyze the provided code:\n{e.Message}");
+            return;
+        }
 
         var builder = new StringBuilder();
         foreach ((string key, GateGrid? grid) in ast)
@@ -81,7 +120,7 @@
             builder.AppendLine(key);
             builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
         }
-        await OutputEditor!.Component.SetCode(builder.ToString());
+        await CompositorPlaceholder!.Component.SetCode(builder.ToString());
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿namespace AstTransformations
 
 open System.Collections.Generic
+open System.Collections.Immutable
 open System.Linq
 open Compiler
 open Helpers
@@ -145,27 +146,37 @@ module FromQSharp =
     and StatementKindTransform(parent: Transform) =
         inherit StatementKindTransformation<State>(parent, TransformationOptions.NoRebuild)
 
+        member this.FlattenNames: (SymbolTuple -> string list) =
+            function
+            | VariableName name -> [ name.Value ]
+            | VariableNameTuple t ->
+                List.collect this.FlattenNames
+                <| List.ofArray (t.ToArray())
+            | _ -> []
+
+        member this.FlattenQubits: (ResolvedInitializer -> int list) =
+            fun x ->
+                match x.Resolution with
+                | SingleQubitAllocation -> [ 1 ]
+                | QubitRegisterAllocation { Expression = IntLiteral num } -> [ int32 num ]
+                | QubitTupleAllocation t ->
+                    List.collect this.FlattenQubits
+                    <| List.ofArray (t.ToArray())
+                | _ -> [] // invalid or bad register with not an int in the brackets
+
         override this.OnAllocateQubits(scope: QsQubitScope) =
-            let qubitID =
-                match scope.Binding.Lhs with
-                | VariableName name -> name.Value
-                | _ -> failwith "Unknown SymbolTuple for the qubit binding"
+            let qubitIDs = this.FlattenNames scope.Binding.Lhs
+            let qubits = this.FlattenQubits scope.Binding.Rhs
 
-            let qubits =
-                int32
-                <| match scope.Binding.Rhs.Resolution with
-                   | QubitRegisterAllocation { Expression = IntLiteral num } -> num
-                   | SingleQubitAllocation -> 1L
-                   | _ -> failwith "Invalid qubit allocation"
-
-            if qubits = 1 then
-                this.SharedState.KnownQubits <- this.SharedState.KnownQubits.Add qubitID
-                this.SharedState.Sectors <- addSingle qubitID this.SharedState.Sectors
-            else
-                this.SharedState.KnownRegisters <- this.SharedState.KnownRegisters.Add qubitID
-                this.SharedState.Sectors <-
-                    List.fold (fun acc x -> addToRegister qubitID x acc) this.SharedState.Sectors
-                    <| List.map (sprintf "%s[%d]" qubitID) [ 0 .. qubits - 1 ]
+            for qubitID, howMany in List.zip qubitIDs qubits do
+                if howMany = 1 then
+                    this.SharedState.KnownQubits <- this.SharedState.KnownQubits.Add qubitID
+                    this.SharedState.Sectors <- addSingle qubitID this.SharedState.Sectors
+                else
+                    this.SharedState.KnownRegisters <- this.SharedState.KnownRegisters.Add qubitID
+                    this.SharedState.Sectors <-
+                        List.fold (fun acc x -> addToRegister qubitID x acc) this.SharedState.Sectors
+                        <| List.map (sprintf "%s[%d]" qubitID) [ 0 .. howMany - 1 ]
 
             base.OnAllocateQubits scope
 
@@ -213,7 +224,7 @@ module FromQSharp =
                     |> fun x -> [ x, true ]
                 else
                     []
-            | ValueTuple args -> // multiple arguments
+            | ValueTuple args ->
                 List.ofArray (args.ToArray())
                 |> List.collect this.ArgsToNames
             | UnitValue -> [] // no arguments

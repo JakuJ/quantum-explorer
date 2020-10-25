@@ -36,10 +36,13 @@ namespace Compiler
         public event EventHandler<QsCompilation>? OnCompilation;
 
         /// <inheritdoc/>
-        public event EventHandler<string>? OnOutput;
+        public event EventHandler<(int, string)>? OnOutput;
 
         /// <inheritdoc/>
-        public async Task Compile(string qsharpCode)
+        public QsCompilation? Compilation { get; private set; }
+
+        /// <inheritdoc/>
+        public async Task Compile(string qsharpCode, bool execute = false)
         {
             // necessary references to compile our Q# program
             IEnumerable<string> qsharpReferences = new[]
@@ -61,9 +64,9 @@ namespace Compiler
                 },
             };
 
-            void Handler(object sender, FilesEmittedArgs args)
+            void Handler(object? sender, FilesEmittedArgs? args)
             {
-                eventQueue.Add(args);
+                eventQueue.Add(args!);
             }
 
             eventQueue.Clear();
@@ -81,16 +84,15 @@ namespace Compiler
             InMemoryEmitter.FilesGenerated -= Handler;
 
             // print any diagnostics
-            if (compilationLoader.LoadDiagnostics.Any())
+            var diags = compilationLoader.LoadDiagnostics;
+            if (diags.Any())
             {
-                var diagnostics = string.Join(
-                    Environment.NewLine,
-                    compilationLoader.LoadDiagnostics.Select(d => $"{d.Severity} {d.Code} {d.Message}"));
+                var diagnostics = string.Join(Environment.NewLine, diags.Select(d => $"{d.Severity} {d.Code} {d.Message}"));
 
                 OnDiagnostics?.Invoke(this, diagnostics);
 
                 // if there are any errors, exit
-                if (compilationLoader.LoadDiagnostics.Any(d => d.Severity == Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity.Error))
+                if (diags.Any(d => d.Severity == Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity.Error))
                 {
                     return;
                 }
@@ -98,6 +100,12 @@ namespace Compiler
 
             // communicate that the Q# compilation was successful
             OnCompilation?.Invoke(this, compilationLoader.CompilationOutput);
+            Compilation = compilationLoader.CompilationOutput;
+
+            if (!execute)
+            {
+                return;
+            }
 
             // necessary references to compile C# simulation of the Q# compilation
             IEnumerable<string> csharpReferences = new[]
@@ -139,7 +147,8 @@ namespace Compiler
                                                                    .WithReferences(csharpReferences.Select(x => MetadataReference.CreateFromFile(x)));
 
             // print any diagnostics
-            List<Diagnostic> csharpDiagnostics = csharpCompilation.GetDiagnostics().Where(d => d.Severity != DiagnosticSeverity.Hidden).ToList();
+            List<Diagnostic> csharpDiagnostics = csharpCompilation.GetDiagnostics()
+                                                                  .Where(d => d.Severity != DiagnosticSeverity.Hidden && d.Id != "CS1702").ToList();
             if (csharpDiagnostics.Any())
             {
                 string? diagnostics = "C# Diagnostics:" + Environment.NewLine +
@@ -169,19 +178,18 @@ namespace Compiler
 
             if (entryPoint?.Invoke(null, new object?[] { null }) is Task<int> entryPointTask)
             {
-                // intercept the standard output
-                TextWriter oldOut = Console.Out;
-
                 var sb = new StringBuilder();
                 var writer = new StringWriter(sb);
-                Console.SetOut(writer);
+
+                // intercept the standard output
+                TextWriter stdOut = Console.Out;
+                Console.SetOut(writer); // TODO: Fix race condition
 
                 // run the program
-                await entryPointTask;
+                int retStatus = await entryPointTask;
 
-                Console.SetOut(oldOut);
-
-                OnOutput?.Invoke(this, sb.ToString());
+                Console.SetOut(stdOut);
+                OnOutput?.Invoke(this, (retStatus, sb.ToString()));
             }
 
             qsharpLoadContext.Unload();
