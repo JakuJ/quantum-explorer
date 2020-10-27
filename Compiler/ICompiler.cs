@@ -16,7 +16,7 @@ namespace Compiler
         event EventHandler<QsCompilation> OnCompilation;
 
         /// <summary>An event raised when there's been some output printed by the simulation.</summary>
-        event EventHandler<(int, string)> OnOutput;
+        event EventHandler<string> OnOutput;
 
         /// <summary>Gets the last compilation if successful, otherwise null.</summary>
         QsCompilation? Compilation { get; }

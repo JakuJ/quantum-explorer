@@ -53,17 +53,14 @@
             await ExecutionOutput.Component.SetCode(outputSb.ToString());
         };
 
-        Compiler.OnOutput += async (sender, val) =>
+        Compiler.OnOutput += async (sender, stdout) =>
         {
             if (outputSb.Length != 0)
             {
                 outputSb.AppendLine();
             }
 
-            (int code, string stdout) = val;
-
-            outputSb.AppendLine(stdout);
-            outputSb.Append($"Program returned: {code}");
+            outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
 
             await ExecutionOutput.Component.SetCode(outputSb.ToString());
         };

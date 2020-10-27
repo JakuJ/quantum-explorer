@@ -47,13 +47,7 @@ namespace Compiler.Tests
             compiler.OnOutput += (sender, s) =>
             {
                 executed = true;
-                (int code, string output) = s;
-                Assert.AreEqual(0, code, "Process should return 0");
-
-                // TODO: Stdout interception doesn't work with NUnit for some reason
-                // TODO: But we have to rewrite it using Processes anyway
-
-                // Assert.AreEqual("Hello World!", output, "Intercepted output must match ");
+                Assert.AreEqual("Hello World!\n", s, "Intercepted output must be correct.");
             };
 
             // Act

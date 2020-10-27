@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Common;
 using Microsoft.CodeAnalysis;
@@ -72,7 +71,7 @@ namespace Compiler
         public event EventHandler<QsCompilation>? OnCompilation;
 
         /// <inheritdoc/>
-        public event EventHandler<(int, string)>? OnOutput;
+        public event EventHandler<string>? OnOutput;
 
         /// <inheritdoc/>
         public QsCompilation? Compilation { get; private set; }
@@ -168,8 +167,9 @@ namespace Compiler
             }
 
             // print any diagnostics
-            List<Diagnostic> csharpDiagnostics = csharpCompilation.GetDiagnostics()
-                                                                  .Where(d => d.Severity != DiagnosticSeverity.Hidden && d.Id != "CS1702").ToList();
+            List<Diagnostic> csharpDiagnostics = csharpCompilation
+                                                .GetDiagnostics()
+                                                .Where(d => d.Severity != DiagnosticSeverity.Hidden && d.Id != "CS1702").ToList();
             if (csharpDiagnostics.Any())
             {
                 var diagnostics = string.Join("", csharpDiagnostics.Select(d => $"\n{d.Severity} {d.Id} {d.GetMessage()}"));
@@ -185,33 +185,44 @@ namespace Compiler
 
             using var timer = new ScopedTimer("Executing simulation", logger);
 
-            // emit C# code into an in memory assembly
+            // emit C# code into an in-memory assembly
             await using var peStream = new MemoryStream();
             csharpCompilation.Emit(peStream);
             peStream.Position = 0;
-            var qsharpLoadContext = new QSharpLoadContext();
 
-            // run the assembly using reflection
+            // load that assembly
+            var qsharpLoadContext = new QSharpLoadContext();
             Assembly qsharpAssembly = qsharpLoadContext.LoadFromStream(peStream);
 
-            // the entry point has a special name "__QsEntryPoint__"
-            MethodInfo? entryPoint = qsharpAssembly.GetTypes().First(x => x.Name == "__QsEntryPoint__")
-                                                   .GetMethod("Main", BindingFlags.NonPublic | BindingFlags.Static);
+            // get the @Entrypoint() operation
+            QsQualifiedName? entryPoint = compilationLoader.CompilationOutput.EntryPoints.FirstOrDefault();
 
-            if (entryPoint?.Invoke(null, new object?[] { null }) is Task<int> entryPointTask)
+            if (entryPoint == null)
             {
-                var sb = new StringBuilder();
-                var writer = new StringWriter(sb);
+                logger.LogError("No entrypoint in Q# compilation.");
+                qsharpLoadContext.Unload();
+                return;
+            }
 
-                // intercept the standard output
-                TextWriter stdOut = Console.Out;
-                Console.SetOut(writer); // TODO: Fix race condition
+            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == entryPoint.Name.Value);
 
-                // run the program
-                int retStatus = await entryPointTask;
+            if (type != null)
+            {
+                using var sim = new InterceptingSimulator();
 
-                Console.SetOut(stdOut);
-                OnOutput?.Invoke(this, (retStatus, sb.ToString()));
+                // simulate the entry point operation using reflection
+                object? invocation = type.InvokeMember("Run", BindingFlags.InvokeMethod, null, type, new object?[] { sim });
+
+                if (invocation is Task task)
+                {
+                    await task;
+                }
+
+                OnOutput?.Invoke(this, sim.Messages);
+            }
+            else
+            {
+                logger.LogError("Q# entrypoint not found in loaded assembly.");
             }
 
             qsharpLoadContext.Unload();
