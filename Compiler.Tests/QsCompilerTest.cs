@@ -57,5 +57,29 @@ namespace Compiler.Tests
             Assert.IsNotNull(compiler.Compilation, "Compilation should be successful");
             Assert.IsTrue(executed, "Execution must emit output.");
         }
+
+        [Test]
+        public async Task ReturnsDiagnosticsOnError()
+        {
+            // Arrange
+            string sourceCode = await Helpers.GetSourceFile("Library"); // no entry point
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            var diagnostics = false;
+
+            compiler.OnDiagnostics += (sender, s) =>
+            {
+                diagnostics = true;
+                Helpers.ConsoleLogger.LogError(s);
+            };
+
+            compiler.OnOutput += (sender, s) => { Assert.Fail("Code should not execute"); };
+
+            // Act
+            await compiler.Compile(sourceCode, true);
+
+            // Assert
+            Assert.IsNotNull(compiler.Compilation, "Q# compilation should succeed");
+            Assert.IsTrue(diagnostics, "Some diagnostics should be present");
+        }
     }
 }

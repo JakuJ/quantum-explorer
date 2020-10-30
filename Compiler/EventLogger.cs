@@ -10,11 +10,6 @@ namespace Compiler
     /// <inheritdoc />
     public sealed class EventLogger : LogTracker
     {
-        private static readonly HashSet<string> Ignored = new HashSet<string>(new[]
-        {
-            "QS7202", // not important to end user, leaks server-side file paths
-        });
-
         private readonly Action<string> logAction;
         private readonly Func<Diagnostic, string> applyFormatting;
 
@@ -37,14 +32,10 @@ namespace Compiler
         {
             string message = applyFormatting(msg);
 
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            if ((msg.Severity == DiagnosticSeverity.Error
-              || msg.Severity == DiagnosticSeverity.Warning)
-             && !Ignored.Contains(msg.Code))
+            // QS7202 is not important to end user and leaks server-side file paths
+            if (msg.Severity == DiagnosticSeverity.Error
+             || (msg.Severity == DiagnosticSeverity.Warning
+              && msg.Code != "QS7202"))
             {
                 var withFilesSkipped = string.Join('\n', message.Split('\n').Where(x => !x.StartsWith("File:")));
                 logAction(withFilesSkipped);

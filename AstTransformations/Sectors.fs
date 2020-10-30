@@ -23,10 +23,10 @@ module Sectors =
             | x :: xs -> x :: addToRegister reg qName xs
             | [] -> [ (reg, [ qName ]) ]
 
-    /// Add a singleton sector contaning qubit identifier
+    /// Add a singleton sector containing a qubit identifier
     let rec addSingle: (string -> Sector list -> Sector list) =
         fun qName ->
             function
-            | ((x, _) :: _) as sec when x = qName -> sec
+            | ((x, _) :: rest) when x = qName -> (x, [ x ]) :: rest
             | x :: xs -> x :: addSingle qName xs
             | [] -> [ (qName, [ qName ]) ]

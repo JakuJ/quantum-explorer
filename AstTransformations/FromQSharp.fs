@@ -1,7 +1,6 @@
 ﻿namespace AstTransformations
 
 open System.Collections.Generic
-open System.Collections.Immutable
 open System.Linq
 open Compiler
 open Helpers
@@ -154,11 +153,12 @@ module FromQSharp =
                 <| List.ofArray (t.ToArray())
             | _ -> []
 
-        member this.FlattenQubits: (ResolvedInitializer -> int list) =
+        // None means single qubit, Some x means x-qubit register
+        member this.FlattenQubits: (ResolvedInitializer -> (int option) list) =
             fun x ->
                 match x.Resolution with
-                | SingleQubitAllocation -> [ 1 ]
-                | QubitRegisterAllocation { Expression = IntLiteral num } -> [ int32 num ]
+                | SingleQubitAllocation -> [ None ]
+                | QubitRegisterAllocation { Expression = IntLiteral num } -> [ Some(int32 num) ]
                 | QubitTupleAllocation t ->
                     List.collect this.FlattenQubits
                     <| List.ofArray (t.ToArray())
@@ -169,14 +169,15 @@ module FromQSharp =
             let qubits = this.FlattenQubits scope.Binding.Rhs
 
             for qubitID, howMany in List.zip qubitIDs qubits do
-                if howMany = 1 then
+                match howMany with
+                | None ->
                     this.SharedState.KnownQubits <- this.SharedState.KnownQubits.Add qubitID
                     this.SharedState.Sectors <- addSingle qubitID this.SharedState.Sectors
-                else
+                | Some n ->
                     this.SharedState.KnownRegisters <- this.SharedState.KnownRegisters.Add qubitID
                     this.SharedState.Sectors <-
                         List.fold (fun acc x -> addToRegister qubitID x acc) this.SharedState.Sectors
-                        <| List.map (sprintf "%s[%d]" qubitID) [ 0 .. howMany - 1 ]
+                        <| List.map (sprintf "%s[%d]" qubitID) [ 0 .. n - 1 ]
 
             base.OnAllocateQubits scope
 

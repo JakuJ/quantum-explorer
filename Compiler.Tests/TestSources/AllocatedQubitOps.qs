@@ -34,4 +34,13 @@ namespace AllocatedQubitOps {
             Z(qs[4]);
         }
     }
+
+    // Complex using statement
+    operation Tuples(): Unit {
+        using (((q1, qs), q2) = ((Qubit(), Qubit[1]), Qubit())) {
+            X(q1); // 1st row
+            Y(q2); // 3rd row
+            H(qs[0]); // 2nd row
+        }
+    }
 }
