@@ -6,6 +6,7 @@
 @using System.Text
 @using Microsoft.Extensions.Logging
 @using Microsoft.Quantum.QsCompiler.SyntaxTree
+@using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -34,6 +35,7 @@
 
     readonly PanelTree tree = new PanelTree(PanelTree.Alignment.Horizontal);
 
+    [ExcludeFromCodeCoverage] // TODO: Waiting for final form of the page and integration tests
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -68,6 +70,7 @@
         Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
     }
 
+    [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
         outputSb.Clear();
@@ -79,6 +82,7 @@
         await Compiler.Compile(code, true);
     }
 
+    [ExcludeFromCodeCoverage]
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -91,6 +95,7 @@
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
     }
 
+    [ExcludeFromCodeCoverage]
     private async Task ProcessCompilation(QsCompilation compilation)
     {
         if (outputSb.Length == 0) // no diagnostics
