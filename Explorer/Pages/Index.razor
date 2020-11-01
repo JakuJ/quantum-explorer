@@ -4,16 +4,17 @@
 @using Newtonsoft.Json
 @using AstTransformations
 @using System.Text
-@using System.Linq
+@using Microsoft.Extensions.Logging
+@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @using System.Diagnostics.CodeAnalysis
-@using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
+@inject ILogger<Index> Logger;
 
 <div class="main">
     <div class="top-row px-4">
         <Toasts/>
-        <button id="compile" @ref="compileButton" class="btn btn-primary" @onclick="OnCompile" disabled>Analyze circuits</button>
+        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze circuits</button>
     </div>
 
     <div class="content px-4">
@@ -24,18 +25,17 @@
 </div>
 
 @code {
-    private static bool compilerLoaded;
-
     internal Panel<Editor>? Editor;
-    internal Panel<Editor>? OutputEditor;
-    internal Panel<DiagnosticList>? Diagnostics;
+    internal Panel<Editor>? CompositorPlaceholder;
+    internal Panel<Editor>? ExecutionOutput;
 
-    private ElementReference compileButton;
+    private readonly StringBuilder outputSb = new StringBuilder();
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
     readonly PanelTree tree = new PanelTree(PanelTree.Alignment.Horizontal);
 
+    [ExcludeFromCodeCoverage] // TODO: Waiting for final form of the page and integration tests
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -44,54 +44,48 @@
 
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
 
-        OutputEditor = sidePanel.AddPanel<Editor>();
-        Diagnostics = sidePanel.AddPanel<DiagnosticList>();
+        CompositorPlaceholder = sidePanel.AddPanel<Editor>();
+        ExecutionOutput = sidePanel.AddPanel<Editor>();
 
         tree.AddPanel(sidePanel);
+
+        Compiler.OnDiagnostics += async (sender, val) =>
+        {
+            outputSb.AppendLine(val);
+            await ExecutionOutput.Component.SetCode(outputSb.ToString());
+        };
+
+        Compiler.OnOutput += async (sender, stdout) =>
+        {
+            if (outputSb.Length != 0)
+            {
+                outputSb.AppendLine();
+            }
+
+            outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
+
+            await ExecutionOutput.Component.SetCode(outputSb.ToString());
+        };
+
+        Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
     }
 
-    [ExcludeFromCodeCoverage] // TODO: Integration tests
+    [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
-        await Compiler.Compile(await Editor!.Component.GetCode());
-        Diagnostics!.Component.Diagnostics = Compiler.Diagnostics;
+        outputSb.Clear();
 
-        if (Compiler.Diagnostics.All(x => x.Severity != DiagnosticSeverity.Error))
-        {
-            Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
+        await CompositorPlaceholder!.Component.SetCode("<compiling>");
+        await ExecutionOutput!.Component.SetCode("<compiling>");
 
-            // Text representation of the GateGrid (until we have the compositor)
-            var builder = new StringBuilder();
-            foreach ((string key, GateGrid? grid) in ast)
-            {
-                grid?.Shrink();
-                builder.AppendLine(key);
-                builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
-            }
-            await OutputEditor!.Component.SetCode(builder.ToString());
-        }
-        else
-        {
-            await OutputEditor!.Component.SetCode("Build failed");
-        }
+        string code = await Editor!.Component.GetCode();
+        await Compiler.Compile(code, true);
     }
 
+    [ExcludeFromCodeCoverage]
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-
-        if (!compilerLoaded)
-        {
-            Compiler.Ready += (sender, e) =>
-            {
-                JsRuntime.InvokeVoidAsync("Library.enable", compileButton, true);
-                compilerLoaded = true;
-            };
-        }
-        else
-        {
-            await JsRuntime.InvokeVoidAsync("Library.enable", compileButton, true);
-        }
 
         string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
         {
@@ -99,6 +93,36 @@
         });
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
+    }
+
+    [ExcludeFromCodeCoverage]
+    private async Task ProcessCompilation(QsCompilation compilation)
+    {
+        if (outputSb.Length == 0) // no diagnostics
+        {
+            await ExecutionOutput!.Component.SetCode("<executing>");
+        }
+
+        Dictionary<string, GateGrid> ast;
+
+        try
+        {
+            ast = FromQSharp.GetGates(compilation);
+        }
+        catch (Exception e)
+        {
+            await CompositorPlaceholder!.Component.SetCode($"Failed to analyze the provided code:\n{e.Message}");
+            return;
+        }
+
+        var builder = new StringBuilder();
+        foreach ((string key, GateGrid? grid) in ast)
+        {
+            grid?.Shrink();
+            builder.AppendLine(key);
+            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
+        }
+        await CompositorPlaceholder!.Component.SetCode(builder.ToString());
     }
 
 }

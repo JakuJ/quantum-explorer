@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
-using Microsoft.VisualStudio.LanguageServer.Protocol;
 
 namespace Compiler
 {
@@ -11,24 +9,22 @@ namespace Compiler
     /// </summary>
     public interface ICompiler
     {
-        /// <summary>
-        /// Gets all compiler diagnostics from the latest call to <see cref="Compile"/>.
-        /// </summary>
-        IEnumerable<Diagnostic> Diagnostics { get; }
+        /// <summary>An event invoked when the compiler has diagnostics.</summary>
+        event EventHandler<string> OnDiagnostics;
 
-        /// <summary>
-        /// Gets the syntax tree of the last compilation.
-        /// </summary>
-        QsCompilation Compilation { get; }
+        /// <summary>An event raised when the compilation object is ready.</summary>
+        event EventHandler<QsCompilation> OnCompilation;
 
-        /// <summary>
-        /// Analyze provided Q# code.
-        /// </summary>
+        /// <summary>An event raised when there's been some output printed by the simulation.</summary>
+        event EventHandler<string> OnOutput;
+
+        /// <summary>Gets the last compilation if successful, otherwise null.</summary>
+        QsCompilation? Compilation { get; }
+
+        /// <summary>Compile and run provided Q# code.</summary>
         /// <param name="code">Q# code as a plain string.</param>
+        /// <param name="execute">Whether to also run the code in a quantum simulator.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        Task Compile(string code);
-
-        /// <summary>An event raised when the compiler is ready for use.</summary>
-        event EventHandler Ready;
+        Task Compile(string code, bool execute = false);
     }
 }

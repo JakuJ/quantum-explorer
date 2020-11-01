@@ -20,7 +20,7 @@ namespace Compiler.Tests
                 new object[]
                 {
                     "AllocatedQubitOps",
-                    new[] { "AllocateFive", "AllocateFiveAndApplyGates", "AllocateOne", "AllocateOneAndApplyGates" },
+                    new[] { "AllocateFive", "AllocateFiveAndApplyGates", "AllocateOne", "AllocateOneAndApplyGates", "Tuples" },
                 },
             };
         }
@@ -81,6 +81,17 @@ namespace Compiler.Tests
                         },
                         new[] { "qs[0]", "qs[1]", "qs[2]", "qs[3]", "qs[4]" },
                     };
+                    yield return new object[]
+                    {
+                        "Tuples",
+                        new[]
+                        {
+                            ("X", 0, 0),
+                            ("Y", 1, 2),
+                            ("H", 2, 1),
+                        },
+                        new[] { "q1", "qs[0]", "q2" },
+                    };
                 }
             }
 
@@ -96,28 +107,28 @@ namespace Compiler.Tests
                     yield return new object[]
                     {
                         "Op1",
-                        new (string, int, int)[] { ("H", 0, 0) },
+                        new[] { ("H", 0, 0) },
                         new[] { "target" },
                     };
 
                     yield return new object[]
                     {
                         "Op2",
-                        new (string, int, int)[] { ("H", 0, 1), ("H", 1, 0) },
+                        new[] { ("H", 0, 1), ("H", 1, 0) },
                         new[] { "target1", "target2" },
                     };
 
                     yield return new object[]
                     {
                         "OpReg1",
-                        new (string, int, int)[] { ("H", 0, 0) },
+                        new[] { ("H", 0, 0) },
                         new[] { "targets[0]" },
                     };
 
                     yield return new object[]
                     {
                         "OpReg2",
-                        new (string, int, int)[]
+                        new[]
                         {
                             ("H", 0, 0),
                             ("H", 1, 1),
@@ -128,7 +139,7 @@ namespace Compiler.Tests
                     yield return new object[]
                     {
                         "OpReg5",
-                        new (string, int, int)[]
+                        new[]
                         {
                             ("H", 0, 0),
                             ("H", 1, 1),
@@ -160,7 +171,7 @@ namespace Compiler.Tests
                     yield return new object[]
                     {
                         "Mixed1",
-                        new (string, int, int)[]
+                        new[]
                         {
                             ("X", 0, 0),
                             ("H", 1, 1),
@@ -172,7 +183,7 @@ namespace Compiler.Tests
                     yield return new object[]
                     {
                         "Mixed2",
-                        new (string, int, int)[]
+                        new[]
                         {
                             ("H", 0, 0),
                             ("X", 1, 2),
@@ -184,7 +195,7 @@ namespace Compiler.Tests
                     yield return new object[]
                     {
                         "Mixed3",
-                        new (string, int, int)[]
+                        new[]
                         {
                             ("X", 0, 0),
                             ("Y", 1, 3),
@@ -251,7 +262,7 @@ namespace Compiler.Tests
         }
 
         [TestCaseSource(typeof(AllocationSources), nameof(AllocationSources.Sources))]
-        public void ExtractsQuantumGates(string operation, (string, int, int)[] gates, string[] names)
+        public void ProcessesAllocations(string operation, (string, int, int)[] gates, string[] names)
         {
             // Arrange (& Act)
             var grids = AllocationSources.Grids;

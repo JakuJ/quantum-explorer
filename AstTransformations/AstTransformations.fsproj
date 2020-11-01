@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20082513" />
+      <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20100504" />
     </ItemGroup>
 
     <ItemGroup>

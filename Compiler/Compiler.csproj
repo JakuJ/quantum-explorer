@@ -11,12 +11,17 @@
   </ItemGroup>
 
   <ItemGroup Label="Packages">
-    <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20070124" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
+    <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.12.20100504" />
+    <PackageReference Include="Microsoft.Quantum.Simulators" Version="0.12.20100504" />
+    <PackageReference Include="Microsoft.Quantum.CsharpGeneration" Version="0.12.20100504" />
+    <PackageReference Include="Microsoft.Quantum.EntryPointDriver" Version="0.12.20100504" />
   </ItemGroup>
 
   <ItemGroup Label="References for the Q# compiler">
-    <PackageReference Include="Microsoft.Quantum.QSharp.Core" Version="0.12.20072031" />
-    <PackageReference Include="Microsoft.Quantum.Standard" Version="0.12.20072031" />
+    <PackageReference Include="Microsoft.Quantum.QSharp.Core" Version="0.12.20100504" />
+    <PackageReference Include="Microsoft.Quantum.Runtime.Core" Version="0.12.20100504" />
+    <PackageReference Include="Microsoft.Quantum.Standard" Version="0.12.20100504" />
   </ItemGroup>
 
 </Project>
