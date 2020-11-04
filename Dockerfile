@@ -27,5 +27,6 @@ RUN dotnet publish -c release --no-build -o /app
 # Final stage/image
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
 WORKDIR /app
+RUN apk add --update libgomp
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "Explorer.dll"]
