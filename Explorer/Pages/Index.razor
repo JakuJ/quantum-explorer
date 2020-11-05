@@ -49,13 +49,40 @@
 
         tree.AddPanel(sidePanel);
 
-        Compiler.OnDiagnostics += (_, s) => { Logger.LogError(s); };
-        Compiler.OnOutput += (_, s) => { Logger.LogInformation(s); };
+        Compiler.OnDiagnostics += async (_, val) =>
+        {
+            outputSb.AppendLine(val);
+            ExecutionOutput.Component.SetText(outputSb.ToString());
+        };
+
+        Compiler.OnOutput += async (_, stdout) =>
+        {
+            if (outputSb.Length != 0)
+            {
+                outputSb.AppendLine();
+            }
+
+            outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
+
+            ExecutionOutput.Component.SetText(outputSb.ToString());
+        };
+
+        Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
+
+        Compiler.OnStatesRecorded += async (sender, states) =>
+        {
+            ExecutionOutput.Component.ShowStates(states);
+        };
     }
 
     [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
+        outputSb.Clear();
+
+        await CompositorPlaceholder!.Component.SetCode("<compiling>");
+        ExecutionOutput.Component.SetText("<compiling>");
+
         string code = await Editor.Component.GetCode();
         await Compiler.Compile(code, true);
     }
@@ -71,6 +98,39 @@
         });
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
+    }
+
+#nullable enable
+
+    [ExcludeFromCodeCoverage]
+    private async Task ProcessCompilation(QsCompilation compilation)
+    {
+        if (outputSb.Length == 0) // no diagnostics
+        {
+            ExecutionOutput.Component.SetText("<executing>");
+        }
+
+        Dictionary<string, GateGrid> ast;
+
+        try
+        {
+            ast = FromQSharp.GetGates(compilation);
+        }
+        catch (Exception e)
+        {
+            await CompositorPlaceholder!.Component.SetCode($"Failed to analyze the provided code");
+            Logger.LogError($"AST analysis failed with error: {e.Message}");
+            return;
+        }
+
+        StringBuilder builder = new();
+        foreach ((string key, GateGrid? grid) in ast)
+        {
+            grid?.Shrink();
+            builder.AppendLine(key);
+            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
+        }
+        await CompositorPlaceholder!.Component.SetCode(builder.ToString());
         await Editor.Component.SetStatusReference(Status);
     }
 

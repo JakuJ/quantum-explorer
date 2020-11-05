@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
 
@@ -17,6 +18,9 @@ namespace Compiler
 
         /// <summary>An event raised when there's been some output printed by the simulation.</summary>
         event EventHandler<string> OnOutput;
+
+        /// <summary>An event raised when there are quantum states recorded for each operation.</summary>
+        event EventHandler<List<OperationState>> OnStatesRecorded;
 
         /// <summary>Gets the last compilation if successful, otherwise null.</summary>
         QsCompilation? Compilation { get; }

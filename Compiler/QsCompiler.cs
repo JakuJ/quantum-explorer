@@ -73,6 +73,9 @@ namespace Compiler
         public event EventHandler<string>? OnOutput;
 
         /// <inheritdoc/>
+        public event EventHandler<List<OperationState>> OnStatesRecorded;
+
+        /// <inheritdoc/>
         public QsCompilation? Compilation { get; private set; }
 
         /// <inheritdoc/>
@@ -205,6 +208,8 @@ namespace Compiler
             {
                 using InterceptingSimulator sim = new();
 
+                var recorder = new StateRecorder(sim);
+
                 // simulate the entry point operation using reflection
                 object? invocation = type.InvokeMember("Run", BindingFlags.InvokeMethod, null, type, new object?[] { sim });
 
@@ -214,6 +219,7 @@ namespace Compiler
                 }
 
                 OnOutput?.Invoke(this, sim.Messages);
+                OnStatesRecorded?.Invoke(this, recorder.Root.Children);
             }
             else
             {

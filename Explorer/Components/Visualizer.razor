@@ -1,1 +1,68 @@
-<p class="text-center">This is where the visualizations are meant to reside.</p>
+@using Compiler;
+@using System.Text;
+@using System.Numerics;
+
+<div class="vis-area">
+    <div class="vis-gate-panel">
+        <RadzenTree Data="@States"
+                    Change="@ShowOperationState"
+                    Style="width: 100%; height: 100%">
+            <RadzenTreeLevel TextProperty="Name"
+                             ChildrenProperty="Children"
+                             HasChildren="@(e => (e as OperationState).Children.Any())"
+                             Expanded="@(data => true)">
+            </RadzenTreeLevel>
+        </RadzenTree>
+    </div>
+    <textarea @bind="Output" class="vis-state-vis"></textarea>
+</div>
+
+
+@code {
+    public string Output { get; set; } = "Hello, World!";
+
+    private IEnumerable<OperationState> States { get; set; } = new List<OperationState>();
+
+    public void SetText(string text)
+    {
+        Output = text;
+        base.StateHasChanged();
+    }
+    public string GetText() => Output;
+
+    public void ShowStates(List<OperationState> states)
+    {
+        States = states;
+        base.StateHasChanged();
+    }
+
+    private void ShowOperationState(TreeEventArgs args)
+    {
+        var state = args.Value as OperationState;
+        if (state == null) return;
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine(state.Name);
+        sb.AppendLine();
+        sb.AppendLine("Arguments:");
+        PrintQuantumState(sb, state.Arguments);
+
+        sb.AppendLine();
+        sb.AppendLine("Results:");
+        PrintQuantumState(sb, state.Results);
+        SetText(sb.ToString());
+    }
+
+    private void PrintQuantumState(StringBuilder sb, List<Complex> values)
+    {
+        int binLength = (int)Math.Ceiling(Math.Log2(values.Count));
+        int i = 0;
+        foreach(var s in values)
+        {
+            var bit = Convert.ToString(i, 2);
+            bit = bit.PadLeft(binLength, '0');
+            sb.AppendLine($"|{bit}>: {s.Real} + {s.Imaginary}i");
+            i++;
+        }
+    }
+}
+
