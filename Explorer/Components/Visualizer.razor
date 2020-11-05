@@ -2,26 +2,44 @@
 @using System.Text;
 @using System.Numerics;
 
-<div class="vis-area">
-    <div class="vis-gate-panel">
-        <RadzenTree Data="@States"
-                    Change="@ShowOperationState"
-                    Style="width: 100%; height: 100%">
-            <RadzenTreeLevel TextProperty="Name"
-                             ChildrenProperty="Children"
-                             HasChildren="@(e => (e as OperationState).Children.Any())"
-                             Expanded="@(data => true)">
-            </RadzenTreeLevel>
-        </RadzenTree>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link noselect @(isOutputChosen ? "active" : "")" @onclick="@(() => { isOutputChosen = true; })">Output</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link noselect @(isOutputChosen ? "" : "active")" @onclick="@(() => { isOutputChosen = false; })">Quantum State</a>
+    </li>
+</ul>
+@if (isOutputChosen)
+{
+    <textarea @bind="Output" class="vis-output"></textarea>
+}
+else
+{
+    <div class="vis-area">
+        <div class="vis-gate-panel">
+            <RadzenTree Data="@States"
+                        Change="@ShowOperationState"
+                        Style="width: 100%; height: 100%">
+                <RadzenTreeLevel TextProperty="Name"
+                                 ChildrenProperty="Children"
+                                 HasChildren="@(e => (e as OperationState).Children.Any())"
+                                 Expanded="@(data => true)">
+                </RadzenTreeLevel>
+            </RadzenTree>
+        </div>
+        <textarea @bind="visConsole" class="vis-state-vis"></textarea>
     </div>
-    <textarea @bind="Output" class="vis-state-vis"></textarea>
-</div>
+}
+
 
 
 @code {
     public string Output { get; set; } = "Hello, World!";
 
     private IEnumerable<OperationState> States { get; set; } = new List<OperationState>();
+
+    private string visConsole = "visualizer";
 
     public void SetText(string text)
     {
@@ -49,19 +67,31 @@
         sb.AppendLine();
         sb.AppendLine("Results:");
         PrintQuantumState(sb, state.Results);
-        SetText(sb.ToString());
+        visConsole = sb.ToString();
     }
 
     private void PrintQuantumState(StringBuilder sb, List<Complex> values)
     {
         int binLength = (int)Math.Ceiling(Math.Log2(values.Count));
         int i = 0;
-        foreach(var s in values)
+        foreach (var s in values)
         {
             var bit = Convert.ToString(i, 2);
             bit = bit.PadLeft(binLength, '0');
             sb.AppendLine($"|{bit}>: {s.Real} + {s.Imaginary}i");
             i++;
+        }
+    }
+
+    bool isOutputChosen = true;
+
+    private void ChangeTab(bool toOutput)
+    {
+        if (isOutputChosen == toOutput) return;
+        isOutputChosen = toOutput;
+        if(isOutputChosen)
+        {
+
         }
     }
 }
