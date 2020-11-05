@@ -47,14 +47,12 @@ namespace Compiler
             currentOperation.AddOperation(opState);
             currentOperation = opState;
             var qubits = input.Qubits?.Select(q => q.Id).ToArray() ?? Array.Empty<int>();
-            Debug.WriteLine("OnOperationStartHandler: " + operation.Name);
             dumper.Dump();
             currentOperation.Arguments = dumper.Values;
         }
 
         private void OnOperationEndHandler(ICallable operation, IApplyData output)
         {
-            Debug.WriteLine("OnOperationEndHandler: " + operation.Name);
             dumper.Dump();
             currentOperation.Results = dumper.Values;
             currentOperation = currentOperation.Parent;
