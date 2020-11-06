@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @using Compiler
 @using Explorer.Utilities.ComponentTree
 @using Newtonsoft.Json
@@ -79,6 +79,9 @@
 
         string code = await Editor!.Component.GetCode();
         await Compiler.Compile(code, true);
+
+        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
+        await Compositor!.Component.Compose(ast);
     }
 
     [ExcludeFromCodeCoverage]

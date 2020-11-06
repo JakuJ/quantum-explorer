@@ -1,18 +1,30 @@
 @inject IJSRuntime JsRuntime
+@using Compiler
 
 <div class="overflow-hidden">
-    <Grid/>
+    @if(grid != null)
+    {
+        <Grid grid="@(grid)"/>
+    }
 </div>
 
 @code {
+    QuantumGate?[,]? grid;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private QuantumGate?[,] GateGridToArray(GateGrid grid)
     {
-        if (!firstRender)
+        var gates = new QuantumGate?[grid.Width, grid.Height];
+        foreach((QuantumGate gate, int x, int y) in grid.Gates)
         {
-            return;
+            gates[x, y] = gate;
         }
+        return gates;
+    }
 
+    public async Task Compose(Dictionary<string, GateGrid> ast)
+    {
+        grid = GateGridToArray(ast.First().Value);
+        StateHasChanged();
         await JsRuntime.InvokeVoidAsync("Library.initGrid");
     }
 
