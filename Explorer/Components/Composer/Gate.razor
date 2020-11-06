@@ -1,4 +1,6 @@
-<div class="gate">
+@using Common
+
+<div id="@Id" class="gate">
     <p>@Name</p>
 </div>
 
@@ -7,4 +9,5 @@
     [Parameter]
     public string Name { get; set; } = "";
 
+    public string Id { get; } = UniqueId.CreateUniqueId();
 }
