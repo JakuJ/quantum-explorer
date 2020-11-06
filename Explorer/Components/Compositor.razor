@@ -1,12 +1,10 @@
 @inject IJSRuntime JsRuntime
 
 <div class="overflow-hidden">
-    <Grid QubitIds=@testQubits></Grid>
+    <Grid/>
 </div>
 
 @code {
-
-    private readonly string[] testQubits = new[] { "q0", "q1", "qs[0]" };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
