@@ -1,20 +1,18 @@
-@using Common
-@using System.Reflection
 @using static Utilities.Rendering
-@inject IJSRuntime JsRuntime;
+@using Compiler
+@inject IJSRuntime JsRuntime
 
 <div id="grid">
-    @for (var y = 0; y < 4; y++)
+    @for (var y = 0; y < grid.GetLength(1); y++)
     {
         <div class="grid-row">
-            @for (var x = 0; x < 10; x++)
+            @for (var x = 0; x < grid.GetLength(0); x++)
             {
                 int localX = x;
                 int localY = y;
 
                 var cellOffset = $"{x * 40}px";
                 var gutterOffset = $"{x * 40 + 20}px";
-                var gateName = $"{x}:{y}";
 
                 var cellSnapPoint = new SnapPoint { xOffset = cellOffset };
                 @RenderContent(cellSnapPoint)
@@ -22,12 +20,14 @@
                 <SnapPoint xOffset=@gutterOffset/>
 
                 <Cell>
-                    @if (localX % 2 == 0 && localY % 2 == 0)
-                    {
-                        var gate = new Gate { Name = gateName };
-                        assocs.Add((cellSnapPoint.Id, gate.Id));
-
-                        @RenderContent(gate)
+                    @{
+                        QuantumGate? qgate = grid[localX, localY];
+                        if(qgate != null)
+                        {
+                            var gate = new Gate { Name = qgate.Name };
+                            assocs.Add((cellSnapPoint.Id, gate.Id));
+                            @RenderContent(gate)
+                        }
                     }
                 </Cell>
             }
@@ -36,6 +36,9 @@
 </div>
 
 @code {
+
+    [Parameter]
+    public QuantumGate?[,] grid { get; set; }
 
     private List<(string, string)> assocs = new List<(string, string)>();
 
