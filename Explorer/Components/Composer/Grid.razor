@@ -1,0 +1,32 @@
+@using Common
+<div id="grid">
+    @for (var y = 0; y < 4; y++)
+    {
+        <div class="grid-row">
+            @for (var x = 0; x < 10; x++)
+            {
+                var localX = x;
+                var localY = y;
+                var cellOffset = $"{x * 40}px";
+                var gutterOffset = $"{x * 40 + 20}px";
+                var gateName = $"{x}:{y}";
+
+                <SnapPoint xOffset=@cellOffset/>
+                <SnapPoint xOffset=@gutterOffset/>
+                <Cell>
+                    @if (localX % 2 == 0 && localY % 2 == 0)
+                    {
+                        <Gate Name=@gateName></Gate>
+                    }
+                </Cell>
+            }
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public string[] QubitIds { get; set; }
+
+}

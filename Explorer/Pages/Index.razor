@@ -26,7 +26,7 @@
 
 @code {
     internal Panel<Editor>? Editor;
-    internal Panel<Editor>? CompositorPlaceholder;
+    internal Panel<Compositor>? Compositor;
     internal Panel<Editor>? ExecutionOutput;
 
     private readonly StringBuilder outputSb = new StringBuilder();
@@ -44,7 +44,7 @@
 
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
 
-        CompositorPlaceholder = sidePanel.AddPanel<Editor>();
+        Compositor = sidePanel.AddPanel<Compositor>();
         ExecutionOutput = sidePanel.AddPanel<Editor>();
 
         tree.AddPanel(sidePanel);
@@ -75,7 +75,6 @@
     {
         outputSb.Clear();
 
-        await CompositorPlaceholder!.Component.SetCode("<compiling>");
         await ExecutionOutput!.Component.SetCode("<compiling>");
 
         string code = await Editor!.Component.GetCode();
@@ -102,27 +101,6 @@
         {
             await ExecutionOutput!.Component.SetCode("<executing>");
         }
-
-        Dictionary<string, GateGrid> ast;
-
-        try
-        {
-            ast = FromQSharp.GetGates(compilation);
-        }
-        catch (Exception e)
-        {
-            await CompositorPlaceholder!.Component.SetCode($"Failed to analyze the provided code:\n{e.Message}");
-            return;
-        }
-
-        var builder = new StringBuilder();
-        foreach ((string key, GateGrid? grid) in ast)
-        {
-            grid?.Shrink();
-            builder.AppendLine(key);
-            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
-        }
-        await CompositorPlaceholder!.Component.SetCode(builder.ToString());
     }
 
 }

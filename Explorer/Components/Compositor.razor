@@ -1,1 +1,21 @@
-<p class="text-center">This is where the compositor is meant to reside.</p>
+@inject IJSRuntime JsRuntime
+
+<div class="overflow-hidden">
+    <Grid QubitIds=@testQubits></Grid>
+</div>
+
+@code {
+
+    private readonly string[] testQubits = new[] { "q0", "q1", "qs[0]" };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await JsRuntime.InvokeVoidAsync("Library.initGrid");
+    }
+
+}

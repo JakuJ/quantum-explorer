@@ -1,0 +1,43 @@
+#grid {
+  height: auto;
+  width: auto;
+  background: papayawhip;
+  display: inline-block;
+}
+
+.grid-row {
+  position: relative;
+  width: auto;
+  height: 40px;
+  margin: 5px 0;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.grid-snap {
+  position: absolute;
+  /*border: 1px dashed red;*/
+  width: 40px;
+  height: 40px;
+  background: transparent;
+}
+
+.grid-cell {
+  position: relative;
+  display: block;
+  border: 1px solid green;
+  width: 40px;
+  height: 40px;
+  overflow: visible;
+}
+
+.gate {
+  width: 40px;
+  height: 40px;
+  float: left;
+  text-align: center;
+  background: lightskyblue;
+  z-index: 99;
+}
