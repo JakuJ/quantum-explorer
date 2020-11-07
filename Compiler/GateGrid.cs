@@ -121,7 +121,7 @@ namespace Compiler
                 throw new ArgumentOutOfRangeException("Trying to remove a gate outside the grid");
             }
 
-            var gate = grid[x][y];
+            QuantumGate? gate = grid[x][y];
 
             if (gate == null)
             {
@@ -163,7 +163,7 @@ namespace Compiler
         /// <param name="yTo">The index of target qubit.</param>
         public void MoveGate(int xFrom, int yFrom, int xTo, int yTo)
         {
-            var gate = RemoveAt(xFrom, yFrom, moving: true);
+            QuantumGate gate = RemoveAt(xFrom, yFrom, true);
             AddGate(xTo, yTo, gate);
         }
 
@@ -184,7 +184,7 @@ namespace Compiler
                     break;
                 }
 
-                for (int x = 0; x < Width; x++)
+                for (var x = 0; x < Width; x++)
                 {
                     if (grid[x][y] != null)
                     {
@@ -194,7 +194,7 @@ namespace Compiler
                 }
             }
 
-        endLoop:
+            endLoop:
 
             if (max != Height)
             {
@@ -216,7 +216,7 @@ namespace Compiler
                 {
                     builder.Append(" ");
 
-                    var gate = grid[x][y];
+                    QuantumGate? gate = grid[x][y];
                     if (gate != null)
                     {
                         builder.Append($"[{gate.Name} arg{gate.ArgIndex}");
@@ -251,7 +251,7 @@ namespace Compiler
 
         private void Expand(int plusWidth, int plusHeight)
         {
-            for (int i = 0; i < plusWidth; i++)
+            for (var i = 0; i < plusWidth; i++)
             {
                 grid.Add(EmptyColumn());
             }

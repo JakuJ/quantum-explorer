@@ -1,11 +1,11 @@
 @using Common
 
-<div id="@Id" class="grid-snap" style="left: @xOffset"></div>
+<div id="@Id" class="grid-snap" style="left: @XOffset"></div>
 
 @code {
 
     [Parameter]
-    public string xOffset { get; set; }
+    public string XOffset { get; set; } = "0px"; // default value
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 

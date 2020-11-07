@@ -17,7 +17,7 @@ namespace Compiler
         public FilesEmittedArgs(int compilationHash, Dictionary<string, string> fileContents)
         {
             CompilationHash = compilationHash;
-            this.FileContents = fileContents;
+            FileContents = fileContents;
         }
 
         /// <summary>Gets the hash of the <see cref="QsCompilation"/> corresponding to the emitted files.</summary>

@@ -31,9 +31,9 @@ namespace Explorer
                     logBuilder.AddEventSourceLogger();
                 })
                .ConfigureWebHostDefaults(webBuilder =>
-               {
-                   var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-                   webBuilder.UseStartup<Startup>().UseUrls($"http://*:{port}");
-               });
+                {
+                    string port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+                    webBuilder.UseStartup<Startup>().UseUrls($"http://*:{port}");
+                });
     }
 }

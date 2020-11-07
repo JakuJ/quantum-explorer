@@ -3,15 +3,16 @@
 <div class="editor-textarea" @ref="editorRootRef">
 
 </div>
+
 @code {
     private ElementReference editorRootRef;
 
     private string editorId = "";
 
-    public async Task<string> GetCode() 
+    public async Task<string> GetCode()
         => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
 
-    public async Task SetCode(string code) 
+    public async Task SetCode(string code)
         => await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

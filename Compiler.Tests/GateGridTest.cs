@@ -42,7 +42,7 @@ namespace Compiler.Tests
 
             // Assert
             var outGates = grid.Gates.ToArray();
-            foreach (var tuple in expected)
+            foreach ((QuantumGate G, int X, int Y) tuple in expected)
             {
                 Assert.Contains(tuple, outGates, "Gate at the correct position should be present in the grid.");
             }
@@ -56,17 +56,8 @@ namespace Compiler.Tests
             string msg = "Cannot add gates at negative index.";
 
             // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.AddGate(1, -1, new QuantumGate("H"));
-            }, msg);
-
-            Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.AddGate(-2, 3, new QuantumGate("H"));
-            }, msg);
+            Assert.Throws<ArgumentOutOfRangeException>(() => { grid.AddGate(1, -1, new QuantumGate("H")); }, msg);
+            Assert.Throws<ArgumentOutOfRangeException>(() => { grid.AddGate(-2, 3, new QuantumGate("H")); }, msg);
         }
 
         [Test]
@@ -164,19 +155,10 @@ namespace Compiler.Tests
 
             Assert.AreEqual(-1, grid.IndexOfName("SomeNoneexistentQubit"), "Trying to get the index of a qubit that does not exist returns -1.");
 
-            Assert.DoesNotThrow(
-            () =>
-            {
-                grid.SetName(10, "SomeOtherQ");
-            }, "Setting names to nonexistent qubits works");
-
+            Assert.DoesNotThrow(() => { grid.SetName(10, "SomeOtherQ"); }, "Setting names to nonexistent qubits works");
             Assert.AreEqual(11, grid.Height, "Setting names to nonexistent qubits expands the grid");
 
-            Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.SetName(-1, "SomeOtherQ");
-            }, "Setting names at negative indices is an error");
+            Assert.Throws<ArgumentOutOfRangeException>(() => { grid.SetName(-1, "SomeOtherQ"); }, "Setting names at negative indices is an error");
         }
 
         [Test]
@@ -187,29 +169,15 @@ namespace Compiler.Tests
             var gates = SampleGates(5);
 
             // Act
-            for (int i = 0; i < gates.Length; i++)
+            for (var i = 0; i < gates.Length; i++)
             {
                 grid.AddGate(i, i, gates[i]);
             }
 
             // Assert
-            Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.RemoveAt(-1, 0);
-            }, "Removing at negative indices is an error.");
-
-            Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.RemoveAt(7, 2);
-            }, "Removing beyond the grid is an error.");
-
-            Assert.Throws<ArgumentException>(
-            () =>
-            {
-                grid.RemoveAt(1, 3);
-            }, "Removing where there is no gate is an error.");
+            Assert.Throws<ArgumentOutOfRangeException>(() => { grid.RemoveAt(-1, 0); }, "Removing at negative indices is an error.");
+            Assert.Throws<ArgumentOutOfRangeException>(() => { grid.RemoveAt(7, 2); }, "Removing beyond the grid is an error.");
+            Assert.Throws<ArgumentException>(() => { grid.RemoveAt(1, 3); }, "Removing where there is no gate is an error.");
 
             Assert.AreEqual(gates[2], grid.RemoveAt(2, 2), "A correct gate should be removed.");
             Assert.AreEqual(gates[4], grid.RemoveAt(3, 4), "A correct gate should be removed.");
@@ -280,7 +248,7 @@ namespace Compiler.Tests
             var gates = SampleGates(5);
 
             // Act
-            for (int i = 0; i < gates.Length; i++)
+            for (var i = 0; i < gates.Length; i++)
             {
                 grid.AddGate(i, 0, gates[i]); // 01234
             }
@@ -289,7 +257,7 @@ namespace Compiler.Tests
             var newGates = grid.Gates.ToArray();
 
             // Assert
-            for (int i = 0; i < gates.Length; i++)
+            for (var i = 0; i < gates.Length; i++)
             {
                 // assuming left-to-right, top-to-bottom order of grid.Gates
                 Assert.AreEqual((gates[expected[i] - '0'], i, 0), newGates[i], "Gates should be in correct order");

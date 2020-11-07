@@ -1,30 +1,31 @@
-@using static Utilities.Rendering
 @using Compiler
+@using static Utilities.Rendering
 @inject IJSRuntime JsRuntime
 
+@{
+    // Setting parameters in Components created in code (SnapPoint, Gate)
+    #pragma warning disable BL0005
+}
+
 <div id="grid">
-    @for (var y = 0; y < grid.GetLength(1); y++)
+    @for (var y = 0; y < Gates.GetLength(1); y++)
     {
         <div class="grid-row">
-            @for (var x = 0; x < grid.GetLength(0); x++)
+            @for (var x = 0; x < Gates.GetLength(0); x++)
             {
-                int localX = x;
-                int localY = y;
+                (int localX, int localY) = (x, y);
 
-                var cellOffset = $"{x * 40}px";
-                var gutterOffset = $"{x * 40 + 20}px";
-
-                var cellSnapPoint = new SnapPoint { xOffset = cellOffset };
+                var cellSnapPoint = new SnapPoint { XOffset = $"{x * 40}px" };
                 @RenderContent(cellSnapPoint)
 
-                <SnapPoint xOffset=@gutterOffset/>
+                <SnapPoint xOffset=@($"{x * 40 + 20}px")/>
 
                 <Cell>
                     @{
-                        QuantumGate? qgate = grid[localX, localY];
-                        if(qgate != null)
+                        QuantumGate? quantumGate = Gates[localX, localY];
+                        if (quantumGate != null)
                         {
-                            var gate = new Gate { Name = qgate.Name };
+                            var gate = new Gate { Name = quantumGate.Name };
                             assocs.Add((cellSnapPoint.Id, gate.Id));
                             @RenderContent(gate)
                         }
@@ -38,7 +39,7 @@
 @code {
 
     [Parameter]
-    public QuantumGate?[,] grid { get; set; }
+    public QuantumGate[,] Gates { get; set; } = null!; // required parameter
 
     private List<(string, string)> assocs = new List<(string, string)>();
 
