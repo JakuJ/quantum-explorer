@@ -33,11 +33,13 @@
   <ItemGroup>
     <Content Remove="$(JsLibRoot)\**" />
     <None Remove="$(JsLibRoot)\**" />
-    <None Include="$(JsLibRoot)\**" Exclude="$(JsLibRoot)\node_modules\**" />
+    <JsFiles Include="$(JsLibRoot)\**" Exclude="$(JsLibRoot)\node_modules\**" />
     <Content Include="syntax\onigasm.wasm" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <Target Name="EnsureNodeEnv" BeforeTargets="BuildJsBundle" Condition=" !Exists('$(JsLibRoot)\node_modules') ">
+  <Target Name="EnsureNodeEnv"
+          BeforeTargets="BuildJsBundle"
+          Condition=" !Exists('$(JsLibRoot)\node_modules') ">
     <!-- Ensure Node.js is installed -->
     <Exec Command="node --version" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
@@ -47,7 +49,11 @@
     <Exec WorkingDirectory="$(JsLibRoot)\" Command="npm install" />
   </Target>
 
-  <Target Name="BuildJsBundle" BeforeTargets="PreBuildEvent">
+  <Target Name="BuildJsBundle"
+          BeforeTargets="PreBuildEvent"
+          Inputs="@(JsFiles)"
+          Outputs="wwwroot\js\library.bundle.js;wwwroot\js\editor.worker.js"
+  >
     <Exec WorkingDirectory="$(JsLibRoot)\" Command="npm run build" />
   </Target>
 
