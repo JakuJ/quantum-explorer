@@ -41,7 +41,7 @@ namespace Compiler.Tests
 
             // Assert
             var outGates = grid.Gates.ToArray();
-            foreach (var tuple in expected)
+            foreach ((QuantumGate G, int X, int Y) tuple in expected)
             {
                 Assert.Contains(tuple, outGates, "Gate at the correct position should be present in the grid.");
             }
@@ -268,7 +268,7 @@ namespace Compiler.Tests
             var newGates = grid.Gates.ToArray();
 
             // Assert
-            for (int i = 0; i < gates.Length; i++)
+            for (var i = 0; i < gates.Length; i++)
             {
                 // assuming left-to-right, top-to-bottom order of grid.Gates
                 Assert.AreEqual((gates[expected[i] - '0'], i, 0), newGates[i], "Gates should be in correct order");
