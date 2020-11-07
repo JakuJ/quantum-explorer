@@ -26,12 +26,19 @@ const INIT_CODE = `namespace HelloWorld {
 
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Measurement;
+    open Microsoft.Quantum.Canon;
 
-    operation RandomBit () : Result {
+    operation RandomBit(): Result {
         using (q = Qubit()) {
             H(q);
             return MResetZ(q);
         }
+    }
+
+    @EntryPoint()
+    operation Hello(): Unit {
+      let bit = RandomBit();
+      Message($"A random bit: {bit}");
     }
 }`;
 
