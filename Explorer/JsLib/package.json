@@ -1,7 +1,7 @@
 {
   "name": "library",
   "version": "1.0.0",
-  "description": "External scripts used by the Blazor application",
+  "description": "JS scripts used by the Blazor application",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
@@ -50,8 +50,7 @@
       }
     },
     "env": {
-      "browser": true,
-      "node": true
+      "browser": true
     }
   },
   "dependencies": {
@@ -60,17 +59,18 @@
     "monaco-editor-webpack-plugin": "^1.9.0",
     "monaco-textmate": "^3.0.1",
     "onigasm": "^2.2.5",
-    "split.js": "^1.6.2",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.12"
+    "split.js": "^1.6.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.5",
+    "@babel/core": "^7.12.3",
     "babel-loader": "^8.1.0",
     "clean-webpack-plugin": "^3.0.0",
-    "css-loader": "^4.2.2",
-    "file-loader": "^6.1.0",
-    "style-loader": "^1.2.1",
-    "webpack-bundle-analyzer": "^3.9.0"
+    "css-loader": "^5.0.1",
+    "eslint": "^7.13.0",
+    "file-loader": "^6.2.0",
+    "style-loader": "^2.0.0",
+    "webpack": "^4.5.0",
+    "webpack-bundle-analyzer": "^4.1.0",
+    "webpack-cli": "^4.2.0"
   }
 }

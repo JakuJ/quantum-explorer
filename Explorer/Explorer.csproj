@@ -6,6 +6,7 @@
     <RootNamespace>Explorer</RootNamespace>
     <JsLibRoot>JsLib</JsLibRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)\node_modules\**</DefaultItemExcludes>
+    <NpmInstallStampFile>$(JsLibRoot)\node_modules\.install-stamp</NpmInstallStampFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,29 +32,37 @@
   <!--  Below are settings for NPM and webpack -->
 
   <ItemGroup>
-    <Content Remove="$(JsLibRoot)\**" />
-    <None Remove="$(JsLibRoot)\**" />
-    <None Include="$(JsLibRoot)\**" Exclude="$(JsLibRoot)\node_modules\**" />
+    <None Include="$(JsLibRoot)\*.json" />
+    <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
     <Content Include="syntax\onigasm.wasm" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <Target Name="EnsureNodeEnv" BeforeTargets="BuildJsBundle" Condition=" !Exists('$(JsLibRoot)\node_modules') ">
+  <Target Name="EnsureNodeEnv"
+          BeforeTargets="RestoreNpmPackages"
+          Condition="!Exists('$(JsLibRoot)\node_modules')">
     <!-- Ensure Node.js is installed -->
     <Exec Command="node --version" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
     </Exec>
-    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project." />
+  </Target>
+
+  <Target Name="RestoreNpmPackages"
+          BeforeTargets="BuildJsBundle"
+          Inputs="$(JsLibRoot)\package.json"
+          Outputs="$(NpmInstallStampFile)">
+    <!-- Restore NPM dependencies -->
     <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-    <Exec WorkingDirectory="$(JsLibRoot)\" Command="npm install" />
+    <Exec WorkingDirectory="$(JsLibRoot)" Command="npm install" />
+    <Touch Files="$(NpmInstallStampFile)" AlwaysCreate="true" />
   </Target>
 
-  <Target Name="BuildJsBundle" BeforeTargets="PreBuildEvent">
-    <Exec WorkingDirectory="$(JsLibRoot)\" Command="npm run build" />
-  </Target>
-
-  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-    <Exec WorkingDirectory="$(JsLibRoot)\" Command="npm install" />
+  <Target Name="BuildJsBundle"
+          BeforeTargets="PreBuildEvent"
+          Inputs="@(JsFiles)"
+          Outputs="wwwroot\js\library.bundle.js;wwwroot\js\editor.worker.js">
+    <!-- Rebuild the JS bundle -->
+    <Message Importance="high" Text="Building JS bundle..." />
     <Exec WorkingDirectory="$(JsLibRoot)\" Command="npm run build" />
   </Target>
 
