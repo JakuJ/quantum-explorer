@@ -1,5 +1,5 @@
 using Bunit;
-using Bunit.TestDoubles.JSInterop;
+using Bunit.TestDoubles;
 using Explorer.Components;
 using Explorer.Templates;
 using Explorer.Utilities.ComponentTree;

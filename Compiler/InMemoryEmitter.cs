@@ -22,7 +22,7 @@ namespace Compiler
 
         public IEnumerable<IRewriteStep.Diagnostic> GeneratedDiagnostics { get; } = new List<IRewriteStep.Diagnostic>();
 
-        public IDictionary<string, string> AssemblyConstants { get; } = new Dictionary<string, string>();
+        public IDictionary<string, string?> AssemblyConstants { get; } = new Dictionary<string, string?>();
 
         public bool ImplementsPreconditionVerification => false;
 
@@ -35,9 +35,9 @@ namespace Compiler
             var context = CodegenContext.Create(compilation, AssemblyConstants);
             ImmutableHashSet<NonNullable<string>>? sources = GetSourceFiles.Apply(compilation.Namespaces);
 
-            var generatedFiles = new Dictionary<string, string>();
+            Dictionary<string, string> generatedFiles = new();
 
-            foreach (NonNullable<string> source in sources.Where(s => !s.Value.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
+            foreach (var source in sources.Where(s => !s.Value.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
             {
                 string? content = SimulationCode.generate(source, context);
                 generatedFiles.Add(source.Value, content);
@@ -47,7 +47,7 @@ namespace Compiler
             {
                 QsCallable? callable = context.allCallables.First(c => c.Key.Equals(compilation.EntryPoints.First())).Value;
                 string? content = EntryPoint.generate(context, callable);
-                NonNullable<string> entryPointName = NonNullable<string>.New(callable.SourceFile.Value + ".EntryPoint");
+                var entryPointName = NonNullable<string>.New(callable.SourceFile.Value + ".EntryPoint");
                 generatedFiles.Add(entryPointName.Value, content);
             }
 

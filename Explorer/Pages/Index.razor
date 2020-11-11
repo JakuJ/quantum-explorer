@@ -25,15 +25,17 @@
 </div>
 
 @code {
-    internal Panel<Editor>? Editor;
-    internal Panel<Editor>? CompositorPlaceholder;
-    internal Panel<Editor>? ExecutionOutput;
+#nullable disable
 
-    private readonly StringBuilder outputSb = new StringBuilder();
+    private Panel<Editor> Editor;
+    private Panel<Editor> CompositorPlaceholder;
+    private Panel<Editor> ExecutionOutput;
+
+    private readonly StringBuilder outputSb = new();
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
-    readonly PanelTree tree = new PanelTree(PanelTree.Alignment.Horizontal);
+    readonly PanelTree tree = new(PanelTree.Alignment.Horizontal);
 
     [ExcludeFromCodeCoverage] // TODO: Waiting for final form of the page and integration tests
     protected override void OnInitialized()
@@ -42,20 +44,20 @@
 
         Editor = tree.AddPanel<Editor>();
 
-        var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
+        PanelTree sidePanel = new(PanelTree.Alignment.Vertical);
 
         CompositorPlaceholder = sidePanel.AddPanel<Editor>();
         ExecutionOutput = sidePanel.AddPanel<Editor>();
 
         tree.AddPanel(sidePanel);
 
-        Compiler.OnDiagnostics += async (sender, val) =>
+        Compiler.OnDiagnostics += async (_, val) =>
         {
             outputSb.AppendLine(val);
             await ExecutionOutput.Component.SetCode(outputSb.ToString());
         };
 
-        Compiler.OnOutput += async (sender, stdout) =>
+        Compiler.OnOutput += async (_, stdout) =>
         {
             if (outputSb.Length != 0)
             {
@@ -67,7 +69,7 @@
             await ExecutionOutput.Component.SetCode(outputSb.ToString());
         };
 
-        Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
+        Compiler.OnCompilation += async (_, comp) => await ProcessCompilation(comp);
     }
 
     [ExcludeFromCodeCoverage]
@@ -75,10 +77,10 @@
     {
         outputSb.Clear();
 
-        await CompositorPlaceholder!.Component.SetCode("<compiling>");
-        await ExecutionOutput!.Component.SetCode("<compiling>");
+        await CompositorPlaceholder.Component.SetCode("<compiling>");
+        await ExecutionOutput.Component.SetCode("<compiling>");
 
-        string code = await Editor!.Component.GetCode();
+        string code = await Editor.Component.GetCode();
         await Compiler.Compile(code, true);
     }
 
@@ -94,6 +96,8 @@
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
     }
+
+#nullable enable
 
     [ExcludeFromCodeCoverage]
     private async Task ProcessCompilation(QsCompilation compilation)
@@ -111,11 +115,12 @@
         }
         catch (Exception e)
         {
-            await CompositorPlaceholder!.Component.SetCode($"Failed to analyze the provided code:\n{e.Message}");
+            await CompositorPlaceholder!.Component.SetCode($"Failed to analyze the provided code");
+            Logger.LogError($"AST analysis failed with error: {e.Message}");
             return;
         }
 
-        var builder = new StringBuilder();
+        StringBuilder builder = new();
         foreach ((string key, GateGrid? grid) in ast)
         {
             grid?.Shrink();

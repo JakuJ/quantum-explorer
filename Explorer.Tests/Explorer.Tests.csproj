@@ -7,8 +7,8 @@
   </ItemGroup>
 
   <ItemGroup Label="Packages">
-    <PackageReference Include="bunit.core" Version="1.0.0-beta-8" />
-    <PackageReference Include="bunit.web" Version="1.0.0-beta-8" />
+    <PackageReference Include="bunit.core" Version="1.0.0-beta-11" />
+    <PackageReference Include="bunit.web" Version="1.0.0-beta-11" />
   </ItemGroup>
 
 </Project>

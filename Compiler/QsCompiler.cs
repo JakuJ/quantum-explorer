@@ -12,6 +12,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
+using static Microsoft.CodeAnalysis.DiagnosticSeverity;
+using Diagnostic = Microsoft.VisualStudio.LanguageServer.Protocol.Diagnostic;
+using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity;
 
 namespace Compiler
 {
@@ -27,12 +30,12 @@ namespace Compiler
 
         private readonly ILogger<QsCompiler> logger;
         private readonly string filename = $"__{UniqueId.CreateUniqueId()}__.qs";
-        private readonly List<FilesEmittedArgs> eventQueue = new List<FilesEmittedArgs>();
+        private readonly List<FilesEmittedArgs> eventQueue = new();
 
-        private static void InitializeReferences(ILogger logger)
+        private static void InitializeReferences()
         {
             // necessary references to compile our Q# program
-            qsharpReferences = new[]
+            qsharpReferences ??= new[]
             {
                 "Microsoft.Quantum.Standard",
                 "Microsoft.Quantum.QSharp.Core",
@@ -40,7 +43,7 @@ namespace Compiler
             }.Select(x => Assembly.Load(new AssemblyName(x))).Select(a => a.Location).ToArray();
 
             // necessary references to compile C# simulation of the Q# compilation
-            csharpReferences = new[]
+            csharpReferences ??= new[]
             {
                 "Microsoft.Quantum.Simulators",
                 "Microsoft.Quantum.EntryPointDriver",
@@ -57,11 +60,7 @@ namespace Compiler
         public QsCompiler(ILogger<QsCompiler> logger)
         {
             this.logger = logger;
-
-            if (qsharpReferences == null)
-            {
-                InitializeReferences(logger);
-            }
+            InitializeReferences();
         }
 
         /// <inheritdoc/>
@@ -83,15 +82,15 @@ namespace Compiler
             var config = new CompilationLoader.Configuration
             {
                 IsExecutable = execute,
-                RewriteSteps = new List<(string, string?)>
+                RewriteSteps = new (string, string?)[]
                 {
                     (Assembly.GetExecutingAssembly().Location, null),
                 },
             };
 
-            void Handler(object? sender, FilesEmittedArgs? args)
+            void Handler(object? sender, FilesEmittedArgs args)
             {
-                eventQueue.Add(args!);
+                eventQueue.Add(args);
             }
 
             eventQueue.Clear();
@@ -113,7 +112,7 @@ namespace Compiler
             InMemoryEmitter.FilesGenerated -= Handler;
 
             // print any diagnostics
-            var diags = compilationLoader.LoadDiagnostics;
+            ImmutableArray<Diagnostic> diags = compilationLoader.LoadDiagnostics;
             if (diags.Any())
             {
                 var diagnostics = string.Join(Environment.NewLine, diags.Select(d => $"{d.Severity} {d.Code} {d.Message}"));
@@ -121,7 +120,7 @@ namespace Compiler
                 OnDiagnostics?.Invoke(this, diagnostics);
 
                 // if there are any errors, exit
-                if (diags.Any(d => d.Severity == Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity.Error))
+                if (diags.Any(d => d.Severity == DiagnosticSeverity.Error))
                 {
                     logger.LogWarning("There were errors in Q# compilation, aborting");
                     return;
@@ -130,23 +129,18 @@ namespace Compiler
 
             // communicate that the Q# compilation was successful
             Compilation = compilationLoader.CompilationOutput;
-            OnCompilation?.Invoke(this, compilationLoader.CompilationOutput);
 
-            if (!execute)
+            if (Compilation == null || !execute)
             {
                 return;
             }
 
+            OnCompilation?.Invoke(this, Compilation);
+
             // find our generated files
-            Dictionary<string, string>? generatedFiles = null;
-            foreach (var args in eventQueue)
-            {
-                if (args.CompilationHash == compilationLoader.CompilationOutput.GetHashCode())
-                {
-                    generatedFiles = args.FileContents;
-                    break;
-                }
-            }
+            Dictionary<string, string>? generatedFiles = (from args in eventQueue
+                                                          where args.CompilationHash == Compilation.GetHashCode()
+                                                          select args.FileContents).FirstOrDefault();
 
             if (generatedFiles == null)
             {
@@ -167,9 +161,10 @@ namespace Compiler
             }
 
             // print any diagnostics
-            List<Diagnostic> csharpDiagnostics = csharpCompilation
-                                                .GetDiagnostics()
-                                                .Where(d => d.Severity != DiagnosticSeverity.Hidden && d.Id != "CS1702").ToList();
+            var csharpDiagnostics = csharpCompilation
+                                   .GetDiagnostics()
+                                   .Where(d => d is { Severity: not Hidden, Id: not "CS1701" or "CS1702" })
+                                   .ToList();
             if (csharpDiagnostics.Any())
             {
                 var diagnostics = string.Join("", csharpDiagnostics.Select(d => $"\n{d.Severity} {d.Id} {d.GetMessage()}"));
@@ -177,7 +172,7 @@ namespace Compiler
                 OnDiagnostics?.Invoke(this, diagnostics);
 
                 // if there are any errors, exit
-                if (csharpDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+                if (csharpDiagnostics.Any(d => d.Severity == Error))
                 {
                     return;
                 }
@@ -186,12 +181,12 @@ namespace Compiler
             using var timer = new ScopedTimer("Executing simulation", logger);
 
             // emit C# code into an in-memory assembly
-            await using var peStream = new MemoryStream();
+            await using MemoryStream peStream = new();
             csharpCompilation.Emit(peStream);
             peStream.Position = 0;
 
             // load that assembly
-            var qsharpLoadContext = new QSharpLoadContext();
+            QSharpLoadContext qsharpLoadContext = new();
             Assembly qsharpAssembly = qsharpLoadContext.LoadFromStream(peStream);
 
             // get the @Entrypoint() operation
@@ -208,7 +203,7 @@ namespace Compiler
 
             if (type != null)
             {
-                using var sim = new InterceptingSimulator();
+                using InterceptingSimulator sim = new();
 
                 // simulate the entry point operation using reflection
                 object? invocation = type.InvokeMember("Run", BindingFlags.InvokeMethod, null, type, new object?[] { sim });

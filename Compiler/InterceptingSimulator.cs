@@ -11,16 +11,14 @@ namespace Compiler
     /// </summary>
     public class InterceptingSimulator : QuantumSimulator
     {
-        private readonly StringBuilder funnel = new StringBuilder();
+        private readonly StringBuilder funnel = new();
 
         /// <summary>
         /// Gets the messages intercepted during simulation.
         /// </summary>
         public string Messages => funnel.ToString();
 
-        /// <summary>
-        /// The overriding definition for operation Message.
-        /// </summary>
+        /// <summary>The overriding definition for the Message operation.</summary>
         public new class Message : Microsoft.Quantum.Intrinsic.Message
         {
             private readonly InterceptingSimulator sim;
