@@ -22,7 +22,7 @@ namespace Compiler
 
         public IEnumerable<IRewriteStep.Diagnostic> GeneratedDiagnostics { get; } = new List<IRewriteStep.Diagnostic>();
 
-        public IDictionary<string, string> AssemblyConstants { get; } = new Dictionary<string, string>();
+        public IDictionary<string, string?> AssemblyConstants { get; } = new Dictionary<string, string?>();
 
         public bool ImplementsPreconditionVerification => false;
 

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
+using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Compiler
 {
@@ -29,10 +30,10 @@ namespace Compiler
         private readonly string filename = $"__{UniqueId.CreateUniqueId()}__.qs";
         private readonly List<FilesEmittedArgs> eventQueue = new List<FilesEmittedArgs>();
 
-        private static void InitializeReferences(ILogger logger)
+        private static void InitializeReferences()
         {
             // necessary references to compile our Q# program
-            qsharpReferences = new[]
+            qsharpReferences ??= new[]
             {
                 "Microsoft.Quantum.Standard",
                 "Microsoft.Quantum.QSharp.Core",
@@ -40,7 +41,7 @@ namespace Compiler
             }.Select(x => Assembly.Load(new AssemblyName(x))).Select(a => a.Location).ToArray();
 
             // necessary references to compile C# simulation of the Q# compilation
-            csharpReferences = new[]
+            csharpReferences ??= new[]
             {
                 "Microsoft.Quantum.Simulators",
                 "Microsoft.Quantum.EntryPointDriver",
@@ -57,11 +58,7 @@ namespace Compiler
         public QsCompiler(ILogger<QsCompiler> logger)
         {
             this.logger = logger;
-
-            if (qsharpReferences == null)
-            {
-                InitializeReferences(logger);
-            }
+            InitializeReferences();
         }
 
         /// <inheritdoc/>
@@ -130,18 +127,19 @@ namespace Compiler
 
             // communicate that the Q# compilation was successful
             Compilation = compilationLoader.CompilationOutput;
-            OnCompilation?.Invoke(this, compilationLoader.CompilationOutput);
 
-            if (!execute)
+            if (Compilation == null || !execute)
             {
                 return;
             }
+
+            OnCompilation?.Invoke(this, Compilation);
 
             // find our generated files
             Dictionary<string, string>? generatedFiles = null;
             foreach (var args in eventQueue)
             {
-                if (args.CompilationHash == compilationLoader.CompilationOutput.GetHashCode())
+                if (args.CompilationHash == Compilation.GetHashCode())
                 {
                     generatedFiles = args.FileContents;
                     break;
@@ -167,9 +165,10 @@ namespace Compiler
             }
 
             // print any diagnostics
-            List<Diagnostic> csharpDiagnostics = csharpCompilation
-                                                .GetDiagnostics()
-                                                .Where(d => d.Severity != DiagnosticSeverity.Hidden && d.Id != "CS1702").ToList();
+            var csharpDiagnostics = csharpCompilation
+                                   .GetDiagnostics()
+                                   .Where(d => d is { Severity: not Hidden, Id: not "CS1701" or "CS1702" })
+                                   .ToList();
             if (csharpDiagnostics.Any())
             {
                 var diagnostics = string.Join("", csharpDiagnostics.Select(d => $"\n{d.Severity} {d.Id} {d.GetMessage()}"));
@@ -177,7 +176,7 @@ namespace Compiler
                 OnDiagnostics?.Invoke(this, diagnostics);
 
                 // if there are any errors, exit
-                if (csharpDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+                if (csharpDiagnostics.Any(d => d.Severity == Error))
                 {
                     return;
                 }

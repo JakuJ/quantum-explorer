@@ -16,7 +16,7 @@ namespace Compiler.Tests
         {
             // Arrange
             var grid = new GateGrid();
-            var gates = SampleGates(4);
+            QuantumGate[] gates = SampleGates(4);
 
             var toAdd = new (QuantumGate G, int X, int Y)[]
             {
@@ -52,21 +52,15 @@ namespace Compiler.Tests
         public void CannotAddGatesAtNegativeIndices()
         {
             // Arrange
-            var grid = new GateGrid(1, 1);
+            var grid = new GateGrid();
             string msg = "Cannot add gates at negative index.";
 
             // Act & Assert
             Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.AddGate(1, -1, new QuantumGate("H"));
-            }, msg);
+                () => { grid.AddGate(1, -1, new QuantumGate("H")); }, msg);
 
             Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.AddGate(-2, 3, new QuantumGate("H"));
-            }, msg);
+                () => { grid.AddGate(-2, 3, new QuantumGate("H")); }, msg);
         }
 
         [Test]
@@ -165,18 +159,12 @@ namespace Compiler.Tests
             Assert.AreEqual(-1, grid.IndexOfName("SomeNoneexistentQubit"), "Trying to get the index of a qubit that does not exist returns -1.");
 
             Assert.DoesNotThrow(
-            () =>
-            {
-                grid.SetName(10, "SomeOtherQ");
-            }, "Setting names to nonexistent qubits works");
+                () => { grid.SetName(10, "SomeOtherQ"); }, "Setting names to nonexistent qubits works");
 
             Assert.AreEqual(11, grid.Height, "Setting names to nonexistent qubits expands the grid");
 
             Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.SetName(-1, "SomeOtherQ");
-            }, "Setting names at negative indices is an error");
+                () => { grid.SetName(-1, "SomeOtherQ"); }, "Setting names at negative indices is an error");
         }
 
         [Test]
@@ -184,32 +172,23 @@ namespace Compiler.Tests
         {
             // Arrange
             var grid = new GateGrid();
-            var gates = SampleGates(5);
+            QuantumGate[] gates = SampleGates(5);
 
             // Act
-            for (int i = 0; i < gates.Length; i++)
+            for (var i = 0; i < gates.Length; i++)
             {
                 grid.AddGate(i, i, gates[i]);
             }
 
             // Assert
             Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.RemoveAt(-1, 0);
-            }, "Removing at negative indices is an error.");
+                () => { grid.RemoveAt(-1, 0); }, "Removing at negative indices is an error.");
 
             Assert.Throws<ArgumentOutOfRangeException>(
-            () =>
-            {
-                grid.RemoveAt(7, 2);
-            }, "Removing beyond the grid is an error.");
+                () => { grid.RemoveAt(7, 2); }, "Removing beyond the grid is an error.");
 
             Assert.Throws<ArgumentException>(
-            () =>
-            {
-                grid.RemoveAt(1, 3);
-            }, "Removing where there is no gate is an error.");
+                () => { grid.RemoveAt(1, 3); }, "Removing where there is no gate is an error.");
 
             Assert.AreEqual(gates[2], grid.RemoveAt(2, 2), "A correct gate should be removed.");
             Assert.AreEqual(gates[4], grid.RemoveAt(3, 4), "A correct gate should be removed.");

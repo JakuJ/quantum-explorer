@@ -40,8 +40,7 @@ namespace Compiler.Tests
 
             compiler.OnDiagnostics += (sender, s) =>
             {
-                Helpers.ConsoleLogger.LogError(s);
-                Assert.Fail("There should be no diagnostics emitted");
+                Assert.Fail($"There should be no diagnostics emitted! Got: {s}");
             };
 
             compiler.OnOutput += (sender, s) =>
