@@ -13,6 +13,8 @@ using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
+using Diagnostic = Microsoft.VisualStudio.LanguageServer.Protocol.Diagnostic;
+using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity;
 
 namespace Compiler
 {
@@ -28,7 +30,7 @@ namespace Compiler
 
         private readonly ILogger<QsCompiler> logger;
         private readonly string filename = $"__{UniqueId.CreateUniqueId()}__.qs";
-        private readonly List<FilesEmittedArgs> eventQueue = new List<FilesEmittedArgs>();
+        private readonly List<FilesEmittedArgs> eventQueue = new();
 
         private static void InitializeReferences()
         {
@@ -80,15 +82,15 @@ namespace Compiler
             var config = new CompilationLoader.Configuration
             {
                 IsExecutable = execute,
-                RewriteSteps = new List<(string, string?)>
+                RewriteSteps = new (string, string?)[]
                 {
                     (Assembly.GetExecutingAssembly().Location, null),
                 },
             };
 
-            void Handler(object? sender, FilesEmittedArgs? args)
+            void Handler(object? sender, FilesEmittedArgs args)
             {
-                eventQueue.Add(args!);
+                eventQueue.Add(args);
             }
 
             eventQueue.Clear();
@@ -110,7 +112,7 @@ namespace Compiler
             InMemoryEmitter.FilesGenerated -= Handler;
 
             // print any diagnostics
-            var diags = compilationLoader.LoadDiagnostics;
+            ImmutableArray<Diagnostic> diags = compilationLoader.LoadDiagnostics;
             if (diags.Any())
             {
                 var diagnostics = string.Join(Environment.NewLine, diags.Select(d => $"{d.Severity} {d.Code} {d.Message}"));
@@ -118,7 +120,7 @@ namespace Compiler
                 OnDiagnostics?.Invoke(this, diagnostics);
 
                 // if there are any errors, exit
-                if (diags.Any(d => d.Severity == Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity.Error))
+                if (diags.Any(d => d.Severity == DiagnosticSeverity.Error))
                 {
                     logger.LogWarning("There were errors in Q# compilation, aborting");
                     return;
@@ -136,15 +138,9 @@ namespace Compiler
             OnCompilation?.Invoke(this, Compilation);
 
             // find our generated files
-            Dictionary<string, string>? generatedFiles = null;
-            foreach (var args in eventQueue)
-            {
-                if (args.CompilationHash == Compilation.GetHashCode())
-                {
-                    generatedFiles = args.FileContents;
-                    break;
-                }
-            }
+            Dictionary<string, string>? generatedFiles = (from args in eventQueue
+                                                          where args.CompilationHash == Compilation.GetHashCode()
+                                                          select args.FileContents).FirstOrDefault();
 
             if (generatedFiles == null)
             {
@@ -185,12 +181,12 @@ namespace Compiler
             using var timer = new ScopedTimer("Executing simulation", logger);
 
             // emit C# code into an in-memory assembly
-            await using var peStream = new MemoryStream();
+            await using MemoryStream peStream = new();
             csharpCompilation.Emit(peStream);
             peStream.Position = 0;
 
             // load that assembly
-            var qsharpLoadContext = new QSharpLoadContext();
+            QSharpLoadContext qsharpLoadContext = new();
             Assembly qsharpAssembly = qsharpLoadContext.LoadFromStream(peStream);
 
             // get the @Entrypoint() operation
@@ -207,7 +203,7 @@ namespace Compiler
 
             if (type != null)
             {
-                using var sim = new InterceptingSimulator();
+                using InterceptingSimulator sim = new();
 
                 // simulate the entry point operation using reflection
                 object? invocation = type.InvokeMember("Run", BindingFlags.InvokeMethod, null, type, new object?[] { sim });

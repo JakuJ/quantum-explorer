@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,14 +47,14 @@ namespace Compiler.Tests
                     yield return new object[]
                     {
                         "AllocateOne",
-                        new (string, int, int)[] { },
+                        Array.Empty<(string, int, int)>(),
                         new[] { "qubit" },
                     };
 
                     yield return new object[]
                     {
                         "AllocateFive",
-                        new (string, int, int)[] { },
+                        Array.Empty<(string, int, int)>(),
                         new[] { "qs[0]", "qs[1]", "qs[2]", "qs[3]", "qs[4]" },
                     };
 
@@ -217,8 +218,8 @@ namespace Compiler.Tests
         {
             // Arrange
             string code = await Helpers.GetSourceFile(path);
-            var compiler = new QsCompiler(Helpers.ConsoleLogger);
-            var qualifiedNames = operations.Select(x => $"{path}.{x}").ToArray();
+            QsCompiler compiler = new(Helpers.ConsoleLogger);
+            string[] qualifiedNames = operations.Select(x => $"{path}.{x}").ToArray();
 
             // Act
             await compiler.Compile(code);
@@ -234,7 +235,7 @@ namespace Compiler.Tests
             // Arrange
             string code = await Helpers.GetSourceFile("MultipleNamespaces");
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
-            string[] qualifiedNames = new[] { "Ns1.Op1", "Ns2.Op1", "Ns2.Op2", "Ns3.Op2" };
+            string[] qualifiedNames = { "Ns1.Op1", "Ns2.Op1", "Ns2.Op2", "Ns3.Op2" };
 
             // Act
             await compiler.Compile(code);

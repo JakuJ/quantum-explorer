@@ -13,7 +13,7 @@ namespace Compiler
         /// <param name="ns">The namespace of the underlying operation.</param>
         /// <param name="argIndex">The index of the argument in the operation call.</param>
         /// <param name="argArray">Whether this gate is a part of an array-like argument.</param>
-        public QuantumGate(string symbol, string ns, int argIndex = 0, bool argArray = false, TypedExpression? ast = null)
+        public QuantumGate(string symbol, string ns = "Test", int argIndex = 0, bool argArray = false, TypedExpression? ast = null)
         {
             Name = symbol;
             Namespace = ns;
@@ -21,10 +21,6 @@ namespace Compiler
             ArgArray = argArray;
             AstElement = ast;
         }
-
-        /// <summary>Initializes a new instance of the <see cref="QuantumGate" /> class.</summary>
-        /// <param name="symbol">The name of the underlying operation.</param>
-        public QuantumGate(string symbol) : this(symbol, "Test") { }
 
         /// <summary>Gets the full namespace of the represented operation.</summary>
         public string Namespace { get; }
@@ -35,7 +31,7 @@ namespace Compiler
         /// <summary>Gets the index of the argument to the operation call this gate represents.</summary>
         public int ArgIndex { get; }
 
-        /// <summary>Gets a value indicating whether this gate representa an argument that is part of an array.</summary>
+        /// <summary>Gets a value indicating whether this gate represents an argument that is part of an array.</summary>
         public bool ArgArray { get; }
 
         /// <summary>Gets the AST element corresponding to the call of the underlying operation.</summary>
@@ -53,7 +49,12 @@ namespace Compiler
 
         /// <inheritdoc/>
         public bool Equals(QuantumGate? other)
-            => other != null && ReferenceEquals(AstElement, other.AstElement);
+            => other != null
+            && Namespace == other.Namespace
+            && Name == other.Name
+            && ArgIndex == other.ArgIndex
+            && ArgArray == other.ArgArray
+            && ReferenceEquals(AstElement, other.AstElement);
 
         /// <inheritdoc/>
         public override string ToString() => Namespace + "." + Name;

@@ -17,11 +17,11 @@ namespace Explorer.Tests
     {
         private static TestContext InitializeContext()
         {
-            var ctx = new TestContext();
+            TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
 
             // Mock the compiler
-            ctx.Services.AddSingleton(container => Mock.Of<ICompiler>());
+            ctx.Services.AddSingleton(_ => Mock.Of<ICompiler>());
 
             ctx.Services.AddLogging(builder => builder.AddConsole());
             return ctx;
@@ -31,7 +31,7 @@ namespace Explorer.Tests
         public void Has3Panels()
         {
             // Arrange
-            using var ctx = InitializeContext();
+            using TestContext ctx = InitializeContext();
 
             // Act
             var index = ctx.RenderComponent<Index>();

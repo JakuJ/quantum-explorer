@@ -31,9 +31,10 @@ namespace Explorer
                     logBuilder.AddEventSourceLogger();
                 })
                .ConfigureWebHostDefaults(webBuilder =>
-               {
-                   var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-                   webBuilder.UseStartup<Startup>().UseUrls($"http://*:{port}");
-               });
+                {
+                    // This environment variable is set when running on Heroku
+                    string port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+                    webBuilder.UseStartup<Startup>().UseUrls($"http://*:{port}");
+                });
     }
 }

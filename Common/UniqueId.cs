@@ -14,8 +14,7 @@ namespace Common
         /// <returns>A string of 32 hexadecimal digits that starts with a character 'f'.</returns>
         public static string CreateUniqueId()
         {
-            var guid = Guid.NewGuid();
-            byte[] bytes = guid.ToByteArray();
+            byte[] bytes = Guid.NewGuid().ToByteArray();
             bytes[3] |= 0xF0;
             return new Guid(bytes).ToString("N");
         }

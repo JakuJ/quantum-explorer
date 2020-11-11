@@ -15,9 +15,9 @@ namespace Compiler.Tests
         {
             // Arrange
             string code = await Helpers.GetSourceFile(file);
-            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            QsCompiler compiler = new(Helpers.ConsoleLogger);
 
-            compiler.OnDiagnostics += (sender, s) =>
+            compiler.OnDiagnostics += (_, s) =>
             {
                 Helpers.ConsoleLogger.LogError(s);
                 Assert.Fail("There should be no diagnostics emitted");
@@ -35,15 +35,12 @@ namespace Compiler.Tests
         {
             // Arrange
             string sourceCode = await Helpers.GetSourceFile("HelloWorld");
-            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            QsCompiler compiler = new(Helpers.ConsoleLogger);
             var executed = false;
 
-            compiler.OnDiagnostics += (sender, s) =>
-            {
-                Assert.Fail($"There should be no diagnostics emitted! Got: {s}");
-            };
+            compiler.OnDiagnostics += (_, s) => { Assert.Fail($"There should be no diagnostics emitted! Got: {s}"); };
 
-            compiler.OnOutput += (sender, s) =>
+            compiler.OnOutput += (_, s) =>
             {
                 executed = true;
                 Assert.AreEqual("Hello World!\n", s, "Intercepted output must be correct.");
@@ -62,16 +59,16 @@ namespace Compiler.Tests
         {
             // Arrange
             string sourceCode = await Helpers.GetSourceFile("Library"); // no entry point
-            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            QsCompiler compiler = new(Helpers.ConsoleLogger);
             var diagnostics = false;
 
-            compiler.OnDiagnostics += (sender, s) =>
+            compiler.OnDiagnostics += (_, s) =>
             {
                 diagnostics = true;
                 Helpers.ConsoleLogger.LogError(s);
             };
 
-            compiler.OnOutput += (sender, s) => { Assert.Fail("Code should not execute"); };
+            compiler.OnOutput += (_, _) => { Assert.Fail("Code should not execute"); };
 
             // Act
             await compiler.Compile(sourceCode, true);

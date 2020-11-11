@@ -12,13 +12,10 @@ namespace Compiler
     {
         /// <inheritdoc cref="EventArgs" />
         /// <summary>Initializes a new instance of the <see cref="FilesEmittedArgs"/> class.</summary>
-        /// <param name="compilationHash">Compilation hash.</param>
-        /// <param name="fileContents">Generated file contents.</param>
-        public FilesEmittedArgs(int compilationHash, Dictionary<string, string> fileContents)
-        {
-            CompilationHash = compilationHash;
-            this.FileContents = fileContents;
-        }
+        /// <param name="hash">Compilation hash.</param>
+        /// <param name="contents">Generated file contents.</param>
+        public FilesEmittedArgs(int hash, Dictionary<string, string> contents) =>
+            (CompilationHash, FileContents) = (hash, contents);
 
         /// <summary>Gets the hash of the <see cref="QsCompilation"/> corresponding to the emitted files.</summary>
         public int CompilationHash { get; }

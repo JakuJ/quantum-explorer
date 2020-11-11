@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Common;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
-using Moq;
 using NUnit.Framework;
 
 namespace Compiler.Tests
@@ -52,14 +51,14 @@ namespace Compiler.Tests
         public void CannotAddGatesAtNegativeIndices()
         {
             // Arrange
-            var grid = new GateGrid();
-            string msg = "Cannot add gates at negative index.";
+            GateGrid grid = new();
+            const string msg = "Cannot add gates at negative index.";
 
             // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentException>(
                 () => { grid.AddGate(1, -1, new QuantumGate("H")); }, msg);
 
-            Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentException>(
                 () => { grid.AddGate(-2, 3, new QuantumGate("H")); }, msg);
         }
 
@@ -67,13 +66,13 @@ namespace Compiler.Tests
         public void ResizingOnGateAdded()
         {
             // Arrange
-            var grid = new GateGrid();
+            GateGrid grid = new();
 
             // Act & Assert
-            grid.AddGate(4, 4, new QuantumGate("SomeOperation")); // resizes to 5x5 then shrinks to 1x5
+            grid.AddGate(4, 4, new("SomeOperation")); // resizes to 5x5 then shrinks to 1x5
             Assert.AreEqual((1, 5), (grid.Width, grid.Height), "Grid should resize correctly");
 
-            grid.AddGate(9, new QuantumGate("SomeOperation")); // resizes to 2x10
+            grid.AddGate(9, new("SomeOperation")); // resizes to 2x10
             Assert.AreEqual((2, 10), (grid.Width, grid.Height), "Grid should resize correctly");
         }
 
@@ -81,7 +80,7 @@ namespace Compiler.Tests
         public void ShrinkingTo0By0()
         {
             // Arrange
-            var grid = new GateGrid(5, 5);
+            GateGrid grid = new(5, 5);
 
             // Act
             grid.Shrink();
@@ -94,8 +93,8 @@ namespace Compiler.Tests
         public void RemovingEmptyColumns()
         {
             // Arrange
-            var grid = new GateGrid();
-            var gates = SampleGates(5);
+            GateGrid grid = new();
+            QuantumGate[] gates = SampleGates(5);
 
             // Act
             grid.AddGate(1, 0, gates[0]); // 0, 0
@@ -120,13 +119,14 @@ namespace Compiler.Tests
         public void ShrinkingUpToGateExtent()
         {
             // Arrange
-            var grid = new GateGrid();
+            GateGrid grid = new();
+            QuantumGate[] gates = SampleGates(4);
 
             // Act
-            grid.AddGate(1, 1, new QuantumGate("SomeOp"));
-            grid.AddGate(5, 5, new QuantumGate("SomeOp"));
-            grid.AddGate(3, 7, new QuantumGate("SomeOp"));
-            grid.AddGate(6, 4, new QuantumGate("SomeOp"));
+            grid.AddGate(1, 1, gates[0]);
+            grid.AddGate(5, 5, gates[1]);
+            grid.AddGate(3, 7, gates[2]);
+            grid.AddGate(6, 4, gates[3]);
 
             // Assert
             Assert.AreEqual((4, 8), (grid.Width, grid.Height), "Empty grid should not be bigger than necessary");
@@ -136,7 +136,7 @@ namespace Compiler.Tests
         public void SettingQubitIdentifiers()
         {
             // Arrange
-            var grid = new GateGrid(3, 1);
+            GateGrid grid = new(3, 1);
 
             // Act
             grid.SetName(0, "qs[0]");
@@ -144,8 +144,8 @@ namespace Compiler.Tests
             grid.SetName(2, "SomeQ");
 
             // maybe try to also expand the grid to see if names persist
-            grid.AddGate(2, new QuantumGate("H"));
-            grid.AddGate(6, new QuantumGate("H"));
+            grid.AddGate(2, new("H"));
+            grid.AddGate(6, new("H"));
 
             // Assert
             Assert.AreEqual("qs[0]", grid.Names[0], "An identifier once set should be persistent");
@@ -156,14 +156,14 @@ namespace Compiler.Tests
             Assert.AreEqual(1, grid.IndexOfName("qs[1]"), "An identifier should map to its corresponding index");
             Assert.AreEqual(2, grid.IndexOfName("SomeQ"), "An identifier should map to its corresponding index");
 
-            Assert.AreEqual(-1, grid.IndexOfName("SomeNoneexistentQubit"), "Trying to get the index of a qubit that does not exist returns -1.");
+            Assert.AreEqual(-1, grid.IndexOfName("SomeNonexistentQubit"), "Trying to get the index of a qubit that does not exist returns -1.");
 
             Assert.DoesNotThrow(
                 () => { grid.SetName(10, "SomeOtherQ"); }, "Setting names to nonexistent qubits works");
 
             Assert.AreEqual(11, grid.Height, "Setting names to nonexistent qubits expands the grid");
 
-            Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentException>(
                 () => { grid.SetName(-1, "SomeOtherQ"); }, "Setting names at negative indices is an error");
         }
 
@@ -171,7 +171,7 @@ namespace Compiler.Tests
         public void RemovingGates()
         {
             // Arrange
-            var grid = new GateGrid();
+            GateGrid grid = new();
             QuantumGate[] gates = SampleGates(5);
 
             // Act
@@ -181,10 +181,10 @@ namespace Compiler.Tests
             }
 
             // Assert
-            Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentException>(
                 () => { grid.RemoveAt(-1, 0); }, "Removing at negative indices is an error.");
 
-            Assert.Throws<ArgumentOutOfRangeException>(
+            Assert.Throws<ArgumentException>(
                 () => { grid.RemoveAt(7, 2); }, "Removing beyond the grid is an error.");
 
             Assert.Throws<ArgumentException>(
@@ -203,8 +203,8 @@ namespace Compiler.Tests
         public void MovingSingleGate()
         {
             // Arrange
-            var grid = new GateGrid();
-            var gate = new QuantumGate("SomeOp", "Testing");
+            GateGrid grid = new();
+            QuantumGate gate = new("SomeOp", "Testing");
 
             // Act & Assert
             grid.AddGate(0, 0, gate);
@@ -230,8 +230,8 @@ namespace Compiler.Tests
         public void MovingOutOfBoundsResizesTheGrid()
         {
             // Arrange
-            var grid = new GateGrid();
-            var gates = SampleGates(2);
+            GateGrid grid = new();
+            QuantumGate[] gates = SampleGates(2);
 
             // Act
             grid.AddGate(0, 0, gates[0]);
@@ -255,11 +255,11 @@ namespace Compiler.Tests
         public void CanInsertBetweenTwoGatesOnTheSameRow(int targetColumn, string expected)
         {
             // Arrange
-            var grid = new GateGrid(1, 1);
-            var gates = SampleGates(5);
+            GateGrid grid = new(1, 1);
+            QuantumGate[] gates = SampleGates(5);
 
             // Act
-            for (int i = 0; i < gates.Length; i++)
+            for (var i = 0; i < gates.Length; i++)
             {
                 grid.AddGate(i, 0, gates[i]); // 01234
             }
@@ -279,8 +279,8 @@ namespace Compiler.Tests
         public void MovingOntoAnotherGateInASeparateColumnMovesItToTheRight()
         {
             // Arrange
-            var grid = new GateGrid(1, 2);
-            var gates = SampleGates(2);
+            GateGrid grid = new(1, 2);
+            QuantumGate[] gates = SampleGates(2);
 
             // Act
             grid.AddGate(0, 0, gates[0]);
@@ -297,8 +297,8 @@ namespace Compiler.Tests
         public void ComplexMovingScenarios()
         {
             // Arrange
-            var grid = new GateGrid(3, 3);
-            var gates = SampleGates(5);
+            GateGrid grid = new(3, 3);
+            QuantumGate[] gates = SampleGates(5);
 
             var expected1 = new[] { (gates[0], 0, 0), (gates[2], 1, 0), (gates[1], 2, 0), (gates[3], 2, 1), (gates[4], 2, 2) };
             var expected2 = new[] { (gates[1], 0, 0), (gates[0], 1, 0), (gates[2], 2, 0), (gates[3], 3, 1), (gates[4], 3, 2) };
@@ -355,8 +355,8 @@ namespace Compiler.Tests
         public void InsertingRows()
         {
             // Arrange
-            var grid = new GateGrid();
-            var gates = SampleGates(3);
+            GateGrid grid = new();
+            QuantumGate[] gates = SampleGates(3);
 
             grid.SetName(0, "q0");
             grid.SetName(1, "q1");
@@ -386,16 +386,16 @@ namespace Compiler.Tests
         public void RemovingMultiQubitGates()
         {
             // Arrange
-            var grid = new GateGrid();
+            GateGrid grid = new();
 
             TypedExpression? exp = null; // ReferenceEquals(null, null) is true
 
-            var gates = new[]
+            QuantumGate[] gates =
             {
-                new QuantumGate("Test", "TestNs", 0, false, exp),
-                new QuantumGate("Test", "TestNs", 1, true, exp),
-                new QuantumGate("Test", "TestNs", 1, true, exp),
-                new QuantumGate("Test", "TestNs", 2, false, exp),
+                new("Test", "TestNs", 0, false, exp),
+                new("Test", "TestNs", 1, true, exp),
+                new("Test", "TestNs", 1, true, exp),
+                new("Test", "TestNs", 2, false, exp),
             };
 
             foreach ((int i, QuantumGate gate) in gates.Enumerate())
