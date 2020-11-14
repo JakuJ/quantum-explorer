@@ -7,6 +7,7 @@
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
     <TieredCompilation>true</TieredCompilation>
+    <LanguageServerPath>..\qsharp-compiler\src\QsCompiler\LanguageServer\bin\Debug\netcoreapp3.1</LanguageServerPath>
   </PropertyGroup>
 
   <ItemGroup Label="StyleCop support">

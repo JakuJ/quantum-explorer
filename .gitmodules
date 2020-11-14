@@ -1,0 +1,3 @@
+[submodule "qsharp-compiler"]
+	path = qsharp-compiler
+	url = https://github.com/microsoft/qsharp-compiler.git

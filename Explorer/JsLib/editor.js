@@ -4,10 +4,10 @@ import {Registry} from 'monaco-textmate';
 import {wireTmGrammars} from 'monaco-editor-textmate';
 import * as path from 'path';
 import {saveCode, loadCode} from './storage';
-import { listen, MessageConnection } from 'vscode-ws-jsonrpc';
+import {listen, MessageConnection} from 'vscode-ws-jsonrpc';
 import {
-    MonacoLanguageClient, CloseAction, ErrorAction,
-    MonacoServices, createConnection
+  MonacoLanguageClient, CloseAction, ErrorAction,
+  MonacoServices, createConnection
 } from 'monaco-languageclient';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
@@ -17,6 +17,8 @@ const LIGHT_THEME_NAME = 'vs-code-custom-light-theme';
 const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 
 const SYNTAX_FILES_FOLDER = 'syntaxFiles';
+const LANGUAGE_ID = 'qsharp';
+const MONACO_URI = monaco.Uri.parse('file:///tmp/Bell.qs');
 
 const [
   ONIGASM_FILE,
@@ -61,7 +63,7 @@ export class Editor {
     const id = 'id' + (window.editorsCounter++);
 
     monaco.languages.register({
-      id: 'qsharp',
+      id: LANGUAGE_ID,
       extensions: ['qs'],
       aliases: ['Q#', 'qsharp']
     });
@@ -75,7 +77,7 @@ export class Editor {
       })
     });
 
-    const grammars = new Map([['qsharp', 'source.qsharp']]);
+    const grammars = new Map([[LANGUAGE_ID, 'source.qsharp']]);
 
     monaco.editor.defineTheme(LIGHT_THEME_NAME,
       await fetch(LIGHT_THEME_JSON).then(x => x.json())
@@ -86,8 +88,7 @@ export class Editor {
     );
 
     window.editorsDict[id] = monaco.editor.create(element, {
-      value: loadCode() || INIT_CODE,
-      language: 'qsharp',
+      model: monaco.editor.createModel(loadCode() || INIT_CODE, LANGUAGE_ID, MONACO_URI),
       theme: LIGHT_THEME_NAME,
       minimap: {
         enabled: false
@@ -96,29 +97,29 @@ export class Editor {
         vertical: 'hidden',
         horizontal: 'auto'
       },
-   	  glyphMargin: true,
+      glyphMargin: true,
       lightbulb: {
-          enabled: true
+        enabled: true
       }
     });
 
-	MonacoServices.install(window.editorsDict[id]);
+    MonacoServices.install(window.editorsDict[id]);
 
-	// create the web socket
-    const url = createUrl('/monaco-editor')
+    // create the web socket
+    const url = createUrl('/monaco-editor');
     const webSocket = createWebSocket(url);
     // listen when the web socket is opened
     listen({
-        webSocket,
-        onConnection: connection => {
-            // create and start the language client
-            const languageClient = createLanguageClient(connection);
-            const disposable = languageClient.start();
-            connection.onClose(() => disposable.dispose());
-        }
+      webSocket,
+      onConnection: connection => {
+        // create and start the language client
+        const languageClient = createLanguageClient(connection);
+        const disposable = languageClient.start();
+        connection.onClose(() => disposable.dispose());
+      }
     });
-    
-	await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
+
+    await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
 
     new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
 
@@ -156,10 +157,10 @@ export class Editor {
 }
 
 function createUrl(path) {
-  const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
+  const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
   return normalizeUrl(
     `${protocol}://${location.host}${location.pathname}${path}`,
-  )
+  );
 }
 
 function createWebSocket(url) {
@@ -170,8 +171,8 @@ function createWebSocket(url) {
     connectionTimeout: 10000,
     maxRetries: Infinity,
     debug: false,
-  }
-  return new ReconnectingWebSocket(url, [], socketOptions)
+  };
+  return new ReconnectingWebSocket(url, [], socketOptions);
 }
 
 function createLanguageClient(connection) {
@@ -189,8 +190,8 @@ function createLanguageClient(connection) {
     // create a language client connection from the JSON RPC connection on demand
     connectionProvider: {
       async get() {
-        return createConnection(connection, console.error, console.warn)
+        return createConnection(connection, console.error, console.warn);
       },
     },
-  })
+  });
 }

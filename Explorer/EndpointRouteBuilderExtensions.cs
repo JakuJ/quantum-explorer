@@ -1,7 +1,7 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using System;
 
 namespace Explorer
 {
@@ -15,8 +15,8 @@ namespace Explorer
             }
 
             RequestDelegate pipeline = endpoints.CreateApplicationBuilder()
-               .UseMiddleware<StreamJsonRpcMiddleware>()
-               .Build();
+                                                .UseMiddleware<StreamJsonRpcMiddleware>()
+                                                .Build();
 
             return endpoints.Map(pattern, pipeline);
         }

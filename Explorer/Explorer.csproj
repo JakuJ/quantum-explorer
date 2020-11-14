@@ -12,23 +12,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
-    <ProjectReference Include="..\Compiler\Compiler.csproj" />
+    <!--    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />-->
+    <!--    <ProjectReference Include="..\Compiler\Compiler.csproj" />-->
+    <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
   <ItemGroup Label="Package references">
     <PackageReference Include="FParsec" Version="1.1.1" />
-    <PackageReference Include="FSharp.Core" Version="4.7.0" />
+    <PackageReference Include="FSharp.Core" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Quantum.Development.Kit" Version="0.12.20100504" />
+    <!--    <PackageReference Include="Microsoft.Quantum.Development.Kit" Version="0.12.20100504" />-->
     <PackageReference Include="Microsoft.Build" Version="16.7.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
-    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.7.97" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
+    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.3.57" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageReference Include="StreamJsonRpc" Version="2.2.34" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
@@ -51,38 +52,37 @@
     <None Include="$(JsLibRoot)\*.json" />
     <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
     <Content Include="syntax\onigasm.wasm" CopyToOutputDirectory="PreserveNewest" />
+
     <Reference Include="Microsoft.Quantum.QsCompilationManager">
-      <HintPath>..\extLib\Microsoft.Quantum.QsCompilationManager.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsCompilationManager.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsCore">
-      <HintPath>..\extLib\Microsoft.Quantum.QsCore.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsCore.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsDataStructures">
-      <HintPath>..\extLib\Microsoft.Quantum.QsDataStructures.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsDataStructures.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsDocumentationParser">
-      <HintPath>..\extLib\Microsoft.Quantum.QsDocumentationParser.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsDocumentationParser.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsLanguageServer">
-      <HintPath>..\extLib\Microsoft.Quantum.QsLanguageServer.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsLanguageServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsOptimizations">
-      <HintPath>..\extLib\Microsoft.Quantum.QsOptimizations.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsOptimizations.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsSyntaxProcessor">
-      <HintPath>..\extLib\Microsoft.Quantum.QsSyntaxProcessor.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsSyntaxProcessor.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsTextProcessor">
-      <HintPath>..\extLib\Microsoft.Quantum.QsTextProcessor.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsTextProcessor.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Quantum.QsTransformations">
-      <HintPath>..\extLib\Microsoft.Quantum.QsTransformations.dll</HintPath>
+      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsTransformations.dll</HintPath>
     </Reference>
   </ItemGroup>
 
-  <Target Name="EnsureNodeEnv"
-          BeforeTargets="RestoreNpmPackages"
-          Condition="!Exists('$(JsLibRoot)\node_modules')">
+  <Target Name="EnsureNodeEnv" BeforeTargets="RestoreNpmPackages" Condition="!Exists('$(JsLibRoot)\node_modules')">
     <!-- Ensure Node.js is installed -->
     <Exec Command="node --version" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
@@ -90,20 +90,14 @@
     <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project." />
   </Target>
 
-  <Target Name="RestoreNpmPackages"
-          BeforeTargets="BuildJsBundle"
-          Inputs="$(JsLibRoot)\package.json"
-          Outputs="$(NpmInstallStampFile)">
+  <Target Name="RestoreNpmPackages" BeforeTargets="BuildJsBundle" Inputs="$(JsLibRoot)\package.json" Outputs="$(NpmInstallStampFile)">
     <!-- Restore NPM dependencies -->
     <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
     <Exec WorkingDirectory="$(JsLibRoot)" Command="npm install" />
     <Touch Files="$(NpmInstallStampFile)" AlwaysCreate="true" />
   </Target>
 
-  <Target Name="BuildJsBundle"
-          BeforeTargets="PreBuildEvent"
-          Inputs="@(JsFiles)"
-          Outputs="wwwroot\js\library.bundle.js;wwwroot\js\editor.worker.js">
+  <Target Name="BuildJsBundle" BeforeTargets="PreBuildEvent" Inputs="@(JsFiles)" Outputs="wwwroot\js\library.bundle.js;wwwroot\js\editor.worker.js">
     <!-- Rebuild the JS bundle -->
     <Message Importance="high" Text="Building JS bundle..." />
     <Exec WorkingDirectory="$(JsLibRoot)\" Command="npm run build" />

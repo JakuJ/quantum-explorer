@@ -1,7 +1,10 @@
+using System.IO;
+using System.Net.WebSockets;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Quantum.QsLanguageServer;
+using Nerdbank.Streams;
 using StreamJsonRpc;
-using System.Threading.Tasks;
 
 namespace Explorer
 {
@@ -13,9 +16,8 @@ namespace Explorer
         {
             if (context.WebSockets.IsWebSocketRequest)
             {
-                var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-
-                IJsonRpcMessageHandler jsonRpcMessageHandler = new WebSocketMessageHandler(webSocket);
+                WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                WebSocketMessageHandler jsonRpcMessageHandler = new(webSocket);
 
                 QsLanguageServer server = new QsLanguageServer(jsonRpcMessageHandler);
                 server.WaitForShutdown();
@@ -26,6 +28,4 @@ namespace Explorer
             }
         }
     }
-
-
 }
