@@ -1,12 +1,10 @@
-using System.IO;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Quantum.QsLanguageServer;
-using Nerdbank.Streams;
 using StreamJsonRpc;
 
-namespace Explorer
+namespace LanguageServer
 {
     internal class StreamJsonRpcMiddleware
     {

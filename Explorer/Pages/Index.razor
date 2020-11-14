@@ -1,14 +1,12 @@
 @page "/"
-@* @using Compiler *@
+@using Compiler
 @using Explorer.Utilities.ComponentTree
 @using Newtonsoft.Json
-@* @using AstTransformations *@
 @using System.Text
 @using Microsoft.Extensions.Logging
-@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime;
-@* @inject ICompiler Compiler; *@
+@inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
 
 <div class="main">
@@ -58,7 +56,7 @@
         outputSb.Clear();
 
         string code = await Editor.Component.GetCode();
-    // await Compiler.Compile(code, true);
+        await Compiler.Compile(code, true);
     }
 
     [ExcludeFromCodeCoverage]

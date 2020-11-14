@@ -158,8 +158,9 @@ export class Editor {
 
 function createUrl(path) {
   const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+  const port = location.protocol === 'https:' ? '5001' : '5000';
   return normalizeUrl(
-    `${protocol}://${location.host}${location.pathname}${path}`,
+    `${protocol}://${location.hostname}:${port}${location.pathname}${path}`,
   );
 }
 

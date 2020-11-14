@@ -12,8 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />-->
-    <!--    <ProjectReference Include="..\Compiler\Compiler.csproj" />-->
+    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
+    <ProjectReference Include="..\Compiler\Compiler.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
@@ -25,7 +25,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
-    <!--    <PackageReference Include="Microsoft.Quantum.Development.Kit" Version="0.12.20100504" />-->
+    <PackageReference Include="Microsoft.Quantum.Development.Kit" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Build" Version="16.7.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
@@ -52,34 +52,6 @@
     <None Include="$(JsLibRoot)\*.json" />
     <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
     <Content Include="syntax\onigasm.wasm" CopyToOutputDirectory="PreserveNewest" />
-
-    <Reference Include="Microsoft.Quantum.QsCompilationManager">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsCompilationManager.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsCore">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsCore.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsDataStructures">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsDataStructures.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsDocumentationParser">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsDocumentationParser.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsLanguageServer">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsLanguageServer.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsOptimizations">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsOptimizations.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsSyntaxProcessor">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsSyntaxProcessor.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsTextProcessor">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsTextProcessor.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Quantum.QsTransformations">
-      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsTransformations.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <Target Name="EnsureNodeEnv" BeforeTargets="RestoreNpmPackages" Condition="!Exists('$(JsLibRoot)\node_modules')">

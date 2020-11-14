@@ -16,7 +16,7 @@
     <PackageReference Include="Microsoft.Quantum.Simulators" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.CsharpGeneration" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.EntryPointDriver" Version="0.12.20100504" />
-    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.7.97" />
+    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.3.57" />
   </ItemGroup>
 
   <ItemGroup Label="References for the Q# compiler">
@@ -24,20 +24,5 @@
     <PackageReference Include="Microsoft.Quantum.Runtime.Core" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.Standard" Version="0.12.20100504" />
   </ItemGroup>
-
-<!--  <ItemGroup>-->
-<!--    <Reference Include="Microsoft.Quantum.QsCompilationManager">-->
-<!--      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsCompilationManager.dll</HintPath>-->
-<!--    </Reference>-->
-<!--    <Reference Include="Microsoft.Quantum.QsCore">-->
-<!--      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsCore.dll</HintPath>-->
-<!--    </Reference>-->
-<!--    <Reference Include="Microsoft.Quantum.QsDataStructures">-->
-<!--      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsDataStructures.dll</HintPath>-->
-<!--    </Reference>-->
-<!--    <Reference Include="Microsoft.Quantum.QsTransformations">-->
-<!--      <HintPath>$(LanguageServerPath)\Microsoft.Quantum.QsTransformations.dll</HintPath>-->
-<!--    </Reference>-->
-<!--  </ItemGroup>-->
 
 </Project>
