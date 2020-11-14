@@ -5,6 +5,7 @@
 @using System.Text
 @using Microsoft.Extensions.Logging
 @using System.Diagnostics.CodeAnalysis
+@using Microsoft.Quantum.Extensions.Math
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -48,6 +49,9 @@
         Visualizer = sidePanel.AddPanel<Visualizer>();
 
         tree.AddPanel(sidePanel);
+
+        Compiler.OnDiagnostics += (_, s) => { Logger.LogError(s); };
+        Compiler.OnOutput += (_, s) => { Logger.LogInformation(s); };
     }
 
     [ExcludeFromCodeCoverage]

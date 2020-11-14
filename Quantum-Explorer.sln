@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "Common.Test
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AstTransformations", "AstTransformations\AstTransformations.fsproj", "{63DA55C3-0DEF-4503-9913-C42456CA7C98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageServer", "LanguageServer\LanguageServer.csproj", "{817087BE-E402-4416-89B5-C8E196329DD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerRunner", "ServerRunner\ServerRunner.csproj", "{817087BE-E402-4416-89B5-C8E196329DD4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

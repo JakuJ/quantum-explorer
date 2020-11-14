@@ -18,7 +18,7 @@ const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 
 const SYNTAX_FILES_FOLDER = 'syntaxFiles';
 const LANGUAGE_ID = 'qsharp';
-const MONACO_URI = monaco.Uri.parse('file:///tmp/Bell.qs');
+const MONACO_URI = monaco.Uri.parse('file:///tmp/qsharp/_x2f_tmp/Bell.qs');
 
 const [
   ONIGASM_FILE,
@@ -158,7 +158,7 @@ export class Editor {
 
 function createUrl(path) {
   const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  const port = location.protocol === 'https:' ? '5001' : '5000';
+  const port = '8091'; // TODO: Move to env variable?
   return normalizeUrl(
     `${protocol}://${location.hostname}:${port}${location.pathname}${path}`,
   );
