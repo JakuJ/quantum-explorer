@@ -10,6 +10,7 @@ import {
   MonacoServices, createConnection
 } from 'monaco-languageclient';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import {v4 as uuidv4} from 'uuid';
 
 const normalizeUrl = require('normalize-url');
 
@@ -18,7 +19,7 @@ const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 
 const SYNTAX_FILES_FOLDER = 'syntaxFiles';
 const LANGUAGE_ID = 'qsharp';
-const MONACO_URI = monaco.Uri.parse('file:///tmp/qsharp/_x2f_/Bell.qs');
+const MONACO_URI = monaco.Uri.parse(`file:///tmp/${uuidv4()}.qs`);
 
 const [
   ONIGASM_FILE,
@@ -99,8 +100,11 @@ export class Editor {
       },
       glyphMargin: true,
       lightbulb: {
-        enabled: true
-      }
+        enabled: false
+      },
+      mouseWheelZoom: false,
+      codeLens: false,
+      foldingStrategy: 'indentation',
     });
 
     MonacoServices.install(window.editorsDict[id]);
