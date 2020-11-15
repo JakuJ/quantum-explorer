@@ -2,14 +2,13 @@
 @using System.IO
 
 <div id="@Id" class="gate">
-    @switch (CheckIconPath())
+    @if (CheckIconPath())
     {
-        case true:
-            <img src="@(IconPath)">
-            break;
-        case false:
-            <span class="gate-name">@Name</span>
-            break;
+        <img src="@(IconPath)">
+    }
+    else
+    {
+        <span class="gate-name">@Name</span>
     }
 </div>
 
