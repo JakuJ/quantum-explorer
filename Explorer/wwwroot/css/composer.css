@@ -1,7 +1,7 @@
 #grid {
   height: auto;
   width: auto;
-  background: papayawhip;
+  padding: 2px;
   display: inline-block;
 }
 
@@ -27,17 +27,24 @@
 .grid-cell {
   position: relative;
   display: block;
-  border: 1px solid green;
+  border: 1px solid rgb(224, 224, 224);
   width: 40px;
   height: 40px;
   overflow: visible;
 }
 
 .gate {
+  left: -1px;
+  top: -1px;
   width: 40px;
   height: 40px;
+  line-height: 40px;
   float: left;
   text-align: center;
-  background: lightskyblue;
+  background: rgb(108, 147, 171);
   z-index: 99;
+}
+
+.gate-name {
+  vertical-align: middle;
 }
