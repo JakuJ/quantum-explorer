@@ -1,6 +1,7 @@
 using Bunit;
 using Bunit.TestDoubles.JSInterop;
 using Explorer.Components;
+using Explorer.Components.Composer;
 using Explorer.Templates;
 using Explorer.Utilities.ComponentTree;
 using Microsoft.AspNetCore.Components;
@@ -49,14 +50,14 @@ namespace Explorer.Tests
             tree.AddPanel<Editor>();
 
             var two = new PanelTree(PanelTree.Alignment.Vertical);
-            tree.AddPanel<Compositor>();
+            tree.AddPanel<Composer>();
             tree.AddPanel<Visualizer>();
 
             tree.AddPanel(two);
 
             var three = new PanelTree(PanelTree.Alignment.Horizontal);
             tree.AddPanel<Visualizer>();
-            tree.AddPanel<Compositor>();
+            tree.AddPanel<Composer>();
 
             var four = new PanelTree(PanelTree.Alignment.Vertical);
             tree.AddPanel<Visualizer>();
@@ -68,7 +69,7 @@ namespace Explorer.Tests
             var page = RenderTree(ctx, tree);
 
             Assert.DoesNotThrow(() => page.FindComponent<Editor>(), "There should be an editor on the page");
-            Assert.AreEqual(2, page.FindComponents<Compositor>().Count, "There should be two compositors on the page");
+            Assert.AreEqual(2, page.FindComponents<Composer>().Count, "There should be two composers on the page");
             Assert.AreEqual(4, page.FindComponents<Visualizer>().Count, "There should be four visualizers on the page");
         }
 

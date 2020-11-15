@@ -26,7 +26,7 @@
 
 @code {
     internal Panel<Editor>? Editor;
-    internal Panel<Compositor>? Compositor;
+    internal Panel<Composer>? Composer;
     internal Panel<Editor>? ExecutionOutput;
 
     private readonly StringBuilder outputSb = new StringBuilder();
@@ -44,7 +44,7 @@
 
         var sidePanel = new PanelTree(PanelTree.Alignment.Vertical);
 
-        Compositor = sidePanel.AddPanel<Compositor>();
+        Composer = sidePanel.AddPanel<Composer>();
         ExecutionOutput = sidePanel.AddPanel<Editor>();
 
         tree.AddPanel(sidePanel);
@@ -81,7 +81,7 @@
         await Compiler.Compile(code, true);
 
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
-        await Compositor!.Component.UpdateGrids(ast);
+        await Composer!.Component.UpdateGrids(ast);
     }
 
     [ExcludeFromCodeCoverage]
