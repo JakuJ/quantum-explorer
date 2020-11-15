@@ -11,7 +11,7 @@ services:
   language-server:
     build:
       context: .
-      dockerfile: qsharp-compiler/src/QsCompiler/ServerRunner/Dockerfile
+      dockerfile: qsharp-compiler-mirror/src/QsCompiler/ServerRunner/Dockerfile
     image: language-server
     container_name: language-server
     ports:

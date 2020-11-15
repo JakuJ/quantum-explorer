@@ -18,7 +18,7 @@ const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 
 const SYNTAX_FILES_FOLDER = 'syntaxFiles';
 const LANGUAGE_ID = 'qsharp';
-const MONACO_URI = monaco.Uri.parse('file:///tmp/qsharp/_x2f_tmp/Bell.qs');
+const MONACO_URI = monaco.Uri.parse('file:///tmp/qsharp/_x2f_/Bell.qs');
 
 const [
   ONIGASM_FILE,

@@ -1,3 +1,3 @@
-[submodule "qsharp-compiler"]
-	path = qsharp-compiler
-	url = https://github.com/microsoft/qsharp-compiler.git
+[submodule "qsharp-compiler-mirror"]
+	path = qsharp-compiler-mirror
+	url = https://github.com/JakuJ/qsharp-compiler-mirror.git
