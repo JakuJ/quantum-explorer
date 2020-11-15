@@ -4,7 +4,7 @@ using Microsoft.Quantum.QsCompiler.SyntaxTree;
 namespace Compiler
 {
     /// <inheritdoc />
-    /// <summary>A simplified representation of a quantum gate meant to be used in the compositor.</summary>
+    /// <summary>A simplified representation of a quantum gate meant to be used in the composer.</summary>
     public class QuantumGate : IEquatable<QuantumGate>
     {
         /// <summary>Initializes a new instance of the <see cref="QuantumGate"/> class.</summary>

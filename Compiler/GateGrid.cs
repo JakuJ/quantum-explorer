@@ -205,7 +205,7 @@ namespace Compiler
         }
 
         /// <inheritdoc/>
-        [ExcludeFromCodeCoverage] // Only used as a placeholder until the Compositor is done
+        [ExcludeFromCodeCoverage] // Only used as a placeholder until the Composer is done
         public override string ToString()
         {
             StringBuilder builder = new();
