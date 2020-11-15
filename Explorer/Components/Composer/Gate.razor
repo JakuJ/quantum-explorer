@@ -1,7 +1,16 @@
 @using Common
+@using System.IO
 
 <div id="@Id" class="gate">
-    <p>@Name</p>
+    @switch (CheckIconPath())
+    {
+        case true:
+            <img src="@(IconPath)">
+            break;
+        case false:
+            <span class="gate-name">@Name</span>
+            break;
+    }
 </div>
 
 @code {
@@ -11,4 +20,17 @@
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
+    public string IconPath
+    {
+        get => $"images/icons/{Name}.svg";
+    }
+
+    /// <summary>
+    /// Checks if the proper icon exists
+    /// </summary>
+    /// <returns></returns>
+    public bool CheckIconPath()
+    {
+        return File.Exists($"wwwroot/{IconPath}");
+    }
 }
