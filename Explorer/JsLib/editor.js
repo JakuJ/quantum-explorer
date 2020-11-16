@@ -19,7 +19,11 @@ const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 
 const SYNTAX_FILES_FOLDER = 'syntaxFiles';
 const LANGUAGE_ID = 'qsharp';
-const MONACO_URI = monaco.Uri.parse(`file:///tmp/${uuidv4()}.qs`);
+
+const UUID = uuidv4();
+const WORKSPACE_NAME = `${UUID}-workspace`;
+const WORKSPACE_URI = monaco.Uri.parse(`file:///tmp/qsharp/${WORKSPACE_NAME}`);
+const FILE_URI = monaco.Uri.parse(`file:///tmp/qsharp/${WORKSPACE_NAME}/dummy.qs`);
 
 const [
   ONIGASM_FILE,
@@ -89,7 +93,7 @@ export class Editor {
     );
 
     window.editorsDict[id] = monaco.editor.create(element, {
-      model: monaco.editor.createModel(loadCode() || INIT_CODE, LANGUAGE_ID, MONACO_URI),
+      model: monaco.editor.createModel(loadCode() || INIT_CODE, LANGUAGE_ID, FILE_URI),
       theme: LIGHT_THEME_NAME,
       minimap: {
         enabled: false
@@ -191,6 +195,10 @@ function createLanguageClient(connection) {
         error: () => ErrorAction.Continue,
         closed: () => CloseAction.DoNotRestart,
       },
+      workspaceFolder: {
+        uri: WORKSPACE_URI,
+        name: WORKSPACE_NAME
+      }
     },
     // create a language client connection from the JSON RPC connection on demand
     connectionProvider: {
