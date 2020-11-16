@@ -19,7 +19,7 @@ const WEBSOCKET_PORT = '8091';
 const UUID = uuidv4();
 const WORKSPACE_NAME = `${UUID}-workspace`;
 const WORKSPACE_URI = monaco.Uri.parse(`file:///tmp/qsharp/${WORKSPACE_NAME}`);
-const FILE_URI = monaco.Uri.parse(`file:///tmp/qsharp/${WORKSPACE_NAME}/dummy.qs`);
+const FILE_URI = monaco.Uri.parse(`file:///tmp/qsharp/${WORKSPACE_NAME}/_content_.qs`);
 
 const [
   ONIGASM_FILE,
