@@ -3,22 +3,18 @@ import {loadWASM} from 'onigasm';
 import {Registry} from 'monaco-textmate';
 import {wireTmGrammars} from 'monaco-editor-textmate';
 import * as path from 'path';
-import {saveCode, loadCode} from './storage';
-import {listen, MessageConnection} from 'vscode-ws-jsonrpc';
-import {
-  MonacoLanguageClient, CloseAction, ErrorAction,
-  MonacoServices, createConnection
-} from 'monaco-languageclient';
+import {loadCode, saveCode} from './storage';
+import {listen} from 'vscode-ws-jsonrpc';
+import {CloseAction, createConnection, ErrorAction, MonacoLanguageClient, MonacoServices} from 'monaco-languageclient';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import {v4 as uuidv4} from 'uuid';
-
-const normalizeUrl = require('normalize-url');
 
 const LIGHT_THEME_NAME = 'vs-code-custom-light-theme';
 const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 
 const SYNTAX_FILES_FOLDER = 'syntaxFiles';
 const LANGUAGE_ID = 'qsharp';
+const WEBSOCKET_PORT = '8091';
 
 const UUID = uuidv4();
 const WORKSPACE_NAME = `${UUID}-workspace`;
@@ -60,6 +56,8 @@ const INIT_CODE = `namespace HelloWorld {
 export class Editor {
 
   static async InitializeEditor(element) {
+    await loadWASM(ONIGASM_FILE);
+
     element.innerHTML = '';
 
     window.editorsDict = window.editorsDict || {};
@@ -73,16 +71,12 @@ export class Editor {
       aliases: ['Q#', 'qsharp']
     });
 
-    await loadWASM(ONIGASM_FILE);
-
     const registry = new Registry({
       getGrammarDefinition: async () => ({
         format: 'json',
         content: await fetch(TM_LANGUAGE).then(x => x.text())
       })
     });
-
-    const grammars = new Map([[LANGUAGE_ID, 'source.qsharp']]);
 
     monaco.editor.defineTheme(LIGHT_THEME_NAME,
       await fetch(LIGHT_THEME_JSON).then(x => x.json())
@@ -113,8 +107,41 @@ export class Editor {
 
     MonacoServices.install(window.editorsDict[id]);
 
+    const grammars = new Map([[LANGUAGE_ID, 'source.qsharp']]);
+    await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
+
+    new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
+
+    window.editorsDict[id].addAction({
+      id: 'set-light-theme',
+      label: 'Switch to Light Theme',
+      precondition: null,
+      keybindingContext: null,
+      contextMenuGroupId: 'editorOptions',
+      contextMenuOrder: 0,
+      run: () => {
+        monaco.editor.setTheme(LIGHT_THEME_NAME);
+      }
+    });
+
+    window.editorsDict[id].addAction({
+      id: 'set-dark-theme',
+      label: 'Switch to Dark Theme',
+      precondition: null,
+      keybindingContext: null,
+      contextMenuGroupId: 'editorOptions',
+      contextMenuOrder: 1,
+      run: () => {
+        monaco.editor.setTheme(DARK_THEME_NAME);
+      }
+    });
+
+    window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+      saveCode(window.editorsDict[id].getValue());
+    });
+
     // create the web socket
-    const url = createUrl('/monaco-editor');
+    const url = createUrl('monaco-editor');
     const webSocket = createWebSocket(url);
     // listen when the web socket is opened
     listen({
@@ -125,31 +152,6 @@ export class Editor {
         const disposable = languageClient.start();
         connection.onClose(() => disposable.dispose());
       }
-    });
-
-    await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
-
-    new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
-
-    window.editorsDict[id].addAction({
-      id: 'change-custom-theme',
-      label: 'Switch Light/Dark Theme',
-      precondition: null,
-      keybindingContext: null,
-      contextMenuGroupId: 'editorOptions',
-      contextMenuOrder: 0,
-      run: ed => {
-        const currTheme = ed._themeService.getTheme().themeName;
-        if (currTheme === LIGHT_THEME_NAME) {
-          monaco.editor.setTheme(DARK_THEME_NAME);
-        } else {
-          monaco.editor.setTheme(LIGHT_THEME_NAME);
-        }
-      }
-    });
-
-    window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
-      saveCode(window.editorsDict[id].getValue());
     });
 
     return id;
@@ -166,10 +168,8 @@ export class Editor {
 
 function createUrl(path) {
   const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  const port = '8091'; // TODO: Move to env variable?
-  return normalizeUrl(
-    `${protocol}://${location.hostname}:${port}${location.pathname}${path}`,
-  );
+  const port = WEBSOCKET_PORT;
+  return `${protocol}://${location.hostname}:${port}/${path}`;
 }
 
 function createWebSocket(url) {

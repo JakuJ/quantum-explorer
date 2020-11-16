@@ -7,8 +7,6 @@
     <JsLibRoot>JsLib</JsLibRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)\node_modules\**</DefaultItemExcludes>
     <NpmInstallStampFile>$(JsLibRoot)\node_modules\.install-stamp</NpmInstallStampFile>
-    <PreserveCompilationReferences>true</PreserveCompilationReferences>
-    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,14 +21,12 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
-    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.3.57" />
   </ItemGroup>
 
   <PropertyGroup>
     <StartAction>Project</StartAction>
     <ExternalConsole>true</ExternalConsole>
     <ApplicationURL>https://localhost:8081;http://localhost:8080</ApplicationURL>
-    <UserSecretsId>93aa2ed6-7792-44a1-91d4-eb3619cba424</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -42,7 +38,6 @@
   <ItemGroup>
     <None Include="$(JsLibRoot)\*.json" />
     <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
-    <Content Include="Dockerfile" />
     <Content Include="syntax\onigasm.wasm" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
