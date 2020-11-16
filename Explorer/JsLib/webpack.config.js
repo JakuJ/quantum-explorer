@@ -3,8 +3,10 @@ const path = require('path');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 module.exports = {
-  mode: 'production',
+  mode: isDev ? 'development' : 'production',
   entry: {
     library: path.resolve(__dirname, 'library.js'),
   },

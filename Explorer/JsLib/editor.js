@@ -14,7 +14,10 @@ const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 
 const SYNTAX_FILES_FOLDER = 'syntaxFiles';
 const LANGUAGE_ID = 'qsharp';
-const WEBSOCKET_PORT = '8091';
+
+const isProd = process.env.NODE_ENV === 'production';
+const WEBSOCKET_PORT = isProd ? '' : ':8091';
+const WEBSOCKET_HOST = isProd ? 'qexplorer-ls.herokuapp.com' : location.hostname;
 
 const UUID = uuidv4();
 const WORKSPACE_NAME = `${UUID}-workspace`;
@@ -167,9 +170,9 @@ export class Editor {
 }
 
 function createUrl(path) {
-  const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  const port = WEBSOCKET_PORT;
-  return `${protocol}://${location.hostname}:${port}/${path}`;
+  let protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+  protocol = isProd ? 'wss' : protocol;
+  return `${protocol}://${WEBSOCKET_HOST}:${WEBSOCKET_PORT}/${path}`;
 }
 
 function createWebSocket(url) {

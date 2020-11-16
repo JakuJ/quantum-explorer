@@ -1,4 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
+ARG ENVIRONMENT=development
+ENV NODE_ENV ${ENVIRONMENT}
 
 # Install npm
 RUN apk add --update npm

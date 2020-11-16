@@ -2,8 +2,7 @@ version: "3.8"
 services:
   language-server:
     build:
-      context: .
-      dockerfile: qsharp-compiler-mirror/src/QsCompiler/ServerRunner/Dockerfile
+      context: qsharp-compiler-mirror
     image: language-server
     container_name: language-server
     ports:
@@ -11,7 +10,6 @@ services:
   explorer:
     build:
       context: .
-      dockerfile: Explorer/Dockerfile
     image: explorer
     container_name: explorer
     ports:
