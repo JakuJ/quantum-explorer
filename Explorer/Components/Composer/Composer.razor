@@ -1,1 +1,41 @@
-<div class="vis-placeholder">This is where the composer will be</div>
+@using Compiler
+@inject IJSRuntime JsRuntime
+
+<div class="overflow-hidden">
+    @if (gates != null)
+    {
+        <Grid Gates="@(gates)"/>
+    }
+</div>
+
+@code {
+    private QuantumGate?[,]? gates;
+
+    private QuantumGate?[,] GateGridToArray(GateGrid grid)
+    {
+        var arr = new QuantumGate?[grid.Width, grid.Height];
+        foreach ((QuantumGate gate, int x, int y) in grid.Gates)
+        {
+            arr[x, y] = gate;
+        }
+        return arr;
+    }
+
+    public async Task UpdateGrids(Dictionary<string, GateGrid> ast)
+    {
+        // force the underlying Gate component to render from scratch
+        gates = null;
+        StateHasChanged();
+
+        gates = GateGridToArray(ast.First().Value);
+        StateHasChanged();
+
+        await JsRuntime.InvokeVoidAsync("Library.initGrids");
+    }
+    
+    [JSInvokable]
+    public static void InsertColumn(string id)
+    {
+        Console.WriteLine($"Inserting a new column at snap: {id}");
+    }
+}
