@@ -12,12 +12,11 @@ import {v4 as uuidv4} from 'uuid';
 const LIGHT_THEME_NAME = 'vs-code-custom-light-theme';
 const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 
-const SYNTAX_FILES_FOLDER = 'syntaxFiles';
+const SYNTAX_FILES_FOLDER = 'syntax';
 const LANGUAGE_ID = 'qsharp';
 
-const isProd = process.env.NODE_ENV === 'production';
-const WEBSOCKET_PORT = isProd ? '' : ':8091';
-const WEBSOCKET_HOST = isProd ? 'qexplorer-ls.herokuapp.com' : location.hostname;
+const isProduction = process.env.NODE_ENV === 'production';
+const WEBSOCKET_HOST = isProduction ? 'qexplorer-ls.herokuapp.com' : 'localhost';
 
 const UUID = uuidv4();
 const WORKSPACE_NAME = `${UUID}-workspace`;
@@ -152,9 +151,14 @@ export class Editor {
       onConnection: connection => {
         // create and start the language client
         const languageClient = createLanguageClient(connection);
+        window.addEventListener('beforeunload', () => {
+          languageClient.stop();
+        });
         const disposable = languageClient.start();
-        connection.onClose(() => disposable.dispose());
-      }
+        connection.onClose(() => {
+          disposable.dispose();
+        });
+      },
     });
 
     return id;
@@ -170,9 +174,9 @@ export class Editor {
 }
 
 function createUrl(path) {
-  let protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  protocol = isProd ? 'wss' : protocol;
-  return `${protocol}://${WEBSOCKET_HOST}:${WEBSOCKET_PORT}/${path}`;
+  const protocol = isProduction ? 'wss' : 'ws';
+  const port = isProduction ? '' : ':8091';
+  return `${protocol}://${WEBSOCKET_HOST}${port}/${path}`;
 }
 
 function createWebSocket(url) {
@@ -182,7 +186,7 @@ function createWebSocket(url) {
     reconnectionDelayGrowFactor: 1.3,
     connectionTimeout: 10000,
     maxRetries: Infinity,
-    debug: false,
+    debug: !isProduction,
   };
   return new ReconnectingWebSocket(url, [], socketOptions);
 }

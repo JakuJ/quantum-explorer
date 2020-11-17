@@ -2,4 +2,5 @@ build:
     docker:
       web: Dockerfile
     config:
-      ENVIRONMENT: production
+      NODE_ENV: production
+      ASPNETCORE_ENVIRONMENT: Production

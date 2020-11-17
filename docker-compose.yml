@@ -13,7 +13,6 @@ services:
     image: explorer
     container_name: explorer
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "5000:80"
     depends_on:
       - language-server
