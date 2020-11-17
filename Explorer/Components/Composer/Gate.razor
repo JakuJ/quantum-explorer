@@ -1,5 +1,12 @@
 @using Common
+@using System
+@using System.Web
 @using System.IO
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Mvc.ViewEngines
+@using Microsoft.Extensions.DependencyInjection
+
+@inject IWebHostEnvironment hostEnvironment
 
 <div id="@Id" class="gate">
     @if (CheckIconPath())
@@ -14,6 +21,18 @@
 
 @code {
 
+    //ElementReference htmlButton;
+    //RadzenButton radzenButton;
+
+    //void ShowTooltip(ElementReference elementReference, TooltipOptions options = null) => tooltipService.Open(elementReference, "Some content", options);
+
+    // private readonly IWebHostEnvironment _env;
+
+    //public Gate(IWebHostEnvironment env)
+    //{
+    //    _env = env;
+    //}
+
     [Parameter]
     public string Name { get; set; } = "";
 
@@ -24,12 +43,24 @@
         get => $"images/icons/{Name}.svg";
     }
 
+    //public string GetPath(IWebHostEnvironment hostEnvironment)
+    //{
+    //    var path = hostEnvironment.WebRootPath;
+    //    return path;
+    //}
+
     /// <summary>
     /// Checks if the proper icon exists
     /// </summary>
     /// <returns></returns>
     public bool CheckIconPath()
     {
+        //var path = GetPath();
+        //var path = hostEnvironment.WebRootPath;
+        //return File.Exists(IconPath);
+        //var p = HttpContext.Current.Server.MapPath($"~/{IconPath}");
+        //var d = AppDomain.CurrentDomain.BaseDirectory;
+        //var dir = Directory.GetCurrentDirectory();
         return File.Exists($"wwwroot/{IconPath}");
     }
 }

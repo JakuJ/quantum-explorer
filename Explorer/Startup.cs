@@ -44,6 +44,8 @@ namespace Explorer
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
+
+            // services.AddScoped<IWebHostEnvironment>();
         }
     }
 }
