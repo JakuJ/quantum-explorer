@@ -32,7 +32,8 @@ namespace Explorer.Tests
             cut.Find(".gate-name").TextContent.MarkupMatches("H");
 
             // it doesn't work, the paths are different for unit testing so the photo cannot be loaded
-            //cut.Find(".img").MarkupMatches("MResetZ");
+            // we have to get the proper wwwroot location by injecting IWebHostEnvironment
+            // cut.Find(".img").MarkupMatches("MResetZ");
             return;
         }
     }
