@@ -11,6 +11,9 @@
     @for (var y = 0; y < Gates.GetLength(1); y++)
     {
         <div class="grid-row">
+
+            @* <RowID y=@(y)/> *@
+
             @for (var x = 0; x < Gates.GetLength(0); x++)
             {
                 (int localX, int localY) = (x, y);
@@ -18,7 +21,7 @@
                 var cellSnapPoint = new SnapPoint { XOffset = $"{x * 40}px" };
                 @RenderContent(cellSnapPoint)
 
-                <SnapPoint xOffset=@($"{x * 40 + 20}px")/>
+                <SnapPoint Half=true xOffset=@($"{x * 40 + 20}px")/>
 
                 <Cell>
                     @{

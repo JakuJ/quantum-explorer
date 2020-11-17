@@ -34,6 +34,14 @@ export function initGrids() {
         drop: (event, {draggable}) => {
           const gateID = draggable[0].id;
 
+          if(snap.classList.contains('half'))
+          {
+            console.log('dropped on half snap');
+
+            // insert a new column
+            DotNet.invokeMethodAsync('Explorer', 'InsertColumn', snap.id);
+          }
+
           // clear previous snap-gate association
           const prevSnap = gate2snap[gateID];
           if (prevSnap) {

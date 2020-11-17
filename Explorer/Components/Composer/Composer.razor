@@ -32,5 +32,10 @@
 
         await JsRuntime.InvokeVoidAsync("Library.initGrids");
     }
-
+    
+    [JSInvokable]
+    public static void InsertColumn(string id)
+    {
+        Console.WriteLine($"Inserting a new column at snap: {id}");
+    }
 }
