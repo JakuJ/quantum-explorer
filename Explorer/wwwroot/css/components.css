@@ -28,15 +28,27 @@
 }
 
 /*visualizer*/
+
 .visualizer {
     width: 100%;
     height: 100%;
+}
+
+.vis-conteiner {
+    display: flex;
+    flex-direction: column;
+}
+
+.vis-content {
+    flex: 1;
+    overflow-y:hidden;
 }
 
 .vis-area {
     width: 100%;
     height: 100%;
     display: flex;
+    overflow-x: hidden;
 }
 
 .vis-gate-panel {
@@ -48,9 +60,6 @@
 .vis-state-vis {
     flex: 1;
     height: 100%;
-    background-color: black;
-    color: white;
-    resize: none;
 }
 
 .vis-output {
@@ -59,5 +68,17 @@
     background-color: black;
     color: white;
     resize: none;
+}
+
+.vis-setting{
+    margin: 3px;
+}
+
+.vis-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 

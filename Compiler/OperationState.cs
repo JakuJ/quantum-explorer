@@ -28,12 +28,12 @@ namespace Compiler
         /// <summary>
         /// Gets or sets a list of complex numbers that represent quantum states of arguments.
         /// </summary>
-        public List<Complex> Arguments { get; set; }
+        public List<(int, Complex)> Arguments { get; set; }
 
         /// <summary>
         /// Gets or sets a list of complex numbers that represent quantum states of results.
         /// </summary>
-        public List<Complex> Results { get; set; }
+        public List<(int, Complex)> Results { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OperationState"/> class.

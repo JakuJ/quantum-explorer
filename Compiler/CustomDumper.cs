@@ -14,7 +14,7 @@ namespace Compiler
         /// <summary>
         /// Gets last dumped quantum states.
         /// </summary>
-        public List<Complex> Values { get; private set; } = new List<Complex>();
+        public List<(int, Complex)> Values { get; private set; } = new List<(int, Complex)>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomDumper"/> class.
@@ -27,14 +27,14 @@ namespace Compiler
         /// <inheritdoc/>
         public override bool Callback(uint idx, double real, double img)
         {
-            Values.Add(new Complex(real, img));
+            Values.Add(((int)idx, new Complex(real, img)));
             return true;
         }
 
         /// <inheritdoc/>
         public override bool Dump(IQArray<Qubit> qubits = null)
         {
-            Values = new List<Complex>();
+            Values = new List<(int, Complex)>();
             return base.Dump(qubits);
         }
 
