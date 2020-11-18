@@ -1,11 +1,9 @@
 @page "/"
+@using Microsoft.Extensions.Logging
+@using Newtonsoft.Json
 @using Compiler
 @using Explorer.Utilities.ComponentTree
-@using Newtonsoft.Json
-@using System.Text
-@using Microsoft.Extensions.Logging
 @using System.Diagnostics.CodeAnalysis
-@using Microsoft.Quantum.Extensions.Math
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -13,7 +11,8 @@
 <div class="main">
     <div class="top-row px-4">
         <Toasts/>
-        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Analyze circuits</button>
+        <LsStatus @ref="Status"/>
+        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Compile & Run</button>
     </div>
 
     <div class="content px-4">
@@ -30,7 +29,7 @@
     private Panel<Compositor> Compositor;
     private Panel<Visualizer> Visualizer;
 
-    private readonly StringBuilder outputSb = new();
+    private LsStatus Status;
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -57,8 +56,6 @@
     [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
-        outputSb.Clear();
-
         string code = await Editor.Component.GetCode();
         await Compiler.Compile(code, true);
     }
@@ -74,6 +71,7 @@
         });
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
+        await Editor.Component.SetStatusReference(Status);
     }
 
 }

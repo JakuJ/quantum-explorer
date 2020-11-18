@@ -79,25 +79,3 @@ a, .btn-link {
   right: 0.75rem;
   top: 0.5rem;
 }
-
-@media (max-width: 767.98px) {
-  .main .top-row:not(.auth) {
-    display: none;
-  }
-
-  .main .top-row.auth {
-    justify-content: space-between;
-  }
-
-  .main .top-row a, .main .top-row .btn-link {
-    margin-left: 0;
-  }
-}
-
-@media (min-width: 768px) {
-
-  .main .top-row {
-    position: sticky;
-    top: 0;
-  }
-}

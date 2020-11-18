@@ -22,7 +22,8 @@ namespace Explorer
         {
             if (env.IsProduction())
             {
-                app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler("/Error")
+                   .UseHttpsRedirection();
             }
             else
             {
@@ -30,7 +31,6 @@ namespace Explorer
             }
 
             app.UseRouting()
-               .UseHttpsRedirection()
                .UseStaticFiles()
                .UseEndpoints(endpoints =>
                 {

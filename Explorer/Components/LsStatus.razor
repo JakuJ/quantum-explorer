@@ -1,0 +1,46 @@
+@using System.Text.Json.Serialization
+
+<div id="ls-status" class="alert alert-light" role="alert">
+    @switch (state)
+    {
+        case ConnectionState.Disconnected:
+        {
+            <img src="/images/icons/disconnected.svg" alt="" width="16" height="16">
+            @:Disconnected
+            break;
+        }
+        case ConnectionState.Connecting:
+        {
+            <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+            @:Connecting
+            break;
+        }
+        case ConnectionState.Connected:
+        {
+            <img src="/images/icons/connected.svg" alt="" width="16" height="16">
+            @:Connected
+            break;
+        }
+    }
+</div>
+
+@code {
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum ConnectionState
+    {
+        Disconnected,
+        Connecting,
+        Connected,
+    }
+
+    private ConnectionState state = ConnectionState.Disconnected;
+
+    [JSInvokable]
+    public void SetState(ConnectionState _state)
+    {
+        state = _state;
+        StateHasChanged();
+    }
+
+}

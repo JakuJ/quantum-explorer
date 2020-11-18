@@ -16,42 +16,6 @@
     "url": "https://github.com/JakuJ/quantum-explorer/issues"
   },
   "homepage": "https://github.com/JakuJ/quantum-explorer#readme",
-  "eslintConfig": {
-    "extends": "eslint:recommended",
-    "rules": {
-      "indent": [
-        "error",
-        2
-      ],
-      "linebreak-style": [
-        "error",
-        "unix"
-      ],
-      "quotes": [
-        "error",
-        "single",
-        {
-          "avoidEscape": true,
-          "allowTemplateLiterals": true
-        }
-      ],
-      "semi": [
-        "error",
-        "always"
-      ]
-    },
-    "parserOptions": {
-      "ecmaVersion": 11,
-      "sourceType": "module",
-      "ecmaFeatures": {
-        "jsx": false,
-        "globalReturn": false
-      }
-    },
-    "env": {
-      "browser": true
-    }
-  },
   "dependencies": {
     "@babel/core": "^7.12.3",
     "babel-loader": "^8.1.0",
@@ -73,6 +37,7 @@
     "webpack-cli": "^4.2.0"
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "eslint": "^7.13.0"
   }
 }
