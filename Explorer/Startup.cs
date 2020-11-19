@@ -13,9 +13,15 @@ namespace Explorer
     [ExcludeFromCodeCoverage]
     public class Startup
     {
-        public Startup(IConfiguration configuration) => Configuration = configuration;
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
+        {
+            Configuration = configuration;
+            this.environment = environment;
+        }
 
         public IConfiguration Configuration { get; }
+
+        private IWebHostEnvironment environment;
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -44,11 +50,7 @@ namespace Explorer
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
-
-            // warning ASP0000: Consider alternatives such as dependency injecting services as parameters to 'Configure'
-            var provider = services.BuildServiceProvider();
-            var host = provider.GetService<IWebHostEnvironment>();
-            services.AddSingleton<IWebHostEnvironment>(host);
+            services.AddSingleton<IWebHostEnvironment>(_ => environment);
         }
     }
 }
