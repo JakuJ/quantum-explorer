@@ -45,7 +45,10 @@ namespace Explorer
             services.AddServerSideBlazor();
             services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
 
-            // services.AddScoped<IWebHostEnvironment>();
+            // warning ASP0000: Consider alternatives such as dependency injecting services as parameters to 'Configure'
+            var provider = services.BuildServiceProvider();
+            var host = provider.GetService<IWebHostEnvironment>();
+            services.AddSingleton<IWebHostEnvironment>(host);
         }
     }
 }
