@@ -16,7 +16,6 @@
     <PackageReference Include="Microsoft.Quantum.Simulators" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.CsharpGeneration" Version="0.12.20100504" />
     <PackageReference Include="Microsoft.Quantum.EntryPointDriver" Version="0.12.20100504" />
-    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Protocol" Version="16.3.57" />
   </ItemGroup>
 
   <ItemGroup Label="References for the Q# compiler">

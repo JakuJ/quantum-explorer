@@ -12,7 +12,6 @@
   <ItemGroup>
     <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
     <ProjectReference Include="..\Compiler\Compiler.csproj" />
-    <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
   <ItemGroup Label="Package references">
@@ -22,17 +21,7 @@
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <StartAction>Project</StartAction>
-    <ExternalConsole>true</ExternalConsole>
-    <ApplicationURL>https://localhost:8081;http://localhost:8080</ApplicationURL>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-
+  
   <!--  Below are settings for NPM and webpack -->
 
   <ItemGroup>
@@ -40,7 +29,7 @@
     <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
   </ItemGroup>
 
-  <Target Name="EnsureNodeEnv" 
+  <Target Name="EnsureNodeEnv"
           BeforeTargets="RestoreNpmPackages" 
           Condition="!Exists('$(JsLibRoot)\node_modules')">
     <!-- Ensure Node.js is installed -->
@@ -60,7 +49,7 @@
     <Touch Files="$(NpmInstallStampFile)" AlwaysCreate="true" />
   </Target>
 
-  <Target Name="BuildJsBundle" 
+  <Target Name="BuildJsBundle"
           BeforeTargets="PreBuildEvent" 
           Inputs="@(JsFiles)"
           Outputs="wwwroot\js\library.bundle.js;wwwroot\js\editor.worker.js">

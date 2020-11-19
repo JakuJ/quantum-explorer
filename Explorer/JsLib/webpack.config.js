@@ -1,5 +1,5 @@
 const path = require('path');
-
+const webpack = require('webpack');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
@@ -56,5 +56,10 @@ module.exports = {
         '!toggleTabFocusMode',
       ],
     }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      // TODO: Use os.tempdir() for local development when qsharp-compiler#737 gets resolved
+      'process.env.TEMP_DIR': JSON.stringify('/tmp'),
+    })
   ]
 };

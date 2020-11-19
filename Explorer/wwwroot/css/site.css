@@ -45,6 +45,10 @@ a, .btn-link {
   background-color: #F6F6F6;
 }
 
+#compile {
+  padding: 0.25rem;
+}
+
 .toast {
   margin: 0.75rem 1.5rem;
 }

@@ -23,8 +23,8 @@ const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 // URIs for the language server
 const UUID = uuidv4();
 const WORKSPACE_NAME = `${UUID}-workspace`;
-const WORKSPACE_URI = monaco.Uri.parse(`file:///tmp/qsharp/${WORKSPACE_NAME}`);
-const FILE_URI = monaco.Uri.parse(`file:///tmp/qsharp/${WORKSPACE_NAME}/_content_.qs`);
+const WORKSPACE_URI = monaco.Uri.parse(`file://${process.env.TEMP_DIR}/qsharp/${WORKSPACE_NAME}`);
+const FILE_URI = monaco.Uri.parse(`file://${process.env.TEMP_DIR}/qsharp/${WORKSPACE_NAME}/_content_.qs`);
 const LANGUAGE_ID = 'qsharp';
 
 // Paths to files in the syntax directory
@@ -178,21 +178,28 @@ export class Editor {
             console.log(message);
           }
 
+          let status = null;
+
           switch (true) {
           case message.startsWith('Discovered Q# project'):
-            await statusRef.invokeMethodAsync('SetState', 'Connecting');
+            status = 'Connecting';
             break;
           case message.startsWith('Done loading project'):
-            await statusRef.invokeMethodAsync('SetState', 'Connected');
+            status = 'Connected';
             break;
           case message.startsWith('Error on loading project'):
             // This happens from time to time with multiple clients connecting at once
             // The client retries the connection right away, so nothing has to be done
-            await statusRef.invokeMethodAsync('SetState', 'Disconnected');
+            status = 'Disconnected';
+            break;
+          case message.endsWith('Only syntactic diagnostics are generated.'):
+            status = 'SyntaxOnly';
             break;
           default:
-            break;
+            return;
           }
+
+          await statusRef.invokeMethodAsync('SetState', status);
         });
 
         // Invoked when the connection is closed by the server

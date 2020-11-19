@@ -21,6 +21,12 @@
             @:Connected
             break;
         }
+        case ConnectionState.SyntaxOnly:
+        {
+            <img src="/images/icons/warning.svg" alt="" width="16" height="16">
+            @:Syntax only
+            break;
+        }
     }
 </div>
 
@@ -32,6 +38,7 @@
         Disconnected,
         Connecting,
         Connected,
+        SyntaxOnly
     }
 
     private ConnectionState state = ConnectionState.Disconnected;
