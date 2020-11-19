@@ -1,6 +1,9 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Hosting
 @using Compiler
 @using static Utilities.Rendering
 @inject IJSRuntime JsRuntime
+@inject IWebHostEnvironment Environment;
 
 @{
     // Setting parameters in Components created in code (SnapPoint, Gate)
@@ -28,7 +31,7 @@
                         QuantumGate? quantumGate = Gates[localX, localY];
                         if (quantumGate != null)
                         {
-                            var gate = new Gate { Name = quantumGate.Name };
+                            var gate = new Gate(Environment) { Name = quantumGate.Name };
                             assocs.Add((cellSnapPoint.Id, gate.Id));
                             @RenderContent(gate)
                         }
