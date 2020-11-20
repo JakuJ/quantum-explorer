@@ -27,7 +27,7 @@
                 </div>
             }
             <div class="vis-area">
-                <div class="vis-gate-panel">
+                <div class="vis-gate-pane">
                     <RadzenTree Data="@States"
                                 Change="@ShowOperationState"
                                 Style="width: 100%; height: 100%">
@@ -51,30 +51,30 @@
                             </label>
                         </div>
                     </div>
-                    <div class="vis-content">
-                        <RadzenChart Style="height: 100%">
-                            <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Real">
-                                <TooltipTemplate Context="data">
-                                    <div>
-                                        <strong>@data.Idx:</strong> <strong>@String.Format("{0:0.###}", data.Real)</strong>+@String.Format("{0:0.###}", data.Imaginary)i
-                                    </div>
-                                </TooltipTemplate>
-                            </RadzenColumnSeries>
-                            <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Imaginary">
-                                <TooltipTemplate Context="data">
-                                    <div>
-                                        <strong>@data.Idx:</strong> @String.Format("{0:0.###}", data.Real)+<strong>@String.Format("{0:0.###}", data.Imaginary)i</strong>
-                                    </div>
-                                </TooltipTemplate>
-                            </RadzenColumnSeries>
-                            <RadzenValueAxis Min="-1" Max="1">
-                                <RadzenGridLines Visible="true" />
-                            </RadzenValueAxis>
-                            <RadzenLegend Visible="false" />
-                            <RadzenColumnOptions Margin="0" />
-                        </RadzenChart>
+                    <div class="vis-content" style="overflow-y: visible">
+                            <RadzenChart Style="height: 100%">
+                                <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Real">
+                                    <TooltipTemplate Context="data">
+                                        <div>
+                                            <strong>@data.Idx:</strong> <strong>@String.Format("{0:0.###}", data.Real)</strong>+@String.Format("{0:0.###}", data.Imaginary)i
+                                        </div>
+                                    </TooltipTemplate>
+                                </RadzenColumnSeries>
+                                <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Imaginary">
+                                    <TooltipTemplate Context="data">
+                                        <div>
+                                            <strong>@data.Idx:</strong> @String.Format("{0:0.###}", data.Real)+<strong>@String.Format("{0:0.###}", data.Imaginary)i</strong>
+                                        </div>
+                                    </TooltipTemplate>
+                                </RadzenColumnSeries>
+                                <RadzenValueAxis Min="-1" Max="1">
+                                    <RadzenGridLines Visible="true" />
+                                </RadzenValueAxis>
+                                <RadzenLegend Visible="false" />
+                                <RadzenColumnOptions Margin="0" />
+                            </RadzenChart>
+                        </div>
                     </div>
-                </div>
             </div>
         }
     </div>
