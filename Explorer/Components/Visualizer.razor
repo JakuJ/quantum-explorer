@@ -146,7 +146,7 @@
             list = list.Where(x => x.v.Magnitude != 0);
         var data = list.Select(x => new DataItem()
         {
-            Idx = '|' + Convert.ToString(x.idx, 2).PadLeft(binLength, '0') + '>',
+            Idx = '|' + new String(Convert.ToString(x.idx, 2).PadLeft(binLength, '0').Reverse().ToArray())+ '>',
             Real = x.v.Real,
             Imaginary = x.v.Imaginary
         });
