@@ -51,8 +51,8 @@
                             </label>
                         </div>
                     </div>
-                    <div class="vis-content" style="overflow-y: visible">
-                            <RadzenChart Style="height: 100%">
+                    <div class="vis-content" style="overflow-x: scroll;position:relative">
+                            <RadzenChart Style=@($"height: 90%;width:{chartSize};position:absolute; bottom:0;")>
                                 <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Real">
                                     <TooltipTemplate Context="data">
                                         <div>
@@ -96,6 +96,21 @@
     private bool showZeros = true;
 
     private string dataType = "Arguments";
+
+    private string chartSize
+    {
+        get
+        {
+            if(chartData==null || chartData.Count() < 16)
+            {
+                return "100%";
+            }
+            else
+            {
+                return 136 + 50 * chartData.Count() + "px";
+            }
+        }
+    }
 
     public void SetText(string text)
     {
