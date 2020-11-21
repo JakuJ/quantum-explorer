@@ -36,7 +36,7 @@
                                          HasChildren="@(e => (e as OperationState).Children.Any())"
                                          Expanded="@(data => true)">
                             <Template>
-                                <span style="line-height: 80%">@((context.Value as OperationState).Name)</span>
+                                <span style="line-height: 80%;margin-right: 20px;">@((context.Value as OperationState).Name)</span>
                             </Template>
                         </RadzenTreeLevel>
                     </RadzenTree>
