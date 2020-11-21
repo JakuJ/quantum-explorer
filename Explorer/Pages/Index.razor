@@ -52,7 +52,7 @@
         Compiler.OnDiagnostics += async (_, val) =>
         {
             outputSb.AppendLine(val);
-            ExecutionOutput.Component.SetText(outputSb.ToString());
+            OutputVisualizer.Component.SetText(outputSb.ToString());
         };
 
         Compiler.OnOutput += async (_, stdout) =>
@@ -64,14 +64,14 @@
 
             outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
 
-            ExecutionOutput.Component.SetText(outputSb.ToString());
+            OutputVisualizer.Component.SetText(outputSb.ToString());
         };
 
         Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
 
         Compiler.OnStatesRecorded += async (sender, states) =>
         {
-            ExecutionOutput.Component.ShowStates(states);
+            OutputVisualizer.Component.ShowStates(states);
         };
     }
 
@@ -81,7 +81,7 @@
         outputSb.Clear();
 
         await CompositorPlaceholder!.Component.SetCode("<compiling>");
-        ExecutionOutput.Component.SetText("<compiling>");
+        OutputVisualizer.Component.SetText("<compiling>");
 
         string code = await Editor.Component.GetCode();
         await Compiler.Compile(code, true);
@@ -107,7 +107,7 @@
     {
         if (outputSb.Length == 0) // no diagnostics
         {
-            ExecutionOutput.Component.SetText("<executing>");
+            OutputVisualizer.Component.SetText("<executing>");
         }
 
         Dictionary<string, GateGrid> ast;
