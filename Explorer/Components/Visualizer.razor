@@ -110,7 +110,8 @@
             }
             else
             {
-                return 136 + 50 * chartData.Count() + "px";
+                int binLength = (int)Math.Ceiling(Math.Log2(chartData.Count()));
+                return 136 + (8 * binLength + 20) * chartData.Count() + "px";
             }
         }
     }
