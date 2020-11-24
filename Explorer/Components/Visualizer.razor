@@ -20,7 +20,7 @@
         }
         else
         {
-            if(States==null)
+            if (States == null)
             {
                 <div class="vis-placeholder">
                     Run simulation to get quantum states.
@@ -55,29 +55,29 @@
                         </div>
                     </div>
                     <div class="vis-content" style="overflow-x: scroll;position:relative">
-                            <RadzenChart Style=@($"height: 90%;width:{chartSize};position:absolute; bottom:0;")>
-                                <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Real">
-                                    <TooltipTemplate Context="data">
-                                        <div>
-                                            <strong>@data.Idx:</strong> <strong>@String.Format("{0:0.###}", data.Real)</strong>+@String.Format("{0:0.###}", data.Imaginary)i
-                                        </div>
-                                    </TooltipTemplate>
-                                </RadzenColumnSeries>
-                                <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Imaginary">
-                                    <TooltipTemplate Context="data">
-                                        <div>
-                                            <strong>@data.Idx:</strong> @String.Format("{0:0.###}", data.Real)+<strong>@String.Format("{0:0.###}", data.Imaginary)i</strong>
-                                        </div>
-                                    </TooltipTemplate>
-                                </RadzenColumnSeries>
-                                <RadzenValueAxis Min="-1" Max="1">
-                                    <RadzenGridLines Visible="true" />
-                                </RadzenValueAxis>
-                                <RadzenLegend Visible="false" />
-                                <RadzenColumnOptions Margin="0" />
-                            </RadzenChart>
-                        </div>
+                        <RadzenChart Style=@($"height: 90%;width:{chartSize};min-width: 100%; position:absolute; bottom:0;")>
+                            <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Real">
+                                <TooltipTemplate Context="data">
+                                    <div>
+                                        <strong>@data.Idx:</strong> <strong>@String.Format("{0:0.###}", data.Real)</strong>+@String.Format("{0:0.###}", data.Imaginary)i
+                                    </div>
+                                </TooltipTemplate>
+                            </RadzenColumnSeries>
+                            <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Imaginary">
+                                <TooltipTemplate Context="data">
+                                    <div>
+                                        <strong>@data.Idx:</strong> @String.Format("{0:0.###}", data.Real)+<strong>@String.Format("{0:0.###}", data.Imaginary)i</strong>
+                                    </div>
+                                </TooltipTemplate>
+                            </RadzenColumnSeries>
+                            <RadzenValueAxis Min="-1" Max="1">
+                                <RadzenGridLines Visible="true" />
+                            </RadzenValueAxis>
+                            <RadzenLegend Visible="false" />
+                            <RadzenColumnOptions Margin="0" />
+                        </RadzenChart>
                     </div>
+                </div>
             </div>
         }
     </div>
@@ -104,14 +104,14 @@
     {
         get
         {
-            if(chartData==null || chartData.Count() < 16)
+            if (chartData == null)
             {
                 return "100%";
             }
             else
             {
                 int binLength = (int)Math.Ceiling(Math.Log2(chartData.Count()));
-                return 136 + (8 * binLength + 20) * chartData.Count() + "px";
+                return 136 + (15 * (binLength + 2) + 20) * chartData.Count() + "px";
             }
         }
     }
@@ -146,7 +146,7 @@
             list = list.Where(x => x.v.Magnitude != 0);
         var data = list.Select(x => new DataItem()
         {
-            Idx = '|' + new String(Convert.ToString(x.idx, 2).PadLeft(binLength, '0').Reverse().ToArray())+ '>',
+            Idx = '|' + new String(Convert.ToString(x.idx, 2).PadLeft(binLength, '0').Reverse().ToArray()) + '>',
             Real = x.v.Real,
             Imaginary = x.v.Imaginary
         });
@@ -162,7 +162,7 @@
 
     }
 
-    void ZerosSwitch(ChangeEventArgs checkedValue)
+    private void ZerosSwitch(ChangeEventArgs checkedValue)
     {
         if (showZeros == (bool)checkedValue.Value) return;
         showZeros = (bool)checkedValue.Value;
@@ -172,7 +172,7 @@
         }
     }
 
-    void DataTypeChanged(ChangeEventArgs e)
+    private void DataTypeChanged(ChangeEventArgs e)
     {
         var selected = e.Value.ToString();
         if (selected == null || selected == dataType) return;
