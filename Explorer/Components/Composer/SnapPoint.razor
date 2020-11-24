@@ -8,9 +8,16 @@
     public bool Half { get; set; } = false;
 
     [Parameter]
-    public string XOffset { get; set; } = "0px"; // default value
+    public int X { get; set; }
+
+    [Parameter]
+    public int Y { get; set; }
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
-    public string HalfClass => Half ? "half" : "";
+    private int XCoord => Half ? X * 40 + 20 : X * 40;
+
+    private string XOffset => $"{XCoord}px";
+
+    private string HalfClass => Half ? "half" : "";
 }

@@ -21,10 +21,13 @@
             {
                 (int localX, int localY) = (x, y);
 
-                var cellSnapPoint = new SnapPoint { XOffset = $"{x * 40}px" };
-                @RenderContent(cellSnapPoint)
+                // Snap point on the cell
+                var cellSnapPoint = new SnapPoint();
+                <SnapPoint X="@x" Y="@y" @ref="@cellSnapPoint"/>
 
-                <SnapPoint Half=true xOffset=@($"{x * 40 + 20}px")/>
+                var spoint = new SnapPoint();
+                <SnapPoint Half=true X="@x" Y="@y" @ref="@spoint"/>
+                HalfSnapPoints.Add(spoint.Id, spoint);
 
                 <Cell>
                     @{
@@ -46,6 +49,8 @@
 
     [Parameter]
     public QuantumGate[,] Gates { get; set; } = null!; // required parameter
+
+    public Dictionary<string, SnapPoint> HalfSnapPoints { get; set; } = new Dictionary<string, SnapPoint>();
 
     private List<(string, string)> assocs = new List<(string, string)>();
 
