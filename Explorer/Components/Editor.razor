@@ -26,4 +26,10 @@
         }
     }
 
+    public async Task SetStatusReference(LsStatus target)
+    {
+        var objRef = DotNetObjectReference.Create(target);
+        await JSRuntime.InvokeVoidAsync("Library.Editor.SetStatusReference", objRef);
+    }
+
 }

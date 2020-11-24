@@ -5,6 +5,15 @@
 }
 
 .editor-textarea {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
+}
+
+#ls-status {
+  margin: auto 10px;
+  padding: 0.25rem;
+}
+
+#ls-status > img {
+  margin-bottom: 3px;
 }

@@ -2,10 +2,9 @@
   "name": "library",
   "version": "1.0.0",
   "description": "JS scripts used by the Blazor application",
-  "main": "index.js",
+  "main": "library.js",
   "scripts": {
-    "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -17,60 +16,28 @@
     "url": "https://github.com/JakuJ/quantum-explorer/issues"
   },
   "homepage": "https://github.com/JakuJ/quantum-explorer#readme",
-  "eslintConfig": {
-    "extends": "eslint:recommended",
-    "rules": {
-      "indent": [
-        "error",
-        2
-      ],
-      "linebreak-style": [
-        "error",
-        "unix"
-      ],
-      "quotes": [
-        "error",
-        "single",
-        {
-          "avoidEscape": true,
-          "allowTemplateLiterals": true
-        }
-      ],
-      "semi": [
-        "error",
-        "always"
-      ]
-    },
-    "parserOptions": {
-      "ecmaVersion": 11,
-      "sourceType": "module",
-      "ecmaFeatures": {
-        "jsx": false,
-        "globalReturn": false
-      }
-    },
-    "env": {
-      "browser": true
-    }
-  },
   "dependencies": {
-    "monaco-editor": "^0.20.0",
-    "monaco-editor-textmate": "^2.2.2",
-    "monaco-editor-webpack-plugin": "^1.9.0",
-    "monaco-textmate": "^3.0.1",
-    "onigasm": "^2.2.5",
-    "split.js": "^1.6.2"
-  },
-  "devDependencies": {
     "@babel/core": "^7.12.3",
     "babel-loader": "^8.1.0",
     "clean-webpack-plugin": "^3.0.0",
     "css-loader": "^5.0.1",
-    "eslint": "^7.13.0",
     "file-loader": "^6.2.0",
+    "monaco-editor": "^0.20.0",
+    "monaco-editor-textmate": "^2.2.2",
+    "monaco-editor-webpack-plugin": "^1.9.0",
+    "monaco-languageclient": "0.11.0",
+    "monaco-textmate": "^3.0.1",
+    "onigasm": "^2.2.5",
+    "reconnecting-websocket": "^4.4.0",
+    "split.js": "^1.6.2",
     "style-loader": "^2.0.0",
+    "uuid": "^8.3.1",
+    "vscode-ws-jsonrpc": "^0.2.0",
     "webpack": "^4.5.0",
-    "webpack-bundle-analyzer": "^4.1.0",
     "webpack-cli": "^4.2.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.13.0"
   }
 }

@@ -1,32 +1,43 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
-WORKDIR /source
+
+# Set node environment
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
+
+# Install npm
 RUN apk add --update npm
 
-# Copy csproj and fsproj and restore as distinct layers
+# Restore dependencies
+WORKDIR /source
 COPY msbuild/ msbuild/
 COPY Explorer/*.csproj Explorer/
 COPY Compiler/*.csproj Compiler/
 COPY Common/*.csproj Common/
 COPY AstTransformations/*.fsproj AstTransformations/
-
 RUN dotnet restore Explorer/Explorer.csproj
 
-# Copy and build app and libraries
+# Build the app
 COPY Explorer/ Explorer/
 COPY Compiler/ Compiler/
 COPY Common/ Common/
 COPY AstTransformations/ AstTransformations/
+WORKDIR Explorer
+RUN dotnet build -c Release --no-restore
 
-WORKDIR /source/Explorer
-RUN dotnet build -c release --no-restore
-
-# Publish endpoint
+# Publish the app
 FROM build AS publish
-RUN dotnet publish -c release --no-build -o /app
+RUN dotnet publish -c Release --no-build -o /app
 
-# Final stage/image
+# Install libgomp required by Q# at run time
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
-WORKDIR /app
+
+# Set ASP.NET Core runtime environment
+ARG ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+
 RUN apk add --update libgomp
+
+# Final image
+WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "Explorer.dll"]
