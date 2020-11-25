@@ -20,8 +20,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+    <PackageReference Include="Radzen.Blazor" Version="2.16.0" />
   </ItemGroup>
-  
+
   <!--  Below are settings for NPM and webpack -->
 
   <ItemGroup>
@@ -30,7 +31,7 @@
   </ItemGroup>
 
   <Target Name="EnsureNodeEnv"
-          BeforeTargets="RestoreNpmPackages" 
+          BeforeTargets="RestoreNpmPackages"
           Condition="!Exists('$(JsLibRoot)\node_modules')">
     <!-- Ensure Node.js is installed -->
     <Exec Command="node --version" ContinueOnError="true">
@@ -41,7 +42,7 @@
 
   <Target Name="RestoreNpmPackages"
           BeforeTargets="BuildJsBundle"
-          Inputs="$(JsLibRoot)\package.json" 
+          Inputs="$(JsLibRoot)\package.json"
           Outputs="$(NpmInstallStampFile)">
     <!-- Restore NPM dependencies -->
     <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
@@ -50,7 +51,7 @@
   </Target>
 
   <Target Name="BuildJsBundle"
-          BeforeTargets="PreBuildEvent" 
+          BeforeTargets="PreBuildEvent"
           Inputs="@(JsFiles)"
           Outputs="wwwroot\js\library.bundle.js;wwwroot\js\editor.worker.js">
     <!-- Rebuild the JS bundle -->

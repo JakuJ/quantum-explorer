@@ -1,3 +1,12 @@
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+
 .resizable {
   width: 100%;
   height: 100%;
@@ -17,3 +26,71 @@
 #ls-status > img {
   margin-bottom: 3px;
 }
+
+/*visualizer*/
+
+.visualizer {
+  width: 100%;
+  height: 100%;
+}
+
+.vis-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.vis-content {
+  flex: 1;
+  overflow-y: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+.vis-area {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+.vis-gate-panel {
+  flex: 0 0 10em;
+  height: 100%;
+  font-size: 13px;
+}
+
+.vis-state-vis {
+  flex: 1;
+  height: 100%;
+  width: 100%;
+}
+
+.vis-output {
+  height: 100%;
+  width: 100%;
+  background-color: white;
+  color: black;
+  resize: none;
+  border: none;
+  font-family: monospace;
+  font-size: 14px;
+  padding: 1rem;
+}
+
+.vis-setting {
+  margin: 3px;
+}
+
+.vis-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.vis-tree-item {
+  line-height: 80%;
+  margin-right: 20px;
+}
+

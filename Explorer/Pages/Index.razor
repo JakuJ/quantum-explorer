@@ -1,8 +1,11 @@
 @page "/"
+@using System.Text
 @using Microsoft.Extensions.Logging
 @using Newtonsoft.Json
 @using Compiler
+@using AstTransformations
 @using Explorer.Utilities.ComponentTree
+@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
@@ -31,6 +34,8 @@
 
     private LsStatus Status;
 
+    private readonly StringBuilder outputSb = new();
+
     RenderFragment Components => new PanelRenderer().Render(tree);
 
     readonly PanelTree tree = new(PanelTree.Alignment.Horizontal);
@@ -49,15 +54,50 @@
 
         tree.AddPanel(sidePanel);
 
-        Compiler.OnDiagnostics += (_, s) => { Logger.LogError(s); };
-        Compiler.OnOutput += (_, s) => { Logger.LogInformation(s); };
+        Compiler.OnDiagnostics += (_, val) =>
+        {
+            outputSb.AppendLine(val);
+            Visualizer.Component.SetOutput(outputSb.ToString());
+        };
+
+        Compiler.OnOutput += (_, stdout) =>
+        {
+            if (outputSb.Length != 0)
+            {
+                outputSb.AppendLine();
+            }
+
+            outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
+
+            Visualizer.Component.SetOutput(outputSb.ToString());
+        };
+
+        Compiler.OnCompilation += (_, _) => ProcessCompilation();
+        Compiler.OnStatesRecorded += (_, states) => { Visualizer.Component.ShowStates(states); };
     }
 
     [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
+        outputSb.Clear();
+
+        Visualizer.Component.SetPlaceholder("Compiling ...");
+
         string code = await Editor.Component.GetCode();
-        await Compiler.Compile(code, true);
+
+    // run compilation in a separate thread so that we don't block the UI
+        Task task = new(() =>
+        {
+            Compiler.Compile(code, true).ContinueWith(
+                t =>
+                {
+                    string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
+                    Visualizer.Component.SetOutput($"Simulation errors occured:\n\n{messages}");
+                },
+                TaskContinuationOptions.OnlyOnFaulted);
+        }, TaskCreationOptions.LongRunning);
+
+        task.Start();
     }
 
     [ExcludeFromCodeCoverage]
@@ -72,6 +112,15 @@
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
         await Editor.Component.SetStatusReference(Status);
+    }
+
+    [ExcludeFromCodeCoverage]
+    private void ProcessCompilation()
+    {
+        if (outputSb.Length == 0) // no diagnostics
+        {
+            Visualizer.Component.SetPlaceholder("Executing ...");
+        }
     }
 
 }

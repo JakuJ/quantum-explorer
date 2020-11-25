@@ -1,1 +1,200 @@
-<p class="text-center">This is where the visualizations are meant to reside.</p>
+@using Compiler;
+@using System.Diagnostics.CodeAnalysis;
+@using System.Numerics;
+
+<div class="visualizer vis-container">
+    <div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link noselect @(isOutputChosen ? "active" : "")" @onclick="@(() => { isOutputChosen = true; })">Output</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link noselect @(isOutputChosen ? "" : "active")" @onclick="@(() => { isOutputChosen = false; })">Quantum States</a>
+            </li>
+        </ul>
+    </div>
+    <div class="vis-content">
+        @if (isPlaceholder)
+        {
+            <div class="vis-placeholder">
+                @Output
+            </div>
+        }
+        else
+        {
+            @if (isOutputChosen)
+            {
+                <textarea @bind="Output" class="vis-output" readonly></textarea>
+            }
+            else
+            {
+                <div class="vis-area">
+                    <div class="vis-gate-panel">
+                        <RadzenTree Data="@States"
+                                    Change="@ShowOperationState"
+                                    Style="width: 100%; height: 100%">
+                            <RadzenTreeLevel TextProperty="Name"
+                                             ChildrenProperty="Children"
+                                             HasChildren="@(e => ((OperationState)e).Children.Any())"
+                                             Expanded="@(_ => true)">
+                                <Template>
+                                    <span class="vis-tree-item">@(((OperationState)context.Value).Name)</span>
+                                </Template>
+                            </RadzenTreeLevel>
+                        </RadzenTree>
+                    </div>
+                    <div class="vis-container vis-state-vis @(selectedOperation == null ? "invisible" : "")">
+                        <div class="form-inline">
+                            <select class="form-control float-left vis-setting" @onchange="DataTypeChanged">
+                                <option>Arguments</option>
+                                <option>Results</option>
+                            </select>
+                            <div class="form-check float-left align-middle vis-setting">
+                                <input class="form-check-input" type="checkbox" checked="@showZeros" @onchange="ZerosSwitch">
+                                <label class="form-check-label">
+                                    Show Zero States
+                                </label>
+                            </div>
+                        </div>
+                        <div class="vis-content" style="overflow-x: scroll;position:relative">
+                            <RadzenChart Style=@($"height: 90%;width:{chartSize};min-width: 100%; position:absolute; bottom:0;")>
+                                <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Real">
+                                    <TooltipTemplate Context="data">
+                                        <div>
+                                            <strong>@($"{data.Real:0.###}")</strong>@($"{data.Imaginary:+0.###;-0.###;+0}")i
+                                        </div>
+                                    </TooltipTemplate>
+                                </RadzenColumnSeries>
+                                <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Imaginary">
+                                    <TooltipTemplate Context="data">
+                                        <div>
+                                            @($"{data.Real:0.###}")<strong>@($"{data.Imaginary:+0.###;-0.###;+0}")i</strong>
+                                        </div>
+                                    </TooltipTemplate>
+                                </RadzenColumnSeries>
+                                <RadzenValueAxis Min="-1" Max="1">
+                                    <RadzenGridLines Visible="true" />
+                                </RadzenValueAxis>
+                                <RadzenLegend Visible="false" />
+                                <RadzenColumnOptions Margin="0" />
+                            </RadzenChart>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+@code {
+
+    private string Output { get; set; } = "Run the simulation to see the output";
+
+    private bool isPlaceholder = true;
+
+    bool isOutputChosen = true;
+
+    private IEnumerable<OperationState>? States { get; set; }
+
+    private IEnumerable<DataItem>? chartData;
+
+    private OperationState? selectedOperation;
+
+    private bool showZeros = true;
+
+    private string dataType = "Arguments";
+
+    private string chartSize
+    {
+        get
+        {
+            if (chartData == null)
+            {
+                return "100%";
+            }
+
+            int binLength = (int)Math.Ceiling(Math.Log2(chartData.Count()));
+            return 136 + (15 * (binLength + 2) + 20) * chartData.Count() + "px";
+        }
+    }
+
+    public async void SetPlaceholder(string text) => await SetText(text, true);
+
+    public async void SetOutput(string text) => await SetText(text, false);
+
+    public async void ShowStates(IEnumerable<OperationState> states)
+    {
+        States = states;
+        selectedOperation = null;
+        chartData = null;
+        isPlaceholder = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SetText(string text, bool asPlaceholder)
+    {
+        isPlaceholder = asPlaceholder;
+        Output = text;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void CreateDisplayList()
+    {
+        List<(int idx, Complex v)>? list = (dataType == "Arguments") ? selectedOperation?.Arguments : selectedOperation?.Results;
+
+        if (list == null) return;
+
+        int binLength = (int)Math.Ceiling(Math.Log2(list.Count));
+
+        if (!showZeros)
+        {
+            list.RemoveAll(x => x.v.Magnitude == 0);
+        }
+
+        chartData = list.Select(pair => new DataItem
+        {
+            Idx = '|' + new String(Convert.ToString(pair.idx, 2).PadLeft(binLength, '0').Reverse().ToArray()) + '>',
+            Real = pair.v.Real,
+            Imaginary = pair.v.Imaginary
+        });
+    }
+
+    private void ShowOperationState(TreeEventArgs args)
+    {
+        if (args.Value is OperationState state)
+        {
+            selectedOperation = state;
+            CreateDisplayList();
+        }
+    }
+
+    private void ZerosSwitch(ChangeEventArgs checkedValue)
+    {
+        showZeros = checkedValue.Value is bool value && value;
+        if (selectedOperation != null)
+        {
+            CreateDisplayList();
+        }
+    }
+
+    private void DataTypeChanged(ChangeEventArgs e)
+    {
+        string? selected = e.Value?.ToString();
+        if (selected == null || selected == dataType) return;
+
+        dataType = selected;
+        CreateDisplayList();
+    }
+
+    [ExcludeFromCodeCoverage]
+    struct DataItem
+    {
+        public string Idx { get; init; }
+
+        public double Real { get; init; }
+
+        public double Imaginary { get; init; }
+    }
+
+}
