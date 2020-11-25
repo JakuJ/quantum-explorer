@@ -85,17 +85,17 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            var testString = "Test output";
+            const string testString = "Test output";
 
             // Act
             var vis = ctx.RenderComponent<Visualizer>();
-            vis.Instance.SetText(testString);
+            vis.Instance.SetOutput(testString);
 
             // Assert
             Assert.AreEqual(testString, vis.Find(".vis-output").GetAttribute("value"), "Custom output should be displayed in textarea");
         }
 
-        private List<(int Idx, Complex Value)> GenerateRandomStates(int length, int zerosCount = 0)
+        private static List<(int Idx, Complex Value)> GenerateRandomStates(int length, int zerosCount = 0)
         {
             List<(int Idx, Complex Value)> states = new();
 
@@ -107,7 +107,7 @@ namespace Explorer.Tests
             return states;
         }
 
-        private List<OperationState> GenerateSampleStates(List<int> sizes)
+        private static IEnumerable<OperationState> GenerateSampleStates(IEnumerable<int> sizes)
         {
             List<OperationState> states = new();
             bool addAsChild = false;
@@ -141,7 +141,7 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            List<OperationState> states = GenerateSampleStates(new List<int>() { 5, 4, 8, 3, 6 });
+            IEnumerable<OperationState> states = GenerateSampleStates(new[] { 5, 4, 8, 3, 6 });
 
             // Act
             var vis = ctx.RenderComponent<Visualizer>();
@@ -158,8 +158,8 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            List<OperationState> states = GenerateSampleStates(new List<int>()
-                                                                   { 6, 4, 9, 16, 80, 45, 32, 89, 3, 54, 6, 4, 9, 16, 80, 45, 32, 89, 3, 54 });
+            IEnumerable<OperationState> states =
+                GenerateSampleStates(new[] { 6, 4, 9, 16, 80, 45, 32, 89, 3, 54, 6, 4, 9, 16, 80, 45, 32, 89, 3, 54 });
 
             // Act
             var vis = ctx.RenderComponent<Visualizer>();
@@ -180,8 +180,8 @@ namespace Explorer.Tests
             // Act
             var vis = ctx.RenderComponent<Visualizer>();
             vis.Find("ul > li:nth-child(2)>a").Click();
-            vis.Instance.ShowStates(GenerateSampleStates(new List<int>() { 4, 7, 4, 3, 6, 2 }));
-            vis.Instance.ShowStates(GenerateSampleStates(new List<int>() { 8, 2, 4, 3 }));
+            vis.Instance.ShowStates(GenerateSampleStates(new[] { 4, 7, 4, 3, 6, 2 }));
+            vis.Instance.ShowStates(GenerateSampleStates(new[] { 8, 2, 4, 3 }));
 
             // Assert
             Assert.AreEqual(2, vis.Find(".vis-gate-panel>*:first-child>ul").ChildElementCount, "Tree with 2 root elements should be renderd");

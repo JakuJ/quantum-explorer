@@ -8,22 +8,22 @@
                 <a class="nav-link noselect @(isOutputChosen ? "active" : "")" @onclick="@(() => { isOutputChosen = true; })">Output</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link noselect @(isOutputChosen ? "" : "active")" @onclick="@(() => { isOutputChosen = false; })">Quantum State</a>
+                <a class="nav-link noselect @(isOutputChosen ? "" : "active")" @onclick="@(() => { isOutputChosen = false; })">Quantum States</a>
             </li>
         </ul>
     </div>
     <div class="vis-content">
-        @if (isOutputChosen)
+        @if (isPlaceholder)
         {
-            <textarea @bind="Output" class="vis-output"></textarea>
+            <div class="vis-placeholder">
+                @Output
+            </div>
         }
         else
         {
-            if (States == null)
+            @if (isOutputChosen)
             {
-                <div class="vis-placeholder">
-                    Run the simulation to see quantum states
-                </div>
+                <textarea @bind="Output" class="vis-output" readonly></textarea>
             }
             else
             {
@@ -90,6 +90,8 @@
 
     private string Output { get; set; } = "Run the simulation to see the output";
 
+    private bool isPlaceholder = true;
+
     bool isOutputChosen = true;
 
     private IEnumerable<OperationState>? States { get; set; }
@@ -116,17 +118,23 @@
         }
     }
 
-    public async void SetText(string text)
-    {
-        Output = text;
-        await InvokeAsync(StateHasChanged);
-    }
+    public async void SetPlaceholder(string text) => await SetText(text, true);
+
+    public async void SetOutput(string text) => await SetText(text, false);
 
     public async void ShowStates(IEnumerable<OperationState> states)
     {
         States = states;
         selectedOperation = null;
         chartData = null;
+        isPlaceholder = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SetText(string text, bool asPlaceholder)
+    {
+        isPlaceholder = asPlaceholder;
+        Output = text;
         await InvokeAsync(StateHasChanged);
     }
 

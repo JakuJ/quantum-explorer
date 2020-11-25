@@ -57,7 +57,7 @@
         Compiler.OnDiagnostics += (_, val) =>
         {
             outputSb.AppendLine(val);
-            Visualizer.Component.SetText(outputSb.ToString());
+            Visualizer.Component.SetOutput(outputSb.ToString());
         };
 
         Compiler.OnOutput += (_, stdout) =>
@@ -69,7 +69,7 @@
 
             outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
 
-            Visualizer.Component.SetText(outputSb.ToString());
+            Visualizer.Component.SetOutput(outputSb.ToString());
         };
 
         Compiler.OnCompilation += (_, _) => ProcessCompilation();
@@ -81,7 +81,7 @@
     {
         outputSb.Clear();
 
-        Visualizer.Component.SetText("Compiling ...");
+        Visualizer.Component.SetPlaceholder("Compiling ...");
 
         string code = await Editor.Component.GetCode();
 
@@ -92,7 +92,7 @@
                 t =>
                 {
                     string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
-                    Visualizer.Component.SetText($"Simulation errors occured:\n\n{messages}");
+                    Visualizer.Component.SetOutput($"Simulation errors occured:\n\n{messages}");
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
         }, TaskCreationOptions.LongRunning);
@@ -119,7 +119,7 @@
     {
         if (outputSb.Length == 0) // no diagnostics
         {
-            Visualizer.Component.SetText("Executing ...");
+            Visualizer.Component.SetPlaceholder("Executing ...");
         }
     }
 
