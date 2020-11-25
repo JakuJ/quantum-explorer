@@ -5,6 +5,7 @@ using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
 using Explorer.Components;
+using Microsoft.AspNetCore.Components;
 using NUnit.Framework;
 using TestContext = Bunit.TestContext;
 
@@ -197,13 +198,59 @@ namespace Explorer.Tests
             // Act
             var vis = ctx.RenderComponent<Visualizer>();
             vis.Find("ul > li:nth-child(2)>a").Click();
-            vis.Instance.ShowStates(GenerateSampleStates(new[] { 2}));
+            vis.Instance.ShowStates(GenerateSampleStates(new[] { 2 }));
 
             // Assert
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-            Assert.ThrowsAsync<System.AggregateException>(async () => vis.Find(".ui-treenode-content").Click()); //its a workaround, because when chart calls JSInterop it loops
+            Assert.ThrowsAsync<System.AggregateException>(async () => vis.Find(".ui-treenode-content").Click()); // its a workaround, because when chart calls JSInterop it loops
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
+            Assert.IsTrue(mockJS.Invocations.ContainsKey("Radzen.createChart"), "JSInterop method \"createChart\" should be called");
+        }
+
+        [Test]
+        public void RendersChartWithoutZeros()
+        {
+            // Arrange
+            using TestContext ctx = new();
+            var mockJS = ctx.Services.AddMockJSRuntime(JSRuntimeMockMode.Strict);
+            var operation = new OperationState("TestOP")
+            {
+                Arguments = GenerateRandomStates(9, 5),
+                Results = GenerateRandomStates(10, 4),
+            };
+
+            // Act
+            var vis = ctx.RenderComponent<Visualizer>();
+            vis.Find("ul > li:nth-child(2)>a").Click();
+            vis.Instance.ShowStates(new List<OperationState> { operation });
+            try { vis.Find(".ui-treenode-content").Click(); } catch { }
+            vis.Find(".form-check-input").Change(new ChangeEventArgs() { Value = false });
+
+            // Assert
+            Assert.IsTrue(mockJS.Invocations.ContainsKey("Radzen.createChart"), "JSInterop method \"createChart\" should be called");
+        }
+
+        [Test]
+        public void SwitchesBetweenArgumentsAndResults()
+        {
+            // Arrange
+            using TestContext ctx = new();
+            var mockJS = ctx.Services.AddMockJSRuntime(JSRuntimeMockMode.Strict);
+            var operation = new OperationState("TestOP")
+            {
+                Arguments = GenerateRandomStates(9, 5),
+                Results = GenerateRandomStates(10, 4),
+            };
+
+            // Act
+            var vis = ctx.RenderComponent<Visualizer>();
+            vis.Find("ul > li:nth-child(2)>a").Click();
+            vis.Instance.ShowStates(new List<OperationState> { operation });
+            try { vis.Find(".ui-treenode-content").Click(); } catch { }
+            vis.Find(".vis-setting").Change(new ChangeEventArgs() { Value = "Results" });
+
+            // Assert
             Assert.IsTrue(mockJS.Invocations.ContainsKey("Radzen.createChart"), "JSInterop method \"createChart\" should be called");
         }
     }
