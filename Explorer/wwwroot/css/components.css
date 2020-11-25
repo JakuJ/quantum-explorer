@@ -153,6 +153,7 @@ input.rename-input {
 .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
   background-color: var(--surface);
   border-color: var(--accent) var(--accent) var(--surface);
+  border-radius: 0;
   color: var(--text);
 }
 
@@ -161,6 +162,7 @@ input.rename-input {
   border-color: var(--accent) var(--accent) var(--surface);
   color: var(--text);
   background-color: var(--accent);
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -179,6 +181,37 @@ input.rename-input {
   stroke: var(--accent);
 }
 
+.rz-chart-tooltip-content {
+  box-shadow: 0 6px 14px 0 rgba(255, 255, 255, 0.05);
+  border-radius: 0;
+}
+
 body:not(.rz-default-scrollbars) ::-webkit-scrollbar {
-  background: var(--surface);
+  background: transparent;
+}
+
+.visualizer select {
+  /* disable default select */
+  -webkit-appearance: none;
+
+  /* add some padding for image */
+  padding-right: 20px;
+
+  /* apply SVG with arrow */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="20" viewBox="0 0 15 15"><path d="M 8,5.5 11,9.5 14,5.5 z"></path></svg>');
+  background-repeat: no-repeat;
+  background-position: center right;
+
+  /* other styles */
+  border-radius: 0;
+  border-color: var(--accent);
+}
+
+select,
+select:active,
+select:focus {
+  outline: none;
+  -moz-box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
 }
