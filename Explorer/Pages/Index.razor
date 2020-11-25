@@ -1,8 +1,11 @@
 @page "/"
+@using System.Text
 @using Microsoft.Extensions.Logging
 @using Newtonsoft.Json
 @using Compiler
+@using AstTransformations
 @using Explorer.Utilities.ComponentTree
+@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
@@ -10,8 +13,8 @@
 
 <div class="main">
     <div class="top-row px-4">
-        <Toasts/>
-        <LsStatus @ref="Status"/>
+        <Toasts />
+        <LsStatus @ref="Status" />
         <button id="compile" class="btn btn-primary" @onclick="OnCompile">Compile & Run</button>
     </div>
 
@@ -30,6 +33,8 @@
     private Panel<Visualizer> Visualizer;
 
     private LsStatus Status;
+
+    private readonly StringBuilder outputSb = new();
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -52,7 +57,7 @@
         Compiler.OnDiagnostics += async (_, val) =>
         {
             outputSb.AppendLine(val);
-            OutputVisualizer.Component.SetText(outputSb.ToString());
+            Visualizer.Component.SetText(outputSb.ToString());
         };
 
         Compiler.OnOutput += async (_, stdout) =>
@@ -64,14 +69,14 @@
 
             outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
 
-            OutputVisualizer.Component.SetText(outputSb.ToString());
+            Visualizer.Component.SetText(outputSb.ToString());
         };
 
         Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
 
         Compiler.OnStatesRecorded += async (sender, states) =>
         {
-            OutputVisualizer.Component.ShowStates(states);
+            Visualizer.Component.ShowStates(states);
         };
     }
 
@@ -80,8 +85,7 @@
     {
         outputSb.Clear();
 
-        await CompositorPlaceholder!.Component.SetCode("<compiling>");
-        OutputVisualizer.Component.SetText("<compiling>");
+        Visualizer.Component.SetText("<compiling>");
 
         string code = await Editor.Component.GetCode();
         await Compiler.Compile(code, true);
@@ -107,7 +111,7 @@
     {
         if (outputSb.Length == 0) // no diagnostics
         {
-            OutputVisualizer.Component.SetText("<executing>");
+            Visualizer.Component.SetText("<executing>");
         }
 
         Dictionary<string, GateGrid> ast;
@@ -118,7 +122,6 @@
         }
         catch (Exception e)
         {
-            await CompositorPlaceholder!.Component.SetCode($"Failed to analyze the provided code");
             Logger.LogError($"AST analysis failed with error: {e.Message}");
             return;
         }
@@ -130,7 +133,6 @@
             builder.AppendLine(key);
             builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
         }
-        await CompositorPlaceholder!.Component.SetCode(builder.ToString());
         await Editor.Component.SetStatusReference(Status);
     }
 
