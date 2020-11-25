@@ -1,4 +1,5 @@
 @using Compiler;
+@using System.Diagnostics.CodeAnalysis;
 @using System.Numerics;
 
 <div class="visualizer vis-container">
@@ -37,7 +38,7 @@
                                              HasChildren="@(e => ((OperationState)e).Children.Any())"
                                              Expanded="@(_ => true)">
                                 <Template>
-                                    <span style="line-height: 80%;margin-right: 20px;">@(((OperationState)context.Value).Name)</span>
+                                    <span class="vis-tree-item">@(((OperationState)context.Value).Name)</span>
                                 </Template>
                             </RadzenTreeLevel>
                         </RadzenTree>
@@ -72,10 +73,10 @@
                                     </TooltipTemplate>
                                 </RadzenColumnSeries>
                                 <RadzenValueAxis Min="-1" Max="1">
-                                    <RadzenGridLines Visible="true"/>
+                                    <RadzenGridLines Visible="true" />
                                 </RadzenValueAxis>
-                                <RadzenLegend Visible="false"/>
-                                <RadzenColumnOptions Margin="0"/>
+                                <RadzenLegend Visible="false" />
+                                <RadzenColumnOptions Margin="0" />
                             </RadzenChart>
                         </div>
                     </div>
@@ -186,6 +187,7 @@
         CreateDisplayList();
     }
 
+    [ExcludeFromCodeCoverage]
     struct DataItem
     {
         public string Idx { get; init; }

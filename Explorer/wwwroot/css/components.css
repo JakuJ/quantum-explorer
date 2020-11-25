@@ -89,3 +89,8 @@
   width: 100%;
 }
 
+.vis-tree-item {
+  line-height: 80%;
+  margin-right: 20px;
+}
+

@@ -186,5 +186,25 @@ namespace Explorer.Tests
             // Assert
             Assert.AreEqual(2, vis.Find(".vis-gate-panel>*:first-child>ul").ChildElementCount, "Tree with 2 root elements should be renderd");
         }
+
+        [Test]
+        public void RendersChart()
+        {
+            // Arrange
+            using TestContext ctx = new();
+            var mockJS = ctx.Services.AddMockJSRuntime(JSRuntimeMockMode.Strict);
+
+            // Act
+            var vis = ctx.RenderComponent<Visualizer>();
+            vis.Find("ul > li:nth-child(2)>a").Click();
+            vis.Instance.ShowStates(GenerateSampleStates(new[] { 2}));
+
+            // Assert
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+            Assert.ThrowsAsync<System.AggregateException>(async () => vis.Find(".ui-treenode-content").Click()); //its a workaround, because when chart calls JSInterop it loops
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
+            Assert.IsTrue(mockJS.Invocations.ContainsKey("Radzen.createChart"), "JSInterop method \"createChart\" should be called");
+        }
     }
 }
