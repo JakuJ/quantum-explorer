@@ -2,6 +2,7 @@ using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 using static Microsoft.Quantum.Simulation.Simulators.QuantumSimulator;
@@ -14,7 +15,7 @@ namespace Compiler
         /// <summary>
         /// Gets last dumped quantum states.
         /// </summary>
-        public List<(int, Complex)> Values { get; private set; } = new List<(int, Complex)>();
+        public List<(int Idx, Complex Value)> Values { get; private set; } = new List<(int, Complex)>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomDumper"/> class.
@@ -25,6 +26,7 @@ namespace Compiler
         }
 
         /// <inheritdoc/>
+        [ExcludeFromCodeCoverage]
         public override bool Callback(uint idx, double real, double img)
         {
             Values.Add(((int)idx, new Complex(real, img)));
@@ -32,6 +34,7 @@ namespace Compiler
         }
 
         /// <inheritdoc/>
+        [ExcludeFromCodeCoverage]
         public override bool Dump(IQArray<Qubit> qubits = null)
         {
             Values = new List<(int, Complex)>();

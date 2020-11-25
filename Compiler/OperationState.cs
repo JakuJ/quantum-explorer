@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
@@ -48,6 +49,7 @@ namespace Compiler
         /// Adds child operation.
         /// </summary>
         /// <param name="child">Child operation run in this operation.</param>
+        [ExcludeFromCodeCoverage]
         public void AddOperation(OperationState child)
         {
             child.Parent = this;
