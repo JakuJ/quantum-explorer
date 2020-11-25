@@ -26,14 +26,14 @@ namespace Compiler
         public List<OperationState> Children { get; } = new List<OperationState>();
 
         /// <summary>
-        /// Gets or sets a list of complex numbers that represent quantum states of arguments.
+        /// Gets or sets a list of complex numbers that represent quantum states of arguments represented by index.
         /// </summary>
-        public List<(int, Complex)> Arguments { get; set; }
+        public List<(int Idx, Complex Value)> Arguments { get; set; }
 
         /// <summary>
-        /// Gets or sets a list of complex numbers that represent quantum states of results.
+        /// Gets or sets a list of complex numbers that represent quantum states of results represented by index.
         /// </summary>
-        public List<(int, Complex)> Results { get; set; }
+        public List<(int Idx, Complex Value)> Results { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OperationState"/> class.

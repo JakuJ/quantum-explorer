@@ -26,8 +26,10 @@
                     Run simulation to get quantum states.
                 </div>
             }
+            else
+            {
             <div class="vis-area">
-                <div class="vis-gate-pane">
+                <div class="vis-gate-panel">
                     <RadzenTree Data="@States"
                                 Change="@ShowOperationState"
                                 Style="width: 100%; height: 100%">
@@ -41,7 +43,7 @@
                         </RadzenTreeLevel>
                     </RadzenTree>
                 </div>
-                <div class="vis-conteiner vis-state-vis  @(selectedOperation == null? "invisible" : "")">
+                <div class="vis-conteiner vis-state-vis  @(selectedOperation == null ? "invisible" : "")">
                     <div class="form-inline">
                         <select class="form-control float-left vis-setting" @onchange="DataTypeChanged">
                             <option>Arguments</option>
@@ -79,6 +81,7 @@
                     </div>
                 </div>
             </div>
+            }
         }
     </div>
 </div>
@@ -116,19 +119,19 @@
         }
     }
 
-    public void SetText(string text)
+    public async void SetText(string text)
     {
         Output = text;
-        base.StateHasChanged();
+        await InvokeAsync(() => StateHasChanged());
     }
     public string GetText() => Output;
 
-    public void ShowStates(List<OperationState> states)
+    public async void ShowStates(List<OperationState> states)
     {
         States = states;
         selectedOperation = null;
         chartData = null;
-        base.StateHasChanged();
+        await InvokeAsync(() => StateHasChanged());
     }
 
     private void ChangeTab(bool toOutput)
