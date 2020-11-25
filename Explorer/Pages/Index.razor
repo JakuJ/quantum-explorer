@@ -14,7 +14,7 @@
         <Toasts/>
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
         <LsStatus @ref="status"/>
-        <button id="compile" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
+        <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
     </div>
     <Progress @ref="progress"></Progress>
     <div class="content">
@@ -33,6 +33,7 @@
 
     private LsStatus status;
     private Progress progress;
+    private ElementReference compileButtonRef;
 
     private readonly StringBuilder output = new();
 
@@ -60,9 +61,11 @@
             Visualizer.Component.SetOutput(output.ToString());
         };
 
-        Compiler.OnOutput += (_, stdout) =>
+        Compiler.OnOutput += async (_, stdout) =>
         {
             progress.Running = false;
+            await JsRuntime.InvokeVoidAsync("Library.enable", compileButtonRef);
+
             if (output.Length != 0)
             {
                 output.AppendLine();
@@ -80,6 +83,7 @@
     [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
+        await JsRuntime.InvokeVoidAsync("Library.disable", compileButtonRef);
         progress.Running = true;
 
         output.Clear();

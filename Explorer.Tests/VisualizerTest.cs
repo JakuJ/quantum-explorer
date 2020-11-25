@@ -201,9 +201,13 @@ namespace Explorer.Tests
             vis.Instance.ShowStates(GenerateSampleStates(new[] { 2 }));
 
             // Assert
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-            Assert.ThrowsAsync<System.AggregateException>(async () => vis.Find(".ui-treenode-content").Click()); // its a workaround, because when chart calls JSInterop it loops
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable CS1998
+
+            // The warning is "Async method lacks 'await' operators and will run synchronously"
+            // it's a workaround, because when chart calls JSInterop, it loops
+            Assert.ThrowsAsync<AggregateException>(async () => vis.Find(".ui-treenode-content").Click());
+
+#pragma warning restore CS1998
 
             Assert.IsTrue(mockJS.Invocations.ContainsKey("Radzen.createChart"), "JSInterop method \"createChart\" should be called");
         }
@@ -224,8 +228,17 @@ namespace Explorer.Tests
             var vis = ctx.RenderComponent<Visualizer>();
             vis.Find("ul > li:nth-child(2)>a").Click();
             vis.Instance.ShowStates(new List<OperationState> { operation });
-            try { vis.Find(".ui-treenode-content").Click(); } catch { }
-            vis.Find(".form-check-input").Change(new ChangeEventArgs() { Value = false });
+
+            try
+            {
+                vis.Find(".ui-treenode-content").Click();
+            }
+            catch
+            {
+                // ignored
+            }
+
+            vis.Find(".form-check-input").Change(new ChangeEventArgs { Value = false });
 
             // Assert
             Assert.IsTrue(mockJS.Invocations.ContainsKey("Radzen.createChart"), "JSInterop method \"createChart\" should be called");
@@ -247,8 +260,16 @@ namespace Explorer.Tests
             var vis = ctx.RenderComponent<Visualizer>();
             vis.Find("ul > li:nth-child(2)>a").Click();
             vis.Instance.ShowStates(new List<OperationState> { operation });
-            try { vis.Find(".ui-treenode-content").Click(); } catch { }
-            vis.Find(".vis-setting").Change(new ChangeEventArgs() { Value = "Results" });
+            try
+            {
+                vis.Find(".ui-treenode-content").Click();
+            }
+            catch
+            {
+                // ignored
+            }
+
+            vis.Find(".vis-setting").Change(new ChangeEventArgs { Value = "Results" });
 
             // Assert
             Assert.IsTrue(mockJS.Invocations.ContainsKey("Radzen.createChart"), "JSInterop method \"createChart\" should be called");
