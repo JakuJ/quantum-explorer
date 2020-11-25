@@ -14,9 +14,9 @@
         <Toasts/>
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
         <LsStatus @ref="status"/>
-        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Compile & Run</button>
+        <button id="compile" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
     </div>
-
+    <Progress @ref="progress"></Progress>
     <div class="content">
         <div id="splitPanes">
             @Components
@@ -32,6 +32,7 @@
     private Panel<Visualizer> Visualizer;
 
     private LsStatus status;
+    private Progress progress;
 
     private readonly StringBuilder output = new();
 
@@ -61,6 +62,7 @@
 
         Compiler.OnOutput += (_, stdout) =>
         {
+            progress.Running = false;
             if (output.Length != 0)
             {
                 output.AppendLine();
@@ -78,6 +80,8 @@
     [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
+        progress.Running = true;
+
         output.Clear();
 
         Visualizer.Component.SetPlaceholder("Compiling");

@@ -36,10 +36,43 @@ input.rename-input {
   background: var(--surface);
   color: var(--text);
   border-color: transparent;
+  cursor: default;
 }
 
 #ls-status > img {
   margin-bottom: 3px;
+}
+
+/* Tooltip text */
+#ls-status .tooltiptext {
+  visibility: hidden;
+  width: 240px;
+  background-color: var(--accent);
+  color: var(--text);
+  text-align: center;
+  padding: 2px 5px;
+
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+  top: 120%;
+  left: 50%;
+  margin-left: -120px;
+}
+
+#ls-status:hover .tooltiptext {
+  visibility: visible;
+}
+
+#ls-status .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  top: -60%; /* At the top of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent var(--accent) transparent;
 }
 
 /* Visualizer */
