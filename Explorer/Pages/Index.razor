@@ -12,8 +12,8 @@
 <div class="main">
     <div class="top-row px-4">
         <Toasts/>
-        <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" alt="" width="32" height="32" onclick="Library.toggleTheme()">
-        <LsStatus @ref="Status"/>
+        <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
+        <LsStatus @ref="status"/>
         <button id="compile" class="btn btn-primary" @onclick="OnCompile">Compile & Run</button>
     </div>
 
@@ -31,9 +31,9 @@
     private Panel<Compositor> Compositor;
     private Panel<Visualizer> Visualizer;
 
-    private LsStatus Status;
+    private LsStatus status;
 
-    private readonly StringBuilder outputSb = new();
+    private readonly StringBuilder output = new();
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
@@ -55,20 +55,20 @@
 
         Compiler.OnDiagnostics += (_, val) =>
         {
-            outputSb.AppendLine(val);
-            Visualizer.Component.SetOutput(outputSb.ToString());
+            output.AppendLine(val);
+            Visualizer.Component.SetOutput(output.ToString());
         };
 
         Compiler.OnOutput += (_, stdout) =>
         {
-            if (outputSb.Length != 0)
+            if (output.Length != 0)
             {
-                outputSb.AppendLine();
+                output.AppendLine();
             }
 
-            outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
+            output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
 
-            Visualizer.Component.SetOutput(outputSb.ToString());
+            Visualizer.Component.SetOutput(output.ToString());
         };
 
         Compiler.OnCompilation += (_, _) => ProcessCompilation();
@@ -78,9 +78,9 @@
     [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
-        outputSb.Clear();
+        output.Clear();
 
-        Visualizer.Component.SetPlaceholder("Compiling ...");
+        Visualizer.Component.SetPlaceholder("Compiling");
 
         string code = await Editor.Component.GetCode();
 
@@ -110,15 +110,15 @@
         });
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
-        await Editor.Component.SetStatusReference(Status);
+        await Editor.Component.SetStatusReference(status);
     }
 
     [ExcludeFromCodeCoverage]
     private void ProcessCompilation()
     {
-        if (outputSb.Length == 0) // no diagnostics
+        if (output.Length == 0) // no diagnostics
         {
-            Visualizer.Component.SetPlaceholder("Executing ...");
+            Visualizer.Component.SetPlaceholder("Executing");
         }
     }
 

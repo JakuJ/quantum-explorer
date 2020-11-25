@@ -30,10 +30,6 @@
     <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="JsLib\theme.js" />
-  </ItemGroup>
-
   <Target Name="EnsureNodeEnv" BeforeTargets="RestoreNpmPackages" Condition="!Exists('$(JsLibRoot)\node_modules')">
     <!-- Ensure Node.js is installed -->
     <Exec Command="node --version" ContinueOnError="true">

@@ -18,6 +18,8 @@ a, .btn-link {
   height: 100%;
 }
 
+/* Top row */
+
 .main .top-row {
   height: 3.5rem;
   display: flex;
@@ -36,13 +38,6 @@ a, .btn-link {
   text-overflow: ellipsis;
 }
 
-.main .content {
-  height: 90%;
-  flex: 1 1 auto;
-  box-sizing: border-box;
-  background-color: var(--background);
-}
-
 #compile {
   padding: 0.25rem;
 }
@@ -50,6 +45,8 @@ a, .btn-link {
 #dark-mode-toggle {
   cursor: pointer;
   background: transparent;
+  width: 28px;
+  height: 28px;
 }
 
 :root.dark-mode #dark-mode-toggle {
@@ -58,6 +55,20 @@ a, .btn-link {
 
 .toast {
   margin: 0.75rem 1.5rem;
+  border-radius: 0;
+}
+
+.btn {
+  border-radius: 0;
+}
+
+/* Everything else */
+
+.main .content {
+  height: 90%;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  background-color: var(--background);
 }
 
 .valid.modified:not([type=checkbox]) {
