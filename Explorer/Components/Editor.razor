@@ -1,6 +1,6 @@
 @inject IJSRuntime JSRuntime
 
-<div class="editor-textarea" @ref="editorRootRef"></div>
+<div id="editor" @ref="editorRootRef"></div>
 
 @code {
     private ElementReference editorRootRef;
@@ -10,6 +10,7 @@
     public async Task<string> GetCode()
         => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
 
+    // Will be used someday
     public async Task SetCode(string code)
     {
         if (editorId != null)

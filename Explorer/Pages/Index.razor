@@ -3,9 +3,7 @@
 @using Microsoft.Extensions.Logging
 @using Newtonsoft.Json
 @using Compiler
-@using AstTransformations
 @using Explorer.Utilities.ComponentTree
-@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
@@ -14,11 +12,12 @@
 <div class="main">
     <div class="top-row px-4">
         <Toasts/>
+        <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" alt="" width="32" height="32" onclick="Library.toggleTheme()">
         <LsStatus @ref="Status"/>
         <button id="compile" class="btn btn-primary" @onclick="OnCompile">Compile & Run</button>
     </div>
 
-    <div class="content px-4">
+    <div class="content">
         <div id="splitPanes">
             @Components
         </div>

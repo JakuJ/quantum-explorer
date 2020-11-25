@@ -1,0 +1,58 @@
+:root {
+  --background: #f2f2f2;
+  --surface: white;
+  --accent: #e9ecef;
+  --text: #212529;
+  --text-secondary: #808080;
+  --error-background: lightyellow;
+  --shadow: rgba(0, 0, 0, 0.2);
+  /* re-exported from Bootstrap */
+  --link: var(--primary);
+  --valid: var(--green);
+  --invalid: var(--red);
+}
+
+:root.dark-mode {
+  --background: #121212;
+  --surface: #1e1e1e;
+  --accent: #333;
+  --text: #e2e2e2;
+  --error-background: var(--surface);
+  --shadow: rgba(255, 255, 255, 0.2);
+}
+
+.rz-tick-text {
+  fill: var(--text);
+}
+
+.rz-axis .rz-grid-line {
+  stroke: var(--accent);
+}
+
+body:not(.rz-default-scrollbars) ::-webkit-scrollbar {
+  background: var(--surface);
+}
+
+/* inactive tabs */
+.nav-link {
+  color: var(--text-secondary);
+}
+
+/* active tab */
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+  background-color: var(--surface);
+  border-color: var(--accent) var(--accent) var(--surface);
+  color: var(--text);
+}
+
+/* on mouse hover over a tab */
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+  border-color: var(--accent) var(--accent) var(--surface);
+  color: var(--link);
+  background-color: var(--accent);
+}
+
+/* the tab bar */
+.nav-tabs {
+  border-color: var(--accent);
+}
