@@ -72,7 +72,7 @@
             Visualizer.Component.SetText(outputSb.ToString());
         };
 
-        Compiler.OnCompilation += async (_, comp) => await ProcessCompilation(comp);
+        Compiler.OnCompilation += (_, _) => ProcessCompilation();
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.Component.ShowStates(states); };
     }
 
@@ -81,10 +81,23 @@
     {
         outputSb.Clear();
 
-        Visualizer.Component.SetText("<compiling>");
+        Visualizer.Component.SetText("Compiling ...");
 
         string code = await Editor.Component.GetCode();
-        await Compiler.Compile(code, true);
+
+    // run compilation in a separate thread so that we don't block the UI
+        Task task = new(() =>
+        {
+            Compiler.Compile(code, true).ContinueWith(
+                t =>
+                {
+                    string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
+                    Visualizer.Component.SetText($"Simulation errors occured:\n\n{messages}");
+                },
+                TaskContinuationOptions.OnlyOnFaulted);
+        }, TaskCreationOptions.LongRunning);
+
+        task.Start();
     }
 
     [ExcludeFromCodeCoverage]
@@ -98,38 +111,16 @@
         });
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
+        await Editor.Component.SetStatusReference(Status);
     }
 
-#nullable enable
-
     [ExcludeFromCodeCoverage]
-    private async Task ProcessCompilation(QsCompilation compilation)
+    private void ProcessCompilation()
     {
         if (outputSb.Length == 0) // no diagnostics
         {
-            Visualizer.Component.SetText("<executing>");
+            Visualizer.Component.SetText("Executing ...");
         }
-
-        Dictionary<string, GateGrid> ast;
-
-        try
-        {
-            ast = FromQSharp.GetGates(compilation);
-        }
-        catch (Exception e)
-        {
-            Logger.LogError($"AST analysis failed with error: {e.Message}");
-            return;
-        }
-
-        StringBuilder builder = new();
-        foreach ((string key, GateGrid? grid) in ast)
-        {
-            grid?.Shrink();
-            builder.AppendLine(key);
-            builder.AppendLine(grid?.ToString() ?? "Couldn't extract circuit info\n");
-        }
-        await Editor.Component.SetStatusReference(Status);
     }
 
 }

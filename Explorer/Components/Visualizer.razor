@@ -60,14 +60,14 @@
                                 <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Real">
                                     <TooltipTemplate Context="data">
                                         <div>
-                                            <strong>@data.Idx:</strong> <strong>@($"{data.Real:0.###}")</strong>+@($"{data.Imaginary:0.###}")i
+                                            <strong>@($"{data.Real:0.###}")</strong>@($"{data.Imaginary:+0.###;-0.###;+0}")i
                                         </div>
                                     </TooltipTemplate>
                                 </RadzenColumnSeries>
                                 <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Imaginary">
                                     <TooltipTemplate Context="data">
                                         <div>
-                                            <strong>@data.Idx:</strong> @($"{data.Real:0.###}")+<strong>@($"{data.Imaginary:0.###}")i</strong>
+                                            @($"{data.Real:0.###}")<strong>@($"{data.Imaginary:+0.###;-0.###;+0}")i</strong>
                                         </div>
                                     </TooltipTemplate>
                                 </RadzenColumnSeries>
