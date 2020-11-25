@@ -101,7 +101,7 @@ export class Editor {
 
     window.editorsDict[id] = monaco.editor.create(element, {
       model: monaco.editor.createModel(loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
-      theme: LIGHT_THEME_NAME,
+      theme: getThemeName(),
       minimap: {
         enabled: false
       },
@@ -124,30 +124,6 @@ export class Editor {
     await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
 
     new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
-
-    window.editorsDict[id].addAction({
-      id: 'set-light-theme',
-      label: 'Switch to Light Theme',
-      precondition: null,
-      keybindingContext: null,
-      contextMenuGroupId: 'editorOptions',
-      contextMenuOrder: 0,
-      run: () => {
-        monaco.editor.setTheme(LIGHT_THEME_NAME);
-      }
-    });
-
-    window.editorsDict[id].addAction({
-      id: 'set-dark-theme',
-      label: 'Switch to Dark Theme',
-      precondition: null,
-      keybindingContext: null,
-      contextMenuGroupId: 'editorOptions',
-      contextMenuOrder: 1,
-      run: () => {
-        monaco.editor.setTheme(DARK_THEME_NAME);
-      }
-    });
 
     window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
       saveCode(window.editorsDict[id].getValue());
@@ -223,6 +199,14 @@ export class Editor {
   static SetStatusReference(ref) {
     statusRef = ref;
   }
+
+  static setColorTheme() {
+    monaco.editor.setTheme(getThemeName());
+  }
+}
+
+function getThemeName() {
+  return localStorage.getItem('theme') === 'dark' ? DARK_THEME_NAME : LIGHT_THEME_NAME;
 }
 
 function createWebSocket(url) {

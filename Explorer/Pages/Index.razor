@@ -3,10 +3,9 @@
 @using Microsoft.Extensions.Logging
 @using Newtonsoft.Json
 @using Compiler
-@using AstTransformations
 @using Explorer.Utilities.ComponentTree
-@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @using System.Diagnostics.CodeAnalysis
+@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -14,11 +13,12 @@
 <div class="main">
     <div class="top-row px-4">
         <Toasts/>
-        <LsStatus @ref="Status"/>
-        <button id="compile" class="btn btn-primary" @onclick="OnCompile">Compile & Run</button>
+        <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
+        <LsStatus @ref="status"/>
+        <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
     </div>
-
-    <div class="content px-4">
+    <Progress @ref="progress"></Progress>
+    <div class="content">
         <div id="splitPanes">
             @Components
         </div>
@@ -32,15 +32,19 @@
     private Panel<Compositor> Compositor;
     private Panel<Visualizer> Visualizer;
 
-    private LsStatus Status;
+    private LsStatus status;
+    private Progress progress;
+    private ElementReference compileButtonRef;
 
-    private readonly StringBuilder outputSb = new();
+    private readonly StringBuilder output = new();
 
     RenderFragment Components => new PanelRenderer().Render(tree);
 
     readonly PanelTree tree = new(PanelTree.Alignment.Horizontal);
 
-    [ExcludeFromCodeCoverage] // TODO: Waiting for final form of the page and integration tests
+    // TODO: end-to-end tests
+    // Until then, all methods in this class are excluded from code coverage
+    [ExcludeFromCodeCoverage]
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -54,34 +58,21 @@
 
         tree.AddPanel(sidePanel);
 
-        Compiler.OnDiagnostics += (_, val) =>
-        {
-            outputSb.AppendLine(val);
-            Visualizer.Component.SetOutput(outputSb.ToString());
-        };
-
-        Compiler.OnOutput += (_, stdout) =>
-        {
-            if (outputSb.Length != 0)
-            {
-                outputSb.AppendLine();
-            }
-
-            outputSb.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
-
-            Visualizer.Component.SetOutput(outputSb.ToString());
-        };
-
-        Compiler.OnCompilation += (_, _) => ProcessCompilation();
+        Compiler.OnDiagnostics += diagnosticsHandler;
+        Compiler.OnOutput += outputHandler;
+        Compiler.OnCompilation += compilationHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.Component.ShowStates(states); };
     }
 
     [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
-        outputSb.Clear();
+        await JsRuntime.InvokeVoidAsync("Library.disable", compileButtonRef);
+        progress.Running = true;
 
-        Visualizer.Component.SetPlaceholder("Compiling ...");
+        output.Clear();
+
+        Visualizer.Component.SetPlaceholder("Compiling");
 
         string code = await Editor.Component.GetCode();
 
@@ -111,16 +102,43 @@
         });
 
         await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
-        await Editor.Component.SetStatusReference(Status);
+        await Editor.Component.SetStatusReference(status);
+    }
+
+    #region Compilation event handlers
+
+    [ExcludeFromCodeCoverage]
+    private void compilationHandler(object _, QsCompilation compilation)
+    {
+        if (output.Length == 0) // no diagnostics
+        {
+            Visualizer.Component.SetPlaceholder("Executing");
+        }
     }
 
     [ExcludeFromCodeCoverage]
-    private void ProcessCompilation()
+    private void diagnosticsHandler(object _, string val)
     {
-        if (outputSb.Length == 0) // no diagnostics
-        {
-            Visualizer.Component.SetPlaceholder("Executing ...");
-        }
+        output.AppendLine(val);
+        Visualizer.Component.SetOutput(output.ToString());
     }
+
+    [ExcludeFromCodeCoverage]
+    private async void outputHandler(object _, string stdout)
+    {
+        progress.Running = false;
+        await JsRuntime.InvokeVoidAsync("Library.enable", compileButtonRef);
+
+        if (output.Length != 0)
+        {
+            output.AppendLine();
+        }
+
+        output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
+
+        Visualizer.Component.SetOutput(output.ToString());
+    }
+
+    #endregion
 
 }

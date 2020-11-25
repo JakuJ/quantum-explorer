@@ -1,16 +1,15 @@
 @import url('../lib/open-iconic/font/css/open-iconic-bootstrap.min.css');
 
-html, body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
 html, body, app {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   width: 100%;
   height: 100%;
+  background: var(--background);
+  color: var(--text);
 }
 
 a, .btn-link {
-  color: #0366d6;
+  color: var(--link);
 }
 
 .main {
@@ -19,12 +18,13 @@ a, .btn-link {
   height: 100%;
 }
 
+/* Top row */
+
 .main .top-row {
   height: 3.5rem;
   display: flex;
   align-items: center;
-  background-color: #f7f7f7;
-  border-bottom: 1px solid #d6d5d5;
+  background-color: var(--surface);
   justify-content: flex-end;
 }
 
@@ -38,37 +38,55 @@ a, .btn-link {
   text-overflow: ellipsis;
 }
 
-.main .content {
-  height: 90%;
-  flex: 1 1 auto;
-  box-sizing: border-box;
-  background-color: #F6F6F6;
-}
-
 #compile {
   padding: 0.25rem;
 }
 
+#dark-mode-toggle {
+  cursor: pointer;
+  background: transparent;
+  width: 28px;
+  height: 28px;
+}
+
+:root.dark-mode #dark-mode-toggle {
+  filter: invert(1);
+}
+
 .toast {
   margin: 0.75rem 1.5rem;
+  border-radius: 0;
+}
+
+.btn {
+  border-radius: 0;
+}
+
+/* Everything else */
+
+.main .content {
+  height: 90%;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  background-color: var(--background);
 }
 
 .valid.modified:not([type=checkbox]) {
-  outline: 1px solid #26b050;
+  outline: 1px solid var(--valid);
 }
 
 .invalid {
-  outline: 1px solid red;
+  outline: 1px solid var(--invalid);
 }
 
 .validation-message {
-  color: red;
+  color: var(--invalid);
 }
 
 #blazor-error-ui {
-  background: lightyellow;
+  background: var(--error-background);
   bottom: 0;
-  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -1px 2px var(--shadow);
   display: none;
   left: 0;
   padding: 0.6rem 1.25rem 0.7rem 1.25rem;
@@ -82,4 +100,9 @@ a, .btn-link {
   position: absolute;
   right: 0.75rem;
   top: 0.5rem;
+}
+
+/* Override reconnection view based on theme */
+#components-reconnect-modal {
+  background-color: var(--background) !important;
 }
