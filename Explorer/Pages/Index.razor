@@ -5,6 +5,7 @@
 @using Compiler
 @using Explorer.Utilities.ComponentTree
 @using System.Diagnostics.CodeAnalysis
+@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -41,7 +42,9 @@
 
     readonly PanelTree tree = new(PanelTree.Alignment.Horizontal);
 
-    [ExcludeFromCodeCoverage] // TODO: Waiting for final form of the page and integration tests
+    // TODO: end-to-end tests
+    // Until then, all methods in this class are excluded from code coverage
+    [ExcludeFromCodeCoverage]
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -55,28 +58,9 @@
 
         tree.AddPanel(sidePanel);
 
-        Compiler.OnDiagnostics += (_, val) =>
-        {
-            output.AppendLine(val);
-            Visualizer.Component.SetOutput(output.ToString());
-        };
-
-        Compiler.OnOutput += async (_, stdout) =>
-        {
-            progress.Running = false;
-            await JsRuntime.InvokeVoidAsync("Library.enable", compileButtonRef);
-
-            if (output.Length != 0)
-            {
-                output.AppendLine();
-            }
-
-            output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
-
-            Visualizer.Component.SetOutput(output.ToString());
-        };
-
-        Compiler.OnCompilation += (_, _) => ProcessCompilation();
+        Compiler.OnDiagnostics += diagnosticsHandler;
+        Compiler.OnOutput += outputHandler;
+        Compiler.OnCompilation += compilationHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.Component.ShowStates(states); };
     }
 
@@ -121,13 +105,40 @@
         await Editor.Component.SetStatusReference(status);
     }
 
+    #region Compilation event handlers
+
     [ExcludeFromCodeCoverage]
-    private void ProcessCompilation()
+    private void compilationHandler(object _, QsCompilation compilation)
     {
         if (output.Length == 0) // no diagnostics
         {
             Visualizer.Component.SetPlaceholder("Executing");
         }
     }
+
+    [ExcludeFromCodeCoverage]
+    private void diagnosticsHandler(object _, string val)
+    {
+        output.AppendLine(val);
+        Visualizer.Component.SetOutput(output.ToString());
+    }
+
+    [ExcludeFromCodeCoverage]
+    private async void outputHandler(object _, string stdout)
+    {
+        progress.Running = false;
+        await JsRuntime.InvokeVoidAsync("Library.enable", compileButtonRef);
+
+        if (output.Length != 0)
+        {
+            output.AppendLine();
+        }
+
+        output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
+
+        Visualizer.Component.SetOutput(output.ToString());
+    }
+
+    #endregion
 
 }

@@ -102,6 +102,7 @@ a, .btn-link {
   top: 0.5rem;
 }
 
+/* Override reconnection view based on theme */
 #components-reconnect-modal {
-  background-color: var(--background);
+  background-color: var(--background) !important;
 }
