@@ -73,7 +73,7 @@ namespace Compiler
         public event EventHandler<string>? OnOutput;
 
         /// <inheritdoc/>
-        public event EventHandler<List<OperationState>> OnStatesRecorded;
+        public event EventHandler<List<OperationState>>? OnStatesRecorded;
 
         /// <inheritdoc/>
         public QsCompilation? Compilation { get; private set; }

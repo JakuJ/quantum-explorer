@@ -13,8 +13,8 @@
 
 <div class="main">
     <div class="top-row px-4">
-        <Toasts />
-        <LsStatus @ref="Status" />
+        <Toasts/>
+        <LsStatus @ref="Status"/>
         <button id="compile" class="btn btn-primary" @onclick="OnCompile">Compile & Run</button>
     </div>
 
@@ -54,13 +54,13 @@
 
         tree.AddPanel(sidePanel);
 
-        Compiler.OnDiagnostics += async (_, val) =>
+        Compiler.OnDiagnostics += (_, val) =>
         {
             outputSb.AppendLine(val);
             Visualizer.Component.SetText(outputSb.ToString());
         };
 
-        Compiler.OnOutput += async (_, stdout) =>
+        Compiler.OnOutput += (_, stdout) =>
         {
             if (outputSb.Length != 0)
             {
@@ -72,12 +72,8 @@
             Visualizer.Component.SetText(outputSb.ToString());
         };
 
-        Compiler.OnCompilation += async (sender, comp) => await ProcessCompilation(comp);
-
-        Compiler.OnStatesRecorded += async (sender, states) =>
-        {
-            Visualizer.Component.ShowStates(states);
-        };
+        Compiler.OnCompilation += async (_, comp) => await ProcessCompilation(comp);
+        Compiler.OnStatesRecorded += (_, states) => { Visualizer.Component.ShowStates(states); };
     }
 
     [ExcludeFromCodeCoverage]

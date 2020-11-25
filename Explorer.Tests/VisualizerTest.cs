@@ -1,14 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Numerics;
 using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
 using Explorer.Components;
-using Explorer.Templates;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
 using TestContext = Bunit.TestContext;
 
 namespace Explorer.Tests
@@ -17,15 +14,16 @@ namespace Explorer.Tests
     [Parallelizable]
     public class VisualizerTest
     {
-
-        private static readonly Random Random = new();
+        private static readonly Random Random = new(1337);
 
         [Test]
         public void RendersTabsHeaders()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
+
+            // Act
             var vis = ctx.RenderComponent<Visualizer>();
 
             // Assert
@@ -36,8 +34,10 @@ namespace Explorer.Tests
         public void InitializesWithFirstTabSelected()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
+
+            // Act
             var vis = ctx.RenderComponent<Visualizer>();
 
             // Assert
@@ -49,11 +49,11 @@ namespace Explorer.Tests
         public void SwitchesToQuantumStatesTab()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            var vis = ctx.RenderComponent<Visualizer>();
 
             // Act
+            var vis = ctx.RenderComponent<Visualizer>();
             vis.Find("ul > li:nth-child(2)>a").Click();
 
             // Assert
@@ -65,11 +65,11 @@ namespace Explorer.Tests
         public void SwitchesToOutputTab()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            var vis = ctx.RenderComponent<Visualizer>();
 
             // Act
+            var vis = ctx.RenderComponent<Visualizer>();
             vis.Find("ul > li:nth-child(2)>a").Click();
 
             vis.Find("ul > li:first-child>a").Click();
@@ -83,12 +83,12 @@ namespace Explorer.Tests
         public void RendersCustomOutput()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            var vis = ctx.RenderComponent<Visualizer>();
             var testString = "Test output";
 
             // Act
+            var vis = ctx.RenderComponent<Visualizer>();
             vis.Instance.SetText(testString);
 
             // Assert
@@ -98,16 +98,10 @@ namespace Explorer.Tests
         private List<(int Idx, Complex Value)> GenerateRandomStates(int length, int zerosCount = 0)
         {
             List<(int Idx, Complex Value)> states = new();
+
             for (int i = 0; i < length; i++)
             {
-                if (i < zerosCount)
-                {
-                    states.Add((i, new Complex(0, 0)));
-                }
-                else
-                {
-                    states.Add((i, new Complex(Random.NextDouble() * 2 - 1, Random.NextDouble() * 2 - 1)));
-                }
+                states.Add((i, i < zerosCount ? Complex.Zero : new Complex(Random.NextDouble() * 2 - 1, Random.NextDouble() * 2 - 1)));
             }
 
             return states;
@@ -117,12 +111,18 @@ namespace Explorer.Tests
         {
             List<OperationState> states = new();
             bool addAsChild = false;
+
             foreach (var size in sizes)
             {
-                var operation = new OperationState(new string('A', size)) { Arguments = GenerateRandomStates(size), Results = GenerateRandomStates(size) };
+                var operation = new OperationState(new string('A', size))
+                {
+                    Arguments = GenerateRandomStates(size),
+                    Results = GenerateRandomStates(size),
+                };
+
                 if (addAsChild)
                 {
-                    states[states.Count - 1].AddOperation(operation);
+                    states[^1].AddOperation(operation);
                 }
                 else
                 {
@@ -139,13 +139,13 @@ namespace Explorer.Tests
         public void RenderSmallOperatonTree()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            var vis = ctx.RenderComponent<Visualizer>();
-            vis.Find("ul > li:nth-child(2)>a").Click();
             List<OperationState> states = GenerateSampleStates(new List<int>() { 5, 4, 8, 3, 6 });
 
             // Act
+            var vis = ctx.RenderComponent<Visualizer>();
+            vis.Find("ul > li:nth-child(2)>a").Click();
             vis.Instance.ShowStates(states);
 
             // Assert
@@ -156,13 +156,14 @@ namespace Explorer.Tests
         public void RenderBigOperatonTree()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            var vis = ctx.RenderComponent<Visualizer>();
-            vis.Find("ul > li:nth-child(2)>a").Click();
-            List<OperationState> states = GenerateSampleStates(new List<int>() { 6, 4, 9, 16, 80, 45, 32, 89, 3, 54, 6, 4, 9, 16, 80, 45, 32, 89, 3, 54 });
+            List<OperationState> states = GenerateSampleStates(new List<int>()
+                                                                   { 6, 4, 9, 16, 80, 45, 32, 89, 3, 54, 6, 4, 9, 16, 80, 45, 32, 89, 3, 54 });
 
             // Act
+            var vis = ctx.RenderComponent<Visualizer>();
+            vis.Find("ul > li:nth-child(2)>a").Click();
             vis.Instance.ShowStates(states);
 
             // Assert
@@ -173,14 +174,13 @@ namespace Explorer.Tests
         public void UpdatesOperatonTree()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            var vis = ctx.RenderComponent<Visualizer>();
-            vis.Find("ul > li:nth-child(2)>a").Click();
 
             // Act
+            var vis = ctx.RenderComponent<Visualizer>();
+            vis.Find("ul > li:nth-child(2)>a").Click();
             vis.Instance.ShowStates(GenerateSampleStates(new List<int>() { 4, 7, 4, 3, 6, 2 }));
-
             vis.Instance.ShowStates(GenerateSampleStates(new List<int>() { 8, 2, 4, 3 }));
 
             // Assert

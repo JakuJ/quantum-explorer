@@ -1,12 +1,5 @@
 using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using static Microsoft.Quantum.Simulation.Simulators.QuantumSimulator;
 
 namespace Compiler
 {
@@ -15,23 +8,16 @@ namespace Compiler
     /// </summary>
     public class StateRecorder
     {
-        private InterceptingSimulator simulator;
-        private CustomDumper dumper;
+        private readonly CustomDumper dumper;
 
         private OperationState currentOperation;
 
         /// <summary>
-        /// Gets a root operation of the simulated program.
-        /// </summary>
-        public OperationState Root { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="StateRecorder"/> class.
         /// </summary>
-        /// <param name="qSimulator">Simulator running the simulation.</param>
-        public StateRecorder(InterceptingSimulator qSimulator)
+        /// <param name="simulator">Simulator running the simulation.</param>
+        public StateRecorder(QuantumSimulator simulator)
         {
-            simulator = qSimulator;
             dumper = new CustomDumper(simulator);
 
             Root = new OperationState("");
@@ -41,12 +27,16 @@ namespace Compiler
             simulator.OnOperationEnd += OnOperationEndHandler;
         }
 
+        /// <summary>
+        /// Gets a root operation of the simulated program.
+        /// </summary>
+        public OperationState Root { get; }
+
         private void OnOperationStartHandler(ICallable operation, IApplyData input)
         {
             var opState = new OperationState(operation.Name);
             currentOperation.AddOperation(opState);
             currentOperation = opState;
-            var qubits = input.Qubits?.Select(q => q.Id).ToArray() ?? Array.Empty<int>();
             dumper.Dump();
             currentOperation.Arguments = dumper.Values;
         }
@@ -55,9 +45,7 @@ namespace Compiler
         {
             dumper.Dump();
             currentOperation.Results = dumper.Values;
-            currentOperation = currentOperation.Parent;
+            currentOperation = currentOperation.Parent!; // an operation that's ending always has a parent operation
         }
-
     }
-
 }
