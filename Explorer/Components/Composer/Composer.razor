@@ -2,40 +2,22 @@
 @inject IJSRuntime JsRuntime
 
 <div class="overflow-hidden">
-    @if (gates != null)
+    @if (gateGrid != null)
     {
-        <Grid Gates="@(gates)"/>
+        <Grid GateGrid="@(gateGrid)"/>
     }
 </div>
 
 @code {
-    private QuantumGate?[,]? gates;
+    private GateGrid gateGrid = new GateGrid();
 
-    private QuantumGate?[,] GateGridToArray(GateGrid grid)
-    {
-        var arr = new QuantumGate?[grid.Width, grid.Height];
-        foreach ((QuantumGate gate, int x, int y) in grid.Gates)
-        {
-            arr[x, y] = gate;
-        }
-        return arr;
-    }
-
-    public async Task UpdateGrids(Dictionary<string, GateGrid> ast)
+    public void UpdateGrids(Dictionary<string, GateGrid> ast)
     {
         // force the underlying Gate component to render from scratch
-        gates = null;
+        gateGrid = new GateGrid();
         StateHasChanged();
 
-        gates = GateGridToArray(ast.First().Value);
+        gateGrid = ast.First().Value; //GateGridToArray(ast.First().Value);
         StateHasChanged();
-
-        await JsRuntime.InvokeVoidAsync("Library.initGrids");
-    }
-    
-    [JSInvokable]
-    public static void InsertColumn(string id)
-    {
-        Console.WriteLine($"Inserting a new column at snap: {id}");
     }
 }

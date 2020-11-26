@@ -1,17 +1,13 @@
-let snap2gate = {};
-let gate2snap = {};
+// initialize the .NET objects references
+let gridRef = null;
+let assocRef = null;
 
-// Associate a snap point with a gate element
-export function associateGate(snapID, gateID) {
-  snap2gate[snapID] = gateID;
-  gate2snap[gateID] = snapID;
+export function setReferences(_gridRef, _assocRef) {
+  gridRef = _gridRef;
+  assocRef = _assocRef;
 }
 
 export function initGrids() {
-  // clear element associations
-  snap2gate = {};
-  gate2snap = {};
-
   // make gates draggable
   $(".gate").draggable({
     containment: "#grid",
@@ -27,11 +23,11 @@ export function initGrids() {
     snap => {
       $(snap).droppable({
         // only accept gates if no gate is already on this snap point
-        accept: () => {
-          return !snap2gate[snap.id];
+        accept: async () => {
+          return !await assocRef.invokeMethodAsync('GateId', snap.id);
         },
         // update associations on gate dropped
-        drop: (event, {draggable}) => {
+        drop: async (event, {draggable}) => {
           const gateID = draggable[0].id;
 
           if(snap.classList.contains('half'))
@@ -39,17 +35,9 @@ export function initGrids() {
             console.log('dropped on half snap');
 
             // insert a new column
-            DotNet.invokeMethodAsync('Explorer', 'InsertColumn', snap.id);
+            await gridRef.invokeMethodAsync('Expand', snap.id);
           }
-
-          // clear previous snap-gate association
-          const prevSnap = gate2snap[gateID];
-          if (prevSnap) {
-            snap2gate[prevSnap] = null;
-          }
-
-          // associate the gate with this snap
-          associateGate(snap.id, gateID);
+          await assocRef.invokeMethodAsync('Reassociate', gateID, snap.id);
         },
         tolerance: "fit"
       });

@@ -81,7 +81,7 @@
         await Compiler.Compile(code, true);
 
         Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
-        await Composer!.Component.UpdateGrids(ast);
+        Composer!.Component.UpdateGrids(ast);
     }
 
     [ExcludeFromCodeCoverage]

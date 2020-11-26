@@ -1,41 +1,40 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Hosting
 @using Compiler
+@using Explorer.Utilities.ComponentTree
+@using Explorer.Utilities.Composer
+@using Microsoft.Extensions.Logging
 @using static Utilities.Rendering
+@using System.ComponentModel.DataAnnotations
 @inject IJSRuntime JsRuntime
 @inject IWebHostEnvironment Environment;
 
-@{
-    // Setting parameters in Components created in code (SnapPoint, Gate)
-    #pragma warning disable BL0005
-}
-
 <div id="grid">
-    @for (var y = 0; y < Gates.GetLength(1); y++)
+    @for (var y = 0; y < gates.GetLength(1); y++)
     {
         <div class="grid-row">
 
-            @* <RowID y=@(y)/> *@
-
-            @for (var x = 0; x < Gates.GetLength(0); x++)
+            @for (var x = 0; x < gates.GetLength(0); x++)
             {
-                (int localX, int localY) = (x, y);
+                var (localX, localY) = (x, y);
 
                 // Snap point on the cell
-                var cellSnapPoint = new SnapPoint();
-                <SnapPoint X="@x" Y="@y" @ref="@cellSnapPoint"/>
+                var cellSnapPoint = new SnapPoint(x, y);
+                @RenderContent(cellSnapPoint)
+                snapPoints.Add(cellSnapPoint.Id, cellSnapPoint);
 
-                var spoint = new SnapPoint();
-                <SnapPoint Half=true X="@x" Y="@y" @ref="@spoint"/>
-                HalfSnapPoints.Add(spoint.Id, spoint);
+                // Snap point between the cells
+                var halfSnapPoint = new SnapPoint(x, y, true);
+                @RenderContent(halfSnapPoint)
+                snapPoints.Add(halfSnapPoint.Id, halfSnapPoint);
 
                 <Cell>
                     @{
-                        QuantumGate? quantumGate = Gates[localX, localY];
+                        var quantumGate = gates[localX, localY];
                         if (quantumGate != null)
                         {
-                            var gate = new Gate(Environment) { Name = quantumGate.Name };
-                            assocs.Add((cellSnapPoint.Id, gate.Id));
+                            var gate = new Gate(Environment, quantumGate.Name);
+                            gridSnapAssoc.Associate(cellSnapPoint.Id, gate.Id);
                             @RenderContent(gate)
                         }
                     }
@@ -48,20 +47,70 @@
 @code {
 
     [Parameter]
-    public QuantumGate[,] Gates { get; set; } = null!; // required parameter
+    [Required]
+    public GateGrid GateGrid { get; set; }
 
-    public Dictionary<string, SnapPoint> HalfSnapPoints { get; set; } = new Dictionary<string, SnapPoint>();
+    private QuantumGate[,] gates;
 
-    private List<(string, string)> assocs = new List<(string, string)>();
+    private Dictionary<string, SnapPoint> snapPoints;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private GridSnapAssoc gridSnapAssoc;
+
+    public Grid()
     {
-        Task[] tasks = assocs
-            .Select(ab => JsRuntime.InvokeVoidAsync("Library.associateGate", ab.Item1, ab.Item2)
-                                   .AsTask())
-            .ToArray();
-
-        await Task.WhenAll(tasks);
+        snapPoints = new Dictionary<string, SnapPoint>();
+        gridSnapAssoc = new GridSnapAssoc(MoveGate);
+        GateGrid = new GateGrid();
+        gates = null!;
     }
 
+    protected override void OnParametersSet()
+    {
+        gates = GetGates();
+    }
+
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        await JsRuntime.InvokeVoidAsync("Library.initGrids");
+        await SetReferences();
+    }
+
+    private QuantumGate[,] GetGates()
+    {
+        var arr = new QuantumGate[GateGrid.Width, GateGrid.Height];
+        foreach ((var gate, int x, int y) in GateGrid.Gates)
+        {
+            arr[x, y] = gate;
+        }
+        return arr;
+    }
+
+    private void MoveGate(string oldSnapId, string newSnapId)
+    {
+        var oldSnap = snapPoints[oldSnapId];
+        var newSnap = snapPoints[newSnapId];
+        GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
+        gates = GetGates();
+    }
+
+    /// Expand the grid by adding a new column
+    [JSInvokable]
+    public void Expand(string snapId)
+    {
+        Console.WriteLine("Expanding " + snapId);
+        var point = snapPoints[snapId];
+        GateGrid.InsertColumn(point.X);
+        gates = GetGates();
+        StateHasChanged();
+    }
+
+    private async Task SetReferences()
+    {
+        var gridRef = DotNetObjectReference.Create(this);
+        var assocRef = DotNetObjectReference.Create(gridSnapAssoc);
+
+        await JsRuntime.InvokeVoidAsync(
+            "Library.setReferences",
+            gridRef, assocRef);
+    }
 }
