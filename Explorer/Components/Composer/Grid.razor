@@ -1,7 +1,5 @@
-@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Hosting
 @using Compiler
-@using Explorer.Utilities.ComponentTree
 @using Explorer.Utilities.Composer
 @using Microsoft.Extensions.Logging
 @using static Utilities.Rendering
@@ -77,6 +75,7 @@
 
     private QuantumGate[,] GetGates()
     {
+        gridSnapAssoc.Clear();
         var arr = new QuantumGate[GateGrid.Width, GateGrid.Height];
         foreach ((var gate, int x, int y) in GateGrid.Gates)
         {
@@ -89,8 +88,13 @@
     {
         var oldSnap = snapPoints[oldSnapId];
         var newSnap = snapPoints[newSnapId];
+        if(oldSnap.X >= gates.GetLength(0) || oldSnap.Y >= gates.GetLength(1))
+            throw new ArgumentOutOfRangeException("Old snap does not belong to the gates grid");
+        if(newSnap.X >= gates.GetLength(0) || newSnap.Y >= gates.GetLength(1))
+            throw new ArgumentOutOfRangeException("New snap does not belong to the gates grid");
         GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
         gates = GetGates();
+        StateHasChanged();
     }
 
     /// Expand the grid by adding a new column

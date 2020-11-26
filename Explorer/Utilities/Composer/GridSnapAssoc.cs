@@ -64,13 +64,23 @@ namespace Explorer.Utilities.Composer
         public void Reassociate(string gateId, string snapId)
         {
             // Disconnect the gate ID from the old snap ID.
-            var oldSnapId = gate2Snap[gateId];
-            snap2Gate.Remove(oldSnapId);
-            gate2Snap.Remove(gateId);
+            try
+            {
+                var oldSnapId = gate2Snap[gateId];
+                snap2Gate.Remove(oldSnapId);
+                gate2Snap.Remove(gateId);
 
-            // Connect the gate ID to the new snap ID.
-            Associate(snapId, gateId);
-            GatePositionChanged.Invoke(oldSnapId, snapId);
+                // Connect the gate ID to the new snap ID.
+                Associate(snapId, gateId);
+                GatePositionChanged.Invoke(oldSnapId, snapId);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                Console.WriteLine("Old snap key not found while reassociating!");
+                Console.WriteLine($"Moved gate: {gateId}, new snap: {snapId}");
+                Print();
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -80,6 +90,21 @@ namespace Explorer.Utilities.Composer
         {
             snap2Gate.Clear();
             gate2Snap.Clear();
+        }
+
+        /// <summary>
+        /// Print the associations.
+        /// </summary>
+        public void Print()
+        {
+            foreach (KeyValuePair<string, string> kvp in snap2Gate)
+            {
+                Console.WriteLine("snap {0}, gate {1}", kvp.Key, kvp.Value);
+            }
+            foreach (KeyValuePair<string, string> kvp in gate2Snap)
+            {
+                Console.WriteLine("gate {0}, snap {1}", kvp.Key, kvp.Value);
+            }
         }
     }
 }
