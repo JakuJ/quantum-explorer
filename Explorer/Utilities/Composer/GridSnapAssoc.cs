@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.JSInterop;
 
-namespace Explorer.Utilities.ComponentTree
+namespace Explorer.Utilities.Composer
 {
     /// <summary>
     /// Handles the associations between the grid gates and snaps.
