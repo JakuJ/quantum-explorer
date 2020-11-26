@@ -17,19 +17,19 @@
 }
 
 .gutter {
-  background-color: transparent;
-  background-repeat: no-repeat;
-  background-position: 50%;
+  background-color: var(--text-secondary);
 }
 
 .gutter.gutter-horizontal {
   cursor: ew-resize;
-  background-image: url('../images/grips/horizontal.png');
+  -webkit-mask: url('../images/icons/horizontal-grip.svg') no-repeat center;
+  mask: url('../images/icons/horizontal-grip.svg') no-repeat center;
 }
 
 .gutter.gutter-vertical {
   cursor: ns-resize;
-  background-image: url('../images/grips/vertical.png');
+  -webkit-mask: url('../images/icons/vertical-grip.svg') no-repeat center;
+  mask: url('../images/icons/vertical-grip.svg') no-repeat center;
 }
 
 .split.split-horizontal,
