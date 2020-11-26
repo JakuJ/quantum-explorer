@@ -149,7 +149,7 @@
 
         if (!showZeros)
         {
-            list.RemoveAll(x => x.v.Magnitude == 0);
+            list = list.Where(x => x.v.Magnitude != 0).ToList();
         }
 
         chartData = list.Select(pair => new DataItem
