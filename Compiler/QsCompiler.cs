@@ -85,6 +85,7 @@ namespace Compiler
             var config = new CompilationLoader.Configuration
             {
                 IsExecutable = execute,
+                SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 RewriteSteps = new (string, string?)[]
                 {
                     (Assembly.GetExecutingAssembly().Location, null),
