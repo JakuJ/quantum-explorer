@@ -6,6 +6,7 @@
 @using System.ComponentModel.DataAnnotations
 @inject IJSRuntime JsRuntime
 @inject IWebHostEnvironment Environment;
+@inject ILogger<Index> Logger;
 
 <div id="grid">
     @for (var y = 0; y < gates.GetLength(1); y++)
@@ -57,7 +58,7 @@
     public Grid()
     {
         snapPoints = new Dictionary<string, SnapPoint>();
-        gridSnapAssoc = new GridSnapAssoc(MoveGate);
+        gridSnapAssoc = new GridSnapAssoc(Logger, MoveGate);
         GateGrid = new GateGrid();
         gates = null!;
     }
@@ -65,6 +66,7 @@
     protected override void OnParametersSet()
     {
         gates = GetGates();
+        StateHasChanged();
     }
 
     protected override async void OnAfterRender(bool firstRender)
@@ -101,7 +103,7 @@
     [JSInvokable]
     public void Expand(string snapId)
     {
-        Console.WriteLine("Expanding " + snapId);
+        Logger.LogInformation("Expanding {0}", snapId);
         var point = snapPoints[snapId];
         GateGrid.InsertColumn(point.X);
         gates = GetGates();
