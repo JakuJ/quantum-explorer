@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
 namespace Explorer.Utilities.Composer
@@ -9,6 +10,8 @@ namespace Explorer.Utilities.Composer
     /// </summary>
     public class GridSnapAssoc
     {
+        private readonly ILogger logger;
+
         private readonly Dictionary<string, string> snap2Gate = new Dictionary<string, string>();
 
         private readonly Dictionary<string, string> gate2Snap = new Dictionary<string, string>();
@@ -16,9 +19,11 @@ namespace Explorer.Utilities.Composer
         /// <summary>
         /// Initializes a new instance of the <see cref="GridSnapAssoc"/> class.
         /// </summary>
+        /// <param name="logg">A logger object.</param>
         /// <param name="gatePosChanged">Action to be called on changing the gate position.</param>
-        public GridSnapAssoc(Action<string, string> gatePosChanged)
+        public GridSnapAssoc(ILogger logg, Action<string, string> gatePosChanged)
         {
+            logger = logg;
             GatePositionChanged = gatePosChanged;
         }
 
@@ -33,10 +38,20 @@ namespace Explorer.Utilities.Composer
         /// </summary>
         /// <param name="snapId">Snap ID.</param>
         /// <param name="gateId">Gate ID.</param>
-        public void Associate(string snapId, string gateId)
+        /// <returns>Error code.</returns>
+        public bool Associate(string snapId, string gateId)
         {
-            snap2Gate.Add(snapId, gateId);
-            gate2Snap.Add(gateId, snapId);
+            try
+            {
+                snap2Gate.Add(snapId, gateId);
+                gate2Snap.Add(gateId, snapId);
+                return false;
+            }
+            catch (ArgumentException ex)
+            {
+                logger.LogError("Cannot associate! {0}, {1}", snapId, gateId);
+                throw ex;
+            }
         }
 
         /// <summary>Get the GateID basing on the SnapID.</summary>
@@ -76,8 +91,8 @@ namespace Explorer.Utilities.Composer
             }
             catch (KeyNotFoundException ex)
             {
-                Console.WriteLine("Old snap key not found while reassociating!");
-                Console.WriteLine($"Moved gate: {gateId}, new snap: {snapId}");
+                logger.LogError("Old snap key not found while reassociating!");
+                logger.LogInformation("Moved gate: {0}, new snap: {1}", gateId, snapId);
                 Print();
                 throw ex;
             }
@@ -99,11 +114,12 @@ namespace Explorer.Utilities.Composer
         {
             foreach (KeyValuePair<string, string> kvp in snap2Gate)
             {
-                Console.WriteLine("snap {0}, gate {1}", kvp.Key, kvp.Value);
+                logger.LogInformation("snap {0}, gate {1}", kvp.Key, kvp.Value);
             }
+
             foreach (KeyValuePair<string, string> kvp in gate2Snap)
             {
-                Console.WriteLine("gate {0}, snap {1}", kvp.Key, kvp.Value);
+                logger.LogInformation("gate {0}, snap {1}", kvp.Key, kvp.Value);
             }
         }
     }
