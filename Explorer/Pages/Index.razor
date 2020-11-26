@@ -67,9 +67,7 @@
     [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
-        await JsRuntime.InvokeVoidAsync("Library.disable", compileButtonRef);
-        progress.Running = true;
-
+        await toggleCompilation(true);
         output.Clear();
 
         Visualizer.Component.SetPlaceholder("Compiling");
@@ -80,8 +78,9 @@
         Task task = new(() =>
         {
             Compiler.Compile(code, true).ContinueWith(
-                t =>
+                async t =>
                 {
+                    await toggleCompilation(false);
                     string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
                     Visualizer.Component.SetOutput($"Simulation errors occured:\n\n{messages}");
                 },
@@ -117,8 +116,9 @@
     }
 
     [ExcludeFromCodeCoverage]
-    private void diagnosticsHandler(object _, string val)
+    private async void diagnosticsHandler(object _, string val)
     {
+        await toggleCompilation(false);
         output.AppendLine(val);
         Visualizer.Component.SetOutput(output.ToString());
     }
@@ -126,8 +126,7 @@
     [ExcludeFromCodeCoverage]
     private async void outputHandler(object _, string stdout)
     {
-        progress.Running = false;
-        await JsRuntime.InvokeVoidAsync("Library.enable", compileButtonRef);
+        await toggleCompilation(false);
 
         if (output.Length != 0)
         {
@@ -140,5 +139,11 @@
     }
 
     #endregion
+
+    private async Task toggleCompilation(bool running)
+    {
+        progress.Running = running;
+        await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);
+    }
 
 }

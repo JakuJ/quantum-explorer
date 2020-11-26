@@ -210,7 +210,6 @@ body:not(.rz-default-scrollbars) ::-webkit-scrollbar {
 select,
 select:active,
 select:focus {
-  outline: none;
   -moz-box-shadow: none !important;
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
