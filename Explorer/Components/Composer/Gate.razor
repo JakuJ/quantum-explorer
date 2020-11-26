@@ -1,14 +1,11 @@
 @using Common
-@using System
-@using System.Web
 @using System.IO
-@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Hosting
 
 <div id="@Id" class="gate">
     @if (CheckIconPath())
     {
-        <img src="@(IconPath)">
+        <img src="@(IconPath)" alt="@(Name)">
     }
     else
     {
@@ -18,33 +15,22 @@
 
 @code {
 
-    //ElementReference htmlButton;
-    //RadzenButton radzenButton;
-
-    //void ShowTooltip(ElementReference elementReference, TooltipOptions options = null) => tooltipService.Open(elementReference, "Some content", options);
-
-    private IWebHostEnvironment Environment { get; set; }
-
-    public Gate(IWebHostEnvironment env)
-    {
-        Environment = env;
-    }
-
-    [Parameter]
-    public string Name { get; set; } = "";
+    public string Name { get; }
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
-    public string IconPath
+    private IWebHostEnvironment Environment { get; }
+
+    private string IconPath => $"images/icons/{Name}.svg";
+
+    public Gate(IWebHostEnvironment env, string name)
     {
-        get => $"images/icons/{Name}.svg";
+        Environment = env;
+        Name = name;
     }
 
-    /// <summary>
     /// Checks if the proper icon exists
-    /// </summary>
-    /// <returns></returns>
-    public bool CheckIconPath()
+    private bool CheckIconPath()
     {
         var iconPath = Path.Combine(Environment.WebRootPath, IconPath);
         return File.Exists(iconPath);

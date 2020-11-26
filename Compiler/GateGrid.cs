@@ -108,6 +108,13 @@ namespace Compiler
             grid.ForEach(col => col.Insert(rowBelow, null));
         }
 
+        /// <summary>Insert an empty column before the one with the provided index.</summary>
+        /// <param name="columnBefore">Index of the column directly before the inserted one.</param>
+        public void InsertColumn(int columnBefore)
+        {
+            grid.Insert(columnBefore, EmptyColumn());
+        }
+
         /// <summary>Removes the gate at a given position.</summary>
         /// <param name="x">The index of the column.</param>
         /// <param name="y">The index of the qubit.</param>
