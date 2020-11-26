@@ -1,10 +1,7 @@
 @page "/"
 @using System.Text
 @using Microsoft.Extensions.Logging
-@using Newtonsoft.Json
 @using Compiler
-@using Explorer.Utilities.ComponentTree
-@using System.Diagnostics.CodeAnalysis
 @using Microsoft.Quantum.QsCompiler.SyntaxTree
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
@@ -20,7 +17,17 @@
     <Progress @ref="progress"></Progress>
     <div class="content">
         <div id="splitPanes">
-            @Components
+            <div id="left-pane" class="split split-horizontal split-content">
+                <Editor @ref="Editor"/>
+            </div>
+            <div id="right-pane" class="split split-horizontal">
+                <div id="top-pane" class="split split-content">
+                    <Compositor @ref="Compositor"/>
+                </div>
+                <div id="bottom-pane" class="split split-content">
+                    <Visualizer @ref="Visualizer"/>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -28,9 +35,9 @@
 @code {
 #nullable disable
 
-    private Panel<Editor> Editor;
-    private Panel<Compositor> Compositor;
-    private Panel<Visualizer> Visualizer;
+    private Editor Editor;
+    private Compositor Compositor;
+    private Visualizer Visualizer;
 
     private LsStatus status;
     private Progress progress;
@@ -38,52 +45,34 @@
 
     private readonly StringBuilder output = new();
 
-    RenderFragment Components => new PanelRenderer().Render(tree);
-
-    readonly PanelTree tree = new(PanelTree.Alignment.Horizontal);
-
-    // TODO: end-to-end tests
-    // Until then, all methods in this class are excluded from code coverage
-    [ExcludeFromCodeCoverage]
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        Editor = tree.AddPanel<Editor>();
-
-        PanelTree sidePanel = new(PanelTree.Alignment.Vertical);
-
-        Compositor = sidePanel.AddPanel<Compositor>();
-        Visualizer = sidePanel.AddPanel<Visualizer>();
-
-        tree.AddPanel(sidePanel);
-
         Compiler.OnDiagnostics += diagnosticsHandler;
         Compiler.OnOutput += outputHandler;
         Compiler.OnCompilation += compilationHandler;
-        Compiler.OnStatesRecorded += (_, states) => { Visualizer.Component.ShowStates(states); };
+        Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
     }
 
-    [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
-        await JsRuntime.InvokeVoidAsync("Library.disable", compileButtonRef);
-        progress.Running = true;
-
+        await toggleCompilation(true);
         output.Clear();
 
-        Visualizer.Component.SetPlaceholder("Compiling");
+        Visualizer.SetPlaceholder("Compiling");
 
-        string code = await Editor.Component.GetCode();
+        string code = await Editor.GetCode();
 
     // run compilation in a separate thread so that we don't block the UI
         Task task = new(() =>
         {
             Compiler.Compile(code, true).ContinueWith(
-                t =>
+                async t =>
                 {
+                    await toggleCompilation(false);
                     string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
-                    Visualizer.Component.SetOutput($"Simulation errors occured:\n\n{messages}");
+                    Visualizer.SetOutput($"Simulation errors occured:\n\n{messages}");
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
         }, TaskCreationOptions.LongRunning);
@@ -91,43 +80,34 @@
         task.Start();
     }
 
-    [ExcludeFromCodeCoverage]
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
-        string serializedTree = JsonConvert.SerializeObject(tree, new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto,
-        });
-
-        await JsRuntime.InvokeVoidAsync("Library.InitializeSplitPanes", serializedTree);
-        await Editor.Component.SetStatusReference(status);
+        await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
+        await Editor.SetStatusReference(status);
     }
 
     #region Compilation event handlers
 
-    [ExcludeFromCodeCoverage]
     private void compilationHandler(object _, QsCompilation compilation)
     {
         if (output.Length == 0) // no diagnostics
         {
-            Visualizer.Component.SetPlaceholder("Executing");
+            Visualizer.SetPlaceholder("Executing");
         }
     }
 
-    [ExcludeFromCodeCoverage]
-    private void diagnosticsHandler(object _, string val)
+    private async void diagnosticsHandler(object _, string val)
     {
+        await toggleCompilation(false);
         output.AppendLine(val);
-        Visualizer.Component.SetOutput(output.ToString());
+        Visualizer.SetOutput(output.ToString());
     }
 
-    [ExcludeFromCodeCoverage]
     private async void outputHandler(object _, string stdout)
     {
-        progress.Running = false;
-        await JsRuntime.InvokeVoidAsync("Library.enable", compileButtonRef);
+        await toggleCompilation(false);
 
         if (output.Length != 0)
         {
@@ -135,10 +115,15 @@
         }
 
         output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
-
-        Visualizer.Component.SetOutput(output.ToString());
+        Visualizer.SetOutput(output.ToString());
     }
 
     #endregion
+
+    private async Task toggleCompilation(bool running)
+    {
+        progress.Running = running;
+        await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);
+    }
 
 }
