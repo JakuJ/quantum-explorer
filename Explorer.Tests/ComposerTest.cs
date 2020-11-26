@@ -1,13 +1,12 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Bunit;
 using Bunit.TestDoubles.JSInterop;
 using Compiler;
 using Explorer.Components.Composer;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -27,6 +26,7 @@ namespace Explorer.Tests
             // Arrange
             using var ctx = new Bunit.TestContext();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped<ILogger<System.Index>>(_ => new Mock<ILogger<System.Index>>().Object);
             ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
             var cut = ctx.RenderComponent<Composer>();
 

@@ -7,6 +7,8 @@ using Explorer.Utilities.ComponentTree;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
 using TestContext = Bunit.TestContext;
 
@@ -27,6 +29,7 @@ namespace Explorer.Tests
         {
             using var ctx = new TestContext();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped<ILogger<System.Index>>(_ => new Mock<ILogger<System.Index>>().Object);
             ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
             var page = RenderTree(ctx, tree);
@@ -49,6 +52,7 @@ namespace Explorer.Tests
         {
             using var ctx = new TestContext();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped<ILogger<System.Index>>(_ => new Mock<ILogger<System.Index>>().Object);
             ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
 
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
