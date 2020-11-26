@@ -31,7 +31,7 @@ namespace Compiler.Tests
         }
 
         [Test]
-        public async Task ExecutesSampleCode()
+        public async Task CompilesAndRunsWithEntryPoint()
         {
             // Arrange
             string sourceCode = await Helpers.GetSourceFile("HelloWorld");
@@ -47,18 +47,19 @@ namespace Compiler.Tests
             };
 
             // Act
-            await compiler.Compile(sourceCode, true);
+            await compiler.Compile(sourceCode);
 
             // Assert
             Assert.IsNotNull(compiler.Compilation, "Compilation should be successful");
             Assert.IsTrue(executed, "Execution must emit output.");
         }
 
-        [Test]
-        public async Task ReturnsDiagnosticsOnError()
+        [TestCase("Library")]
+        [TestCase("CommentedEntryPoint")]
+        public async Task CompilesWithNoEntryPoint(string path)
         {
             // Arrange
-            string sourceCode = await Helpers.GetSourceFile("Library"); // no entry point
+            string sourceCode = await Helpers.GetSourceFile(path);
             QsCompiler compiler = new(Helpers.ConsoleLogger);
             var diagnostics = false;
 
@@ -71,11 +72,11 @@ namespace Compiler.Tests
             compiler.OnOutput += (_, _) => { Assert.Fail("Code should not execute"); };
 
             // Act
-            await compiler.Compile(sourceCode, true);
+            await compiler.Compile(sourceCode);
 
             // Assert
             Assert.IsNotNull(compiler.Compilation, "Q# compilation should succeed");
-            Assert.IsTrue(diagnostics, "Some diagnostics should be present");
+            Assert.IsFalse(diagnostics, "No diagnostics should be present");
         }
     }
 }

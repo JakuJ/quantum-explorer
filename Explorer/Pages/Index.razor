@@ -67,12 +67,12 @@
     // run compilation in a separate thread so that we don't block the UI
         Task task = new(() =>
         {
-            Compiler.Compile(code, true).ContinueWith(
+            Compiler.Compile(code).ContinueWith(
                 async t =>
                 {
                     await toggleCompilation(false);
                     string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
-                    Visualizer.SetOutput($"Simulation errors occured:\n\n{messages}");
+                    Visualizer.SetOutput(messages);
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
         }, TaskCreationOptions.LongRunning);
