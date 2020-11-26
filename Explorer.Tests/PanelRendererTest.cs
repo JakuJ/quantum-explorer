@@ -5,6 +5,8 @@ using Explorer.Components.Composer;
 using Explorer.Templates;
 using Explorer.Utilities.ComponentTree;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NUnit.Framework;
 using TestContext = Bunit.TestContext;
 
@@ -25,6 +27,7 @@ namespace Explorer.Tests
         {
             using var ctx = new TestContext();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
             var page = RenderTree(ctx, tree);
             page.MarkupMatches("<div class=\"resizable\"></div>", "There should be no components");
@@ -46,6 +49,8 @@ namespace Explorer.Tests
         {
             using var ctx = new TestContext();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
+
             var tree = new PanelTree(PanelTree.Alignment.Horizontal);
             tree.AddPanel<Editor>();
 

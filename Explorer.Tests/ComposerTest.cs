@@ -25,25 +25,9 @@ namespace Explorer.Tests
         public async Task RendersComposer()
         {
             // Arrange
-            var repoDir = Directory
-                .GetParent(Directory.GetCurrentDirectory())
-                .Parent.Parent.Parent.FullName;
-            var wwwRoot = Path.Join(repoDir, "Explorer", "wwwroot");
-
-            var mockEnvironment = new Mock<IWebHostEnvironment>();
-            mockEnvironment
-                .Setup(m => m.ApplicationName)
-                .Returns("ComposerTest");
-            mockEnvironment
-                .Setup(m => m.EnvironmentName)
-                .Returns("UnitTestEnvironment");
-            mockEnvironment
-                .Setup(m => m.WebRootPath)
-                .Returns(wwwRoot);
-
             using var ctx = new Bunit.TestContext();
             ctx.Services.AddMockJSRuntime();
-            ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => mockEnvironment.Object);
+            ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
             var cut = ctx.RenderComponent<Composer>();
 
             var grid = new GateGrid();
@@ -52,7 +36,7 @@ namespace Explorer.Tests
             var ast = new Dictionary<string, GateGrid> { { "tab1", grid } };
 
             // Act
-            await cut.InvokeAsync(async () => cut.Instance.UpdateGrids(ast));
+            await cut.InvokeAsync(() => cut.Instance.UpdateGrids(ast));
 
             // Assert
             // Check if the gate name is displayed

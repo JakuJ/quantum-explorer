@@ -2,7 +2,9 @@ using Bunit;
 using Bunit.TestDoubles.JSInterop;
 using Compiler;
 using Explorer.Templates;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -19,6 +21,7 @@ namespace Explorer.Tests
         {
             var ctx = new TestContext();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
 
             // Mock the compiler
             ctx.Services.AddSingleton(container => Mock.Of<ICompiler>());
