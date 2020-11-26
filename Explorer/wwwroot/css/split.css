@@ -13,6 +13,7 @@
 
 .split.split-content {
   padding: 1px;
+  background: var(--surface);
 }
 
 .gutter {

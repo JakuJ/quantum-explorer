@@ -1,7 +1,6 @@
 using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
-using Explorer.Templates;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -37,7 +36,7 @@ namespace Explorer.Tests
             var index = ctx.RenderComponent<Index>();
 
             // Assert
-            Assert.AreEqual(3, index.FindComponents<Resizable>().Count, "There should be three Resizable panels at the beginning");
+            Assert.AreEqual(3, index.FindAll(".split-content").Count, "There should be three split panes at the beginning");
         }
     }
 }
