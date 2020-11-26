@@ -2,7 +2,6 @@
 @using System.Text
 @using Microsoft.Extensions.Logging
 @using Compiler
-@using System.Diagnostics.CodeAnalysis
 @using Microsoft.Quantum.QsCompiler.SyntaxTree
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
@@ -46,9 +45,6 @@
 
     private readonly StringBuilder output = new();
 
-    // TODO: end-to-end tests
-    // Until then, all methods in this class are excluded from code coverage
-    [ExcludeFromCodeCoverage]
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -59,7 +55,6 @@
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
     }
 
-    [ExcludeFromCodeCoverage]
     private async Task OnCompile()
     {
         await toggleCompilation(true);
@@ -85,7 +80,6 @@
         task.Start();
     }
 
-    [ExcludeFromCodeCoverage]
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -96,7 +90,6 @@
 
     #region Compilation event handlers
 
-    [ExcludeFromCodeCoverage]
     private void compilationHandler(object _, QsCompilation compilation)
     {
         if (output.Length == 0) // no diagnostics
@@ -105,7 +98,6 @@
         }
     }
 
-    [ExcludeFromCodeCoverage]
     private async void diagnosticsHandler(object _, string val)
     {
         await toggleCompilation(false);
@@ -113,7 +105,6 @@
         Visualizer.SetOutput(output.ToString());
     }
 
-    [ExcludeFromCodeCoverage]
     private async void outputHandler(object _, string stdout)
     {
         await toggleCompilation(false);
