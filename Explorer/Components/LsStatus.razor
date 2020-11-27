@@ -46,6 +46,10 @@
 
     private ConnectionState state = ConnectionState.Disconnected;
 
+    /// <summary>
+    /// Sets state displayed in component.
+    /// </summary>
+    /// <param name="_state"><see cref="ConnectionState"/> representing LS status.</param>
     [JSInvokable]
     public void SetState(ConnectionState _state)
     {

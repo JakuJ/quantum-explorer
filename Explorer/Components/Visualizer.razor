@@ -119,10 +119,22 @@
         }
     }
 
+    /// <summary>
+    /// Sets text in placeholder.
+    /// </summary>
+    /// <param name="text">Text to be set in placeholder.</param>
     public async void SetPlaceholder(string text) => await SetText(text, true);
 
+    /// <summary>
+    /// Sets simulation and compilation output in output console tab.
+    /// </summary>
+    /// <param name="text">Text to be set in console.</param>
     public async void SetOutput(string text) => await SetText(text, false);
 
+    /// <summary>
+    /// Passes quantum states of operations to be listed in a tree.
+    /// </summary>
+    /// <param name="states">Collection of <see cref="OperationState"/> representing quantum operation states.</param>
     public async void ShowStates(IEnumerable<OperationState> states)
     {
         States = states;
@@ -139,13 +151,16 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Transforms chosen operation state to displayable list binded to chart
+    /// </summary>
     private void CreateDisplayList()
     {
         List<(int idx, Complex v)>? list = (dataType == "Arguments") ? selectedOperation?.Arguments : selectedOperation?.Results;
 
         if (list == null) return;
 
-        int binLength = (int)Math.Ceiling(Math.Log2(list.Count));
+        int binLength = (int)Math.Ceiling(Math.Log2(list.Count)); //calculate number of qubits to include in labels
 
         if (!showZeros)
         {
@@ -159,7 +174,9 @@
             Imaginary = pair.v.Imaginary
         });
     }
-
+    /// <summary>
+    /// Displays chart on operation choosing
+    /// </summary>
     private void ShowOperationState(TreeEventArgs args)
     {
         if (args.Value is OperationState state)
@@ -169,6 +186,9 @@
         }
     }
 
+    /// <summary>
+    /// Filter zero states and update chart
+    /// </summary>
     private void ZerosSwitch(ChangeEventArgs checkedValue)
     {
         showZeros = checkedValue.Value is bool value && value;
@@ -178,6 +198,9 @@
         }
     }
 
+    /// <summary>
+    /// Switch between operation's arguments and results, then update the chart
+    /// </summary>
     private void DataTypeChanged(ChangeEventArgs e)
     {
         string? selected = e.Value?.ToString();

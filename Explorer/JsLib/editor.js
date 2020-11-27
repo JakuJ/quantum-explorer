@@ -78,6 +78,7 @@ export class Editor {
 
     const id = 'id' + (window.editorsCounter++);
 
+    //register qsharp language in monaco
     monaco.languages.register({
       id: LANGUAGE_ID,
       extensions: ['qs'],
@@ -91,6 +92,7 @@ export class Editor {
       })
     });
 
+    //define themes in editor
     monaco.editor.defineTheme(LIGHT_THEME_NAME,
       await fetch(LIGHT_THEME_JSON).then(x => x.json())
     );
@@ -99,6 +101,7 @@ export class Editor {
       await fetch(DARK_THEME_JSON).then(x => x.json())
     );
 
+    //create monaco editor
     window.editorsDict[id] = monaco.editor.create(element, {
       model: monaco.editor.createModel(loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
       theme: getThemeName(),
@@ -118,6 +121,7 @@ export class Editor {
       foldingStrategy: 'indentation',
     });
 
+    //install services required to communicate with LS
     MonacoServices.install(window.editorsDict[id]);
 
     const grammars = new Map([[LANGUAGE_ID, 'source.qsharp']]);
@@ -125,6 +129,7 @@ export class Editor {
 
     new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
 
+    //add command to save code
     window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
       saveCode(window.editorsDict[id].getValue());
     });
