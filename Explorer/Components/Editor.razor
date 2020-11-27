@@ -7,10 +7,14 @@
 
     private string? editorId;
 
+    /// <summary>Asynchronously gets code stored in Editor component.</summary>
+    /// <returns>An awaitable <see cref="Task"/> returning <see cref="string"/>.</returns>
     public async Task<string> GetCode()
-        => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
+    => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
 
-    // Will be used someday
+    /// <summary>Asynchronously sets code in Editor component.</summary>
+    /// <param name="code">Q# code as a plain string.</param>
+    /// <returns>An awaitable <see cref="Task"/>.</returns>
     public async Task SetCode(string code)
     {
         if (editorId != null)
@@ -19,6 +23,7 @@
         }
     }
 
+    /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -27,6 +32,9 @@
         }
     }
 
+    /// <summary>Asynchronously sets Language Server status of editor in <see cref="LsStatus"/> object.</summary>
+    /// <param name="target"><see cref="LsStatus"/> component to set status in.</param>
+    /// <returns>An awaitable <see cref="Task"/>.</returns>
     public async Task SetStatusReference(LsStatus target)
     {
         var objRef = DotNetObjectReference.Create(target);
