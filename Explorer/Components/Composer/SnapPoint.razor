@@ -29,5 +29,5 @@
 
     private string HalfClass => Half ? "half" : "";
 
-    public override string ToString() => $"[{X},{Y}]{HalfClass} {Id.Take(10)}";
+    public override string ToString() => $"[{X},{Y}]{HalfClass} {Id.Substring(0,10)}";
 }
