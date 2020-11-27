@@ -73,7 +73,6 @@ namespace DatabaseHandler.Tests
             Guid newId = databaseHandler.SaveCode(name, code);
 
             // Assert
-            Assert.AreEqual(1, dbContext.CodeInformations.Count());
             var savedCode = dbContext.CodeInformations.FirstOrDefault(x => x.Id == newId);
             Assert.NotNull(savedCode);
             Assert.AreEqual(code, savedCode?.Code);
