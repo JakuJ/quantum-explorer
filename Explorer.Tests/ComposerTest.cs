@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bunit;
-using Bunit.TestDoubles.JSInterop;
+using Bunit.TestDoubles;
 using Compiler;
 using Explorer.Components.Composer;
 using Microsoft.AspNetCore.Hosting;
