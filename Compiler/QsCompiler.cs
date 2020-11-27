@@ -20,9 +20,6 @@ using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.Diagno
 namespace Compiler
 {
     /// <inheritdoc />
-    /// <remarks>
-    /// Inspired by <see cref="!:https://www.strathweb.com/2020/08/running-q-compiler-and-simulation-programmatically-from-a-c-application/"/>.
-    /// </remarks>
     public class QsCompiler : ICompiler
     {
         private static string[]? qsharpReferences;
@@ -82,12 +79,13 @@ namespace Compiler
         /// <inheritdoc/>
         public async Task Compile(string qsharpCode)
         {
+            // do we have an uncommented @EntryPoint?
             bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
 
             // to load our custom rewrite step, we need to point Q# compiler config at our current assembly
             var config = new CompilationLoader.Configuration
             {
-                IsExecutable = execute, // do we have an uncommented @EntryPoint?
+                IsExecutable = execute,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 RewriteStepAssemblies = new (string, string?)[]
                 {
@@ -95,6 +93,7 @@ namespace Compiler
                 },
             };
 
+            // set up a handler to intercept generated C# code
             void Handler(object? sender, FilesEmittedArgs args)
             {
                 eventQueue.Add(args);
@@ -154,6 +153,7 @@ namespace Compiler
                 return;
             }
 
+            // report that the compilation succeeded
             OnCompilation?.Invoke(this, Compilation);
 
             // find our generated files
@@ -197,6 +197,7 @@ namespace Compiler
                 }
             }
 
+            // measure execution time
             using var timer = new ScopedTimer("Executing simulation", logger);
 
             // emit C# code into an in-memory assembly
@@ -208,7 +209,7 @@ namespace Compiler
             QSharpLoadContext qsharpLoadContext = new();
             Assembly qsharpAssembly = qsharpLoadContext.LoadFromStream(peStream);
 
-            // get the @Entrypoint() operation
+            // get the @EntryPoint() operation
             QsQualifiedName? entryPoint = compilationLoader.CompilationOutput?.EntryPoints.FirstOrDefault();
 
             if (entryPoint == null)
@@ -223,7 +224,6 @@ namespace Compiler
             if (type != null)
             {
                 using InterceptingSimulator sim = new();
-
                 var recorder = new StateRecorder(sim);
 
                 // simulate the entry point operation using reflection

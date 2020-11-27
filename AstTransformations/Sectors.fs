@@ -1,7 +1,9 @@
 namespace AstTransformations
 
+/// Exports functions and types that deal with organizing qubit identifier sectors
 module Sectors =
-    /// UniqueList is a list that contains unique elements
+    /// A list that can only contain unique elements
+    /// Note that this is only a type alias, the uniqueness is not enforced in any way
     type UniqueList<'a> = 'a list
 
     /// Add an element to the end of the list or do nothing if already present
@@ -12,8 +14,8 @@ module Sectors =
             | x :: xs -> x :: addUnique v xs
             | [] -> [ v ]
 
-    /// A Sector represents consecutive rows assigned to single qubits or ones from the same register
-    type Sector = (string * UniqueList<string>)
+    /// Represents consecutive rows assigned to single qubits or ones from the same register
+    type Sector = string * UniqueList<string>
 
     /// Add a concrete identifier to the provided register's sector
     let rec addToRegister: (string -> string -> Sector list -> Sector list) =

@@ -11,6 +11,7 @@ using Microsoft.Quantum.QsCompiler.Transformations.BasicTransformations;
 namespace Compiler
 {
     /// <inheritdoc />
+    /// <summary>A compiler rewrite step that generates C# code in-memory.</summary>
     // ReSharper disable once ClassNeverInstantiated.Global
     internal class InMemoryEmitter : IRewriteStep
     {
@@ -30,6 +31,10 @@ namespace Compiler
 
         public bool ImplementsPostconditionVerification => false;
 
+        /// <summary>Generate C# code for a Q# compilation in-memory.</summary>
+        /// <param name="compilation">The compilation to generate code for.</param>
+        /// <param name="transformed">The output compilation, unchanged.</param>
+        /// <returns>Whether the code generation succeeded.</returns>
         public bool Transformation(QsCompilation compilation, out QsCompilation transformed)
         {
             var context = CodegenContext.Create(compilation, AssemblyConstants);

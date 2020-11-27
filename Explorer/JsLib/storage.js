@@ -1,3 +1,4 @@
+// Save the currently edited code in localStorage
 export function saveCode(code) {
   try {
     window.localStorage.setItem('code', code);
@@ -10,6 +11,7 @@ export function saveCode(code) {
   }
 }
 
+// Get the code saved in localStorage
 export function loadCode() {
   return window.localStorage.getItem('code');
 }

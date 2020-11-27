@@ -120,7 +120,7 @@
     }
 
     /// <summary>
-    /// Sets text in placeholder.
+    /// Displays text in the placeholder.
     /// </summary>
     /// <param name="text">Text to be set in placeholder.</param>
     public async void SetPlaceholder(string text) => await SetText(text, true);
@@ -152,7 +152,7 @@
     }
 
     /// <summary>
-    /// Transforms chosen operation state to displayable list binded to chart
+    /// Transforms chosen operation state to a displayable list binded to the chart.
     /// </summary>
     private void CreateDisplayList()
     {
@@ -174,8 +174,9 @@
             Imaginary = pair.v.Imaginary
         });
     }
+
     /// <summary>
-    /// Displays chart on operation choosing
+    /// Displays the chart whenever an operation is chosen.
     /// </summary>
     private void ShowOperationState(TreeEventArgs args)
     {
@@ -187,7 +188,7 @@
     }
 
     /// <summary>
-    /// Filter zero states and update chart
+    /// Filter out zero states and update the chart.
     /// </summary>
     private void ZerosSwitch(ChangeEventArgs checkedValue)
     {
@@ -199,7 +200,7 @@
     }
 
     /// <summary>
-    /// Switch between operation's arguments and results, then update the chart
+    /// Switch between an operation's arguments and results, then update the chart.
     /// </summary>
     private void DataTypeChanged(ChangeEventArgs e)
     {

@@ -10,8 +10,9 @@ open Microsoft.Quantum.QsCompiler.SyntaxTree
 open Microsoft.Quantum.QsCompiler.Transformations.Core
 
 module FromQSharp =
-    /// Am identifier that resolves to a Qubit
-    /// Either a Qubit itself, or Qubit[] with index
+    /// An identifier that resolves to a Qubit
+    /// Either a Qubit itself, or a Qubit array with an index
+    /// TODO: Support qubit arrays indexed by arbitrary expressions
     type QubitRef =
         | Single of string
         | Register of string * int
@@ -49,6 +50,7 @@ module FromQSharp =
             member val GateQueue: ((QubitRef * QuantumGate) list) list = List.empty with get, set
         end
 
+    /// Our custom SyntaxTreeTransformation
     type Transform(options: TransformationOptions) =
         inherit SyntaxTreeTransformation<State>(State(), options)
 
@@ -65,6 +67,7 @@ module FromQSharp =
     and NamespaceTransform(parent: Transform) =
         inherit NamespaceTransformation<State>(parent, TransformationOptions.NoRebuild)
 
+        /// Parser a callable signature to extract names of arguments that hold qubits
         let rec parseArgs (declTuple: QsTuple<LocalVariableDeclaration<QsLocalSymbol>>): (string * bool) list =
             match declTuple with
             | QsTupleItem item ->
@@ -76,21 +79,23 @@ module FromQSharp =
                 List.ofArray (items.ToArray())
                 |> List.collect parseArgs
 
+        /// Remember namespace name on traversal
         override this.OnNamespace(ns: QsNamespace) =
             this.SharedState.Namespace <- ns.Name
             base.OnNamespace ns
 
+        /// Process callable declarations
         override this.OnCallableDeclaration(callable: QsCallable) =
             match callable.Kind with
             | Operation ->
-                // reset state
+                // reset state, each callable is processed separately
                 this.SharedState.KnownQubits <- Set.empty
                 this.SharedState.KnownRegisters <- Set.empty
                 this.SharedState.Sectors <- List.empty
                 this.SharedState.GateQueue <- List.empty
                 this.SharedState.Operation <- callable.FullName.Name
 
-                // parse qubit and register arguments
+                // fill shared state based on the callable signature
                 let argNames = parseArgs callable.ArgumentTuple
 
                 for name, isReg in argNames do
@@ -117,21 +122,22 @@ module FromQSharp =
                 // create and save the grid to the dictionary
                 let grid = GateGrid()
 
+                // fill sectors with identifiers
                 this.SharedState.GateQueue
-                |> List.collect
-                    (List.map
-                        (fst
-                         >> fun x -> (refToSector x, refToString x)))
+                |> List.collect (List.map (fst >> fun x -> (refToSector x, refToString x)))
                 |> List.iter (fun (reg, full) ->
                     this.SharedState.Sectors <- addToRegister reg full this.SharedState.Sectors)
 
+                // set qubit identifiers in the grid based on sectors
                 this.SharedState.Sectors
                 |> List.collect snd
                 |> fun x -> List.zip [ 0 .. x.Length - 1 ] x
                 |> List.iter grid.SetName
 
+                // add gates to the grid
                 for column in this.SharedState.GateQueue do
                     let col = grid.Width
+
                     for (i, g) in List.rev column do
                         let y = grid.IndexOfName(refToString i)
                         grid.AddGate(col, y, g)
@@ -145,6 +151,7 @@ module FromQSharp =
     and StatementKindTransform(parent: Transform) =
         inherit StatementKindTransformation<State>(parent, TransformationOptions.NoRebuild)
 
+        /// Flatten arbitrarily nested tuples of variable names
         member this.FlattenNames: (SymbolTuple -> string list) =
             function
             | VariableName name -> [ name ]
@@ -153,7 +160,8 @@ module FromQSharp =
                 <| List.ofArray (t.ToArray())
             | _ -> []
 
-        // None means single qubit, Some x means x-qubit register
+        /// Flatten arbitrarily nested tuples of qubit initializers
+        /// Returns None for single qubit allocations, and Some x for x-qubit register allocations
         member this.FlattenQubits: (ResolvedInitializer -> (int option) list) =
             fun x ->
                 match x.Resolution with
@@ -162,12 +170,15 @@ module FromQSharp =
                 | QubitTupleAllocation t ->
                     List.collect this.FlattenQubits
                     <| List.ofArray (t.ToArray())
-                | _ -> [] // invalid or bad register with not an int in the brackets
+                | _ -> [] // invalid or bad register without an integer in the brackets
+        // TODO: Support qubit register allocations with size given by arbitrary expressions
 
+        /// Process qubit allocations ("using" statements)
         override this.OnAllocateQubits(scope: QsQubitScope) =
             let qubitIDs = this.FlattenNames scope.Binding.Lhs
             let qubits = this.FlattenQubits scope.Binding.Rhs
 
+            // Update shared state based on the collected identifiers
             for qubitID, howMany in List.zip qubitIDs qubits do
                 match howMany with
                 | None ->
@@ -175,6 +186,7 @@ module FromQSharp =
                     this.SharedState.Sectors <- addSingle qubitID this.SharedState.Sectors
                 | Some n ->
                     this.SharedState.KnownRegisters <- this.SharedState.KnownRegisters.Add qubitID
+
                     this.SharedState.Sectors <-
                         List.fold (fun acc x -> addToRegister qubitID x acc) this.SharedState.Sectors
                         <| List.map (sprintf "%s[%d]" qubitID) [ 0 .. n - 1 ]
@@ -184,6 +196,7 @@ module FromQSharp =
     and ExpressionKindTransform(parent: Transform) =
         inherit ExpressionKindTransformation<State>(parent, TransformationOptions.NoRebuild)
 
+        /// Parse primitive types that refer to qubits (Identifier, ArrayItem etc.)
         member this.PrimToRefs(rhs: TypedExpression): QubitRef option =
             if not (isQubit rhs.ResolvedType) then
                 None
@@ -211,6 +224,8 @@ module FromQSharp =
                     | _ -> None
                 | _ -> None
 
+        /// Parse arbitraty structures containing references to qubits
+        /// This includes arrays, tuples, and indexed registers
         member this.ArgsToNames(rhs: TypedExpression): (QubitRef list * bool) list =
             match rhs.Expression with
             | Identifier _
@@ -231,7 +246,9 @@ module FromQSharp =
             | UnitValue -> [] // no arguments
             | _ -> [] // ignore other arguments
 
+        /// Process operation calls
         override this.OnOperationCall(lhs: TypedExpression, rhs: TypedExpression) =
+            // Validate whether the operation name represents a callable
             let (gate: (string * string) option) =
                 match lhs.Expression with
                 | Identifier (var, _) ->
@@ -240,8 +257,10 @@ module FromQSharp =
                     | _ -> None
                 | _ -> None
 
+            // Save the operation call as a gate to be added to the grid
             if gate.IsSome then
                 let qubitIDs = this.ArgsToNames rhs
+
                 if not (List.isEmpty qubitIDs) then
                     let (ns, name) = gate.Value
 
@@ -255,6 +274,7 @@ module FromQSharp =
 
             base.OnOperationCall(lhs, rhs)
 
+    /// Process a QsCompilation and return operation names and corresponding GateGrids
     let GetGates (compilation: QsCompilation): Dictionary<string, GateGrid> =
         let transform = Transform()
 

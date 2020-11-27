@@ -4,7 +4,7 @@ using Microsoft.Quantum.Simulation.Simulators;
 namespace Compiler
 {
     /// <summary>
-    /// Records quantum states for simulation.
+    /// Records quantum states during a simulation.
     /// </summary>
     public class StateRecorder
     {
@@ -12,9 +12,7 @@ namespace Compiler
 
         private OperationState currentOperation;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StateRecorder"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="StateRecorder"/> class.</summary>
         /// <param name="simulator">Simulator running the simulation.</param>
         public StateRecorder(QuantumSimulator simulator)
         {
@@ -27,9 +25,7 @@ namespace Compiler
             simulator.OnOperationEnd += OnOperationEndHandler;
         }
 
-        /// <summary>
-        /// Gets a root operation of the simulated program.
-        /// </summary>
+        /// <summary>Gets the root operation of the simulated program.</summary>
         public OperationState Root { get; }
 
         private void OnOperationStartHandler(ICallable operation, IApplyData input)
