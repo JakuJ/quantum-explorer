@@ -1,14 +1,17 @@
 @page "/"
 @using Compiler
+@using DatabaseHandler
+@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @using Microsoft.Extensions.Logging
 @using System.Text
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
+@inject ICodeDatabaseHandler DatabaseHandler;
 
 <div class="main">
     <div class="top-row px-4">
-        <Toasts/>
+        <Toasts />
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
         <LsStatus/>
         <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>

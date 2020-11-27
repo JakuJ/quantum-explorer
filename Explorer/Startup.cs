@@ -1,9 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using Compiler;
+using DatabaseHandler;
 using Compiler.AzureFunction;
 using Compiler.AzureFunction.Connection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -56,6 +59,11 @@ namespace Explorer
             {
                 services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
             }
+            services.AddDbContext<CodeDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DatabaseConnection"),
+                    x => x.MigrationsAssembly("DatabaseHandler")));
+            services.AddScoped<ICodeDatabaseHandler, CodeDatabaseHandler>();
         }
     }
 }
