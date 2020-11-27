@@ -150,6 +150,7 @@ namespace Compiler
 
             if (Compilation == null || !execute)
             {
+                OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
                 return;
             }
 

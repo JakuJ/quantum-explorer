@@ -20,7 +20,10 @@ namespace Compiler.Tests
             compiler.OnDiagnostics += (_, s) =>
             {
                 Helpers.ConsoleLogger.LogError(s);
-                Assert.Fail("There should be no diagnostics emitted");
+                if (s != noEntryPointMessage)
+                {
+                    Assert.Fail("No diagnostics should be present");
+                }
             };
 
             // Act
@@ -61,12 +64,14 @@ namespace Compiler.Tests
             // Arrange
             string sourceCode = await Helpers.GetSourceFile(path);
             QsCompiler compiler = new(Helpers.ConsoleLogger);
-            var diagnostics = false;
 
             compiler.OnDiagnostics += (_, s) =>
             {
-                diagnostics = true;
                 Helpers.ConsoleLogger.LogError(s);
+                if (s != noEntryPointMessage)
+                {
+                    Assert.Fail("No diagnostics should be present");
+                }
             };
 
             compiler.OnOutput += (_, _) => { Assert.Fail("Code should not execute"); };
@@ -76,7 +81,8 @@ namespace Compiler.Tests
 
             // Assert
             Assert.IsNotNull(compiler.Compilation, "Q# compilation should succeed");
-            Assert.IsFalse(diagnostics, "No diagnostics should be present");
         }
+
+        private const string noEntryPointMessage = "Nothing to execute, no entry point specified.";
     }
 }
