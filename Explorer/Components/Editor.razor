@@ -10,7 +10,7 @@
     /// <summary>Asynchronously gets code stored in Editor component.</summary>
     /// <returns>An awaitable <see cref="Task"/> returning <see cref="string"/>.</returns>
     public async Task<string> GetCode()
-    => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
+        => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

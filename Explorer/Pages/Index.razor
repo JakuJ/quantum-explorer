@@ -49,12 +49,14 @@
     {
         base.OnInitialized();
 
+    // set handlers for compiler events
         Compiler.OnDiagnostics += diagnosticsHandler;
         Compiler.OnOutput += outputHandler;
         Compiler.OnCompilation += compilationHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
     }
 
+    /// <summary>On-click handler for the "Compile & Run" button.</summary>
     private async Task OnCompile()
     {
         await toggleCompilation(true);
@@ -64,8 +66,7 @@
 
         string code = await Editor.GetCode();
 
-    // run compilation in a separate thread so that we don't block the UI
-        Task task = new(() =>
+        Task task = new(() => // run compilation in a separate thread so that we don't block the UI
         {
             Compiler.Compile(code).ContinueWith(
                 async t =>
@@ -120,6 +121,7 @@
 
     #endregion
 
+    /// <summary>Toggle the progressbar and whether the "Compile & Run" button is enabled.</summary>
     private async Task toggleCompilation(bool running)
     {
         progress.Running = running;
