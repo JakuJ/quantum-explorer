@@ -1,12 +1,13 @@
-// load theme from localStorage of preferences
 import {Editor} from './editor';
 
+// load theme from localStorage of preferences
 let theme = localStorage.getItem('theme');
 if (!theme) {
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
   theme = prefersDarkScheme.matches ? 'dark' : 'light';
 }
 
+// set the theme on page opened
 setSiteTheme();
 
 function setSiteTheme() {
@@ -19,6 +20,7 @@ function setSiteTheme() {
   }
 }
 
+// Toggle between light and dark themes
 export function toggleTheme() {
   theme = theme === 'dark' ? 'light' : 'dark';
   setSiteTheme();

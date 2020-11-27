@@ -82,12 +82,13 @@ namespace Compiler
         /// <inheritdoc/>
         public async Task Compile(string qsharpCode)
         {
+            // do we have an uncommented @EntryPoint?
             bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
 
             // to load our custom rewrite step, we need to point Q# compiler config at our current assembly
             var config = new CompilationLoader.Configuration
             {
-                IsExecutable = execute, // do we have an uncommented @EntryPoint?
+                IsExecutable = execute,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 RewriteStepAssemblies = new (string, string?)[]
                 {

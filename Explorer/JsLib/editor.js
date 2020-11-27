@@ -68,9 +68,8 @@ let statusRef = null;
 
 export class Editor {
 
+  // Setup the Q# editor and establish a connection to the language server if possible
   static async InitializeEditor(element) {
-    await loadWASM(ONIGASM_FILE);
-
     element.innerHTML = '';
 
     window.editorsDict = window.editorsDict || {};
@@ -78,13 +77,17 @@ export class Editor {
 
     const id = 'id' + (window.editorsCounter++);
 
-    //register qsharp language in monaco
+    // preload onigasm
+    await loadWASM(ONIGASM_FILE);
+
+    // register the Q# language
     monaco.languages.register({
       id: LANGUAGE_ID,
       extensions: ['qs'],
       aliases: ['Q#', 'qsharp']
     });
 
+    // set up the registry with our custom grammar
     const registry = new Registry({
       getGrammarDefinition: async () => ({
         format: 'json',
@@ -92,7 +95,7 @@ export class Editor {
       })
     });
 
-    //define themes in editor
+    // define light and dark themes
     monaco.editor.defineTheme(LIGHT_THEME_NAME,
       await fetch(LIGHT_THEME_JSON).then(x => x.json())
     );
@@ -101,7 +104,7 @@ export class Editor {
       await fetch(DARK_THEME_JSON).then(x => x.json())
     );
 
-    //create monaco editor
+    // create the editor instance
     window.editorsDict[id] = monaco.editor.create(element, {
       model: monaco.editor.createModel(loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
       theme: getThemeName(),
@@ -121,15 +124,17 @@ export class Editor {
       foldingStrategy: 'indentation',
     });
 
-    //install services required to communicate with LS
+    // install Monaco services required to communicate with the LS
     MonacoServices.install(window.editorsDict[id]);
 
+    // wire TM grammars
     const grammars = new Map([[LANGUAGE_ID, 'source.qsharp']]);
     await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
 
+    // enable dynamic layout changes
     new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
 
-    //add command to save code
+    // bind the save command to Ctrl+S
     window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
       saveCode(window.editorsDict[id].getValue());
     });
@@ -147,20 +152,22 @@ export class Editor {
         // create and start the language client
         const languageClient = createLanguageClient(connection);
         const disposable = languageClient.start();
-
         const con = await languageClient.connectionProvider.get();
 
+        // gracefully stop the client on page closed
         window.addEventListener('beforeunload', () => {
           languageClient.stop();
         });
 
         con.onLogMessage(async ({message}) => {
+          // log detailed LS connection messages outside production
           if (!IS_PRODUCTION) {
             console.log(message);
           }
 
           let status = null;
 
+          // change LS status based on received notifications
           switch (true) {
           case message.startsWith('Discovered Q# project'):
             status = 'Connecting';
@@ -183,7 +190,7 @@ export class Editor {
           await statusRef.invokeMethodAsync('SetState', status);
         });
 
-        // Invoked when the connection is closed by the server
+        // Dispose when the connection is closed by the server
         connection.onClose(async () => {
           disposable.dispose();
         });
@@ -193,14 +200,12 @@ export class Editor {
     return id;
   }
 
+  // Get the code that's currently in the editor
   static GetCode(id) {
     return window.editorsDict[id].getValue();
   }
 
-  static SetCode(id, code) {
-    window.editorsDict[id].setValue(code);
-  }
-
+  // Save the reference to the LS connection status component
   static SetStatusReference(ref) {
     statusRef = ref;
   }

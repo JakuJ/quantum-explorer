@@ -8,6 +8,8 @@ namespace Compiler.Tests
     [Parallelizable]
     public class QsCompilerTest
     {
+        private const string NoEntryPointMessage = "Nothing to execute, no entry point specified.";
+
         [TestCase("Library")]
         [TestCase("MultipleOperations")]
         [TestCase("AllocatedQubitOps")]
@@ -20,7 +22,7 @@ namespace Compiler.Tests
             compiler.OnDiagnostics += (_, s) =>
             {
                 Helpers.ConsoleLogger.LogError(s);
-                if (s != noEntryPointMessage)
+                if (s != NoEntryPointMessage)
                 {
                     Assert.Fail("No diagnostics should be present");
                 }
@@ -68,7 +70,7 @@ namespace Compiler.Tests
             compiler.OnDiagnostics += (_, s) =>
             {
                 Helpers.ConsoleLogger.LogError(s);
-                if (s != noEntryPointMessage)
+                if (s != NoEntryPointMessage)
                 {
                     Assert.Fail("No diagnostics should be present");
                 }
@@ -82,7 +84,5 @@ namespace Compiler.Tests
             // Assert
             Assert.IsNotNull(compiler.Compilation, "Q# compilation should succeed");
         }
-
-        private const string noEntryPointMessage = "Nothing to execute, no entry point specified.";
     }
 }

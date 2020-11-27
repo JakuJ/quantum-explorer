@@ -1,5 +1,6 @@
 import Split from 'split.js';
 
+// Make the gutters in the split pane layout draggable
 export function initializeSplitPanes() {
 
   Split(['#left-pane', '#right-pane'], {
