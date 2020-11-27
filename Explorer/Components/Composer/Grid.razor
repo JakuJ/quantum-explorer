@@ -18,14 +18,12 @@
                 var (localX, localY) = (x, y);
 
                 // Snap point on the cell
-                var cellSnapPoint = new SnapPoint(x, y);
+                var cellSnapPoint = new SnapPoint(AddSnapPoint, x, y);
                 @RenderContent(cellSnapPoint)
-                snapPoints.Add(cellSnapPoint.Id, cellSnapPoint);
 
                 // Snap point between the cells
-                var halfSnapPoint = new SnapPoint(x, y, true);
+                var halfSnapPoint = new SnapPoint(AddSnapPoint, x, y, true);
                 @RenderContent(halfSnapPoint)
-                snapPoints.Add(halfSnapPoint.Id, halfSnapPoint);
 
                 <Cell>
                     @{
@@ -78,6 +76,7 @@
     private QuantumGate[,] GetGates()
     {
         gridSnapAssoc.Clear();
+        snapPoints.Clear();
         var arr = new QuantumGate[GateGrid.Width, GateGrid.Height];
         foreach ((var gate, int x, int y) in GateGrid.Gates)
         {
@@ -97,6 +96,11 @@
         GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
         gates = GetGates();
         StateHasChanged();
+    }
+
+    private void AddSnapPoint(SnapPoint point)
+    {
+        snapPoints.Add(point.Id, point);
     }
 
     /// Expand the grid by adding a new column
