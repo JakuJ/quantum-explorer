@@ -36,7 +36,7 @@ namespace Explorer.Tests
             var ast = new Dictionary<string, GateGrid> { { "tab1", grid } };
 
             // Act
-            await cut.InvokeAsync(() => cut.Instance.UpdateGrids(ast));
+            await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(ast));
 
             // Assert
             // Check if the gate name is displayed

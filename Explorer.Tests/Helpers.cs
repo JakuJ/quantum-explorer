@@ -15,9 +15,9 @@ namespace Explorer.Tests
         /// <returns>The mock environment.</returns>
         public static Mock<IWebHostEnvironment> GetMockEnvironment()
         {
-            var repoDir = Directory
-                .GetParent(Directory.GetCurrentDirectory())
-                .Parent.Parent.Parent.FullName;
+            var curDir = Directory.GetCurrentDirectory();
+            var directoryInfo = Directory.GetParent(curDir) ?? new DirectoryInfo(curDir);
+            var repoDir = (((directoryInfo.Parent ?? directoryInfo).Parent ?? directoryInfo).Parent ?? directoryInfo).FullName;
             var wwwRoot = Path.Join(repoDir, "Explorer", "wwwroot");
 
             var mockEnvironment = new Mock<IWebHostEnvironment>();

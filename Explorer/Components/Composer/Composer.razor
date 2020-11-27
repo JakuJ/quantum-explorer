@@ -11,13 +11,13 @@
 @code {
     private GateGrid gateGrid = new GateGrid();
 
-    public void UpdateGrids(Dictionary<string, GateGrid> ast)
+    public async Task UpdateGridsAsync(Dictionary<string, GateGrid> ast)
     {
         // force the underlying Gate component to render from scratch
         gateGrid = new GateGrid();
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
 
         gateGrid = ast.First().Value; //GateGridToArray(ast.First().Value);
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 }

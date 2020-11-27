@@ -95,12 +95,12 @@ namespace Explorer.Utilities.Composer
 
                 GatePositionChanged.Invoke(oldSnapId, snapId);
             }
-            catch (KeyNotFoundException ex)
+            catch (KeyNotFoundException)
             {
                 logger?.LogError("Old snap key not found while reassociating!");
                 logger?.LogInformation("Moved gate: {0}, new snap: {1}", gateId, snapId);
                 Print();
-                throw ex;
+                throw;
             }
         }
 

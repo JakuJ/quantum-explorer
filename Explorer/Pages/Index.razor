@@ -1,8 +1,9 @@
 @page "/"
 @using System.Text
 @using Microsoft.Extensions.Logging
-@using Compiler
 @using Microsoft.Quantum.QsCompiler.SyntaxTree
+@using AstTransformations
+@using Compiler
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -90,14 +91,14 @@
 
     #region Compilation event handlers
 
-    private void compilationHandler(object _, QsCompilation compilation)
+    private async void compilationHandler(object _, QsCompilation compilation)
     {
         if (output.Length == 0) // no diagnostics
         {
             Visualizer.SetPlaceholder("Executing");
-            // Dictionary<string, GateGrid> ast = FromQSharp.GetGates(Compiler.Compilation);
-            // await Compositor!.Component.Compose(ast);
         }
+        Dictionary<string, GateGrid> ast = FromQSharp.GetGates(compilation);
+        await Composer.UpdateGridsAsync(ast);
     }
 
     private async void diagnosticsHandler(object _, string val)
