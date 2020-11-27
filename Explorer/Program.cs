@@ -24,12 +24,6 @@ namespace Explorer
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host
                .CreateDefaultBuilder(args)
-               .ConfigureLogging(logBuilder =>
-                {
-                    logBuilder.AddConsole();
-                    logBuilder.AddDebug();
-                    logBuilder.AddEventSourceLogger();
-                })
                .ConfigureWebHostDefaults(webBuilder =>
                 {
                     string port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
