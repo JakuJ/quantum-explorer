@@ -65,7 +65,7 @@ let statusRef = null;
 export class Editor {
 
   // Setup the Q# editor and establish a connection to the language server if possible
-  static async InitializeEditor(element, server_url, is_development) {
+  static async InitializeEditor(element, initialCode, server_url, is_development) {
     element.innerHTML = '';
 
     window.editorsDict = window.editorsDict || {};
@@ -102,7 +102,7 @@ export class Editor {
 
     // create the editor instance
     window.editorsDict[id] = monaco.editor.create(element, {
-      model: monaco.editor.createModel(loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
+        model: monaco.editor.createModel(initialCode || loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
       theme: getThemeName(),
       minimap: {
         enabled: false

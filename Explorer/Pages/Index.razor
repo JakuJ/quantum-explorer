@@ -23,7 +23,7 @@
     <div class="content">
         <div id="splitPanes">
             <div id="left-pane" class="split split-horizontal split-content">
-                <Editor @ref="Editor"/>
+                <Editor @ref="Editor" InitialCode=@GetCodeFromDatabse()/>
             </div>
             <div id="right-pane" class="split split-horizontal">
                 <div id="top-pane" class="split split-content">
@@ -49,13 +49,9 @@
 
     private readonly StringBuilder output = new();
 
-    RenderFragment Components => new PanelRenderer().Render(tree);
+    [Parameter]
+    public Guid? LoadedCodeId { get; set; }
 
-    readonly PanelTree tree = new(PanelTree.Alignment.Horizontal);
-
-    // TODO: end-to-end tests
-    // Until then, all methods in this class are excluded from code coverage
-    [ExcludeFromCodeCoverage]
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -128,6 +124,16 @@
     {
         progress.Running = running;
         await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);
+    }
+
+    private string? GetCodeFromDatabse()
+    {
+        if (LoadedCodeId != null)
+        {
+            (string _, string code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
+            return code;
+        }
+        return null;
     }
 
 }
