@@ -41,7 +41,7 @@ export function initGrids() {
           else { // we do not associate to the half snaps!
             await assocRef.invokeMethodAsync('Reassociate', gateID, snap.id);
           }
-          draggable[0].style.left = "-1px";
+          draggable[0].style.left = "0";
         },
         tolerance: "fit"
       });
