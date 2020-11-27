@@ -33,22 +33,22 @@ namespace Compiler
         public bool Transformation(QsCompilation compilation, out QsCompilation transformed)
         {
             var context = CodegenContext.Create(compilation, AssemblyConstants);
-            ImmutableHashSet<NonNullable<string>>? sources = GetSourceFiles.Apply(compilation.Namespaces);
+            ImmutableHashSet<string> sources = GetSourceFiles.Apply(compilation.Namespaces);
 
             Dictionary<string, string> generatedFiles = new();
 
-            foreach (var source in sources.Where(s => !s.Value.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
+            foreach (var source in sources.Where(s => !s.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
             {
                 string? content = SimulationCode.generate(source, context);
-                generatedFiles.Add(source.Value, content);
+                generatedFiles.Add(source, content);
             }
 
             if (!compilation.EntryPoints.IsEmpty)
             {
                 QsCallable? callable = context.allCallables.First(c => c.Key.Equals(compilation.EntryPoints.First())).Value;
                 string? content = EntryPoint.generate(context, callable);
-                var entryPointName = NonNullable<string>.New(callable.SourceFile.Value + ".EntryPoint");
-                generatedFiles.Add(entryPointName.Value, content);
+                string entryPointName = callable.SourceFile + ".EntryPoint";
+                generatedFiles.Add(entryPointName, content);
             }
 
             FilesGenerated?.Invoke(this, new FilesEmittedArgs(compilation.GetHashCode(), generatedFiles));

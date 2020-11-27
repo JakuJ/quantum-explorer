@@ -27,8 +27,7 @@ namespace Compiler
 
         /// <summary>Compile and run provided Q# code.</summary>
         /// <param name="code">Q# code as a plain string.</param>
-        /// <param name="execute">Whether to also run the code in a quantum simulator.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        Task Compile(string code, bool execute = false);
+        Task Compile(string code);
     }
 }

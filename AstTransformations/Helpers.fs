@@ -16,5 +16,5 @@ module Helpers =
 
     let symbolName (symbol: QsLocalSymbol): string =
         match symbol with
-        | ValidName name -> name.Value
+        | ValidName name -> name
         | InvalidName -> failwith "Invalid symbol name"

@@ -44,6 +44,22 @@ docker run -p 8091:8091 -t language-server
 
 By default, the app runs on port `8091`.
 
-# Coding style
+If you want to build locally, you must first execute the `bootstrap.ps1` script at the root of the `qsharp-compiler-mirror` repository
+with the correct value of the `NUGET_VERSION` environment variable (defined in the [Dockerfile](./qsharp-compiler-mirror/Dockerfile) for the language server).
+
+```shell
+# On MacOS or Linux, pwsh is the Powershell binary
+NUGET_VERSION=0.14.2011120240 pwsh bootstrap.ps1
+
+# On Windows, in Powershell
+$Env:NUGET_VERSION=0.14.2011120240
+bootstrap.ps1
+
+# build and run the Language Server afterwards
+cd src/QsCompiler/ServerRunner
+dotnet run
+```
+
+# Code style
 This repository uses a Roslyn-based analyzer called [StyleCop](https://github.com/DotNetAnalyzers/StyleCopAnalyzers).
 Configuration of style enforcement rules and their severities can be done by modifying the [Ruleset](msbuild/Common.ruleset) and [config](msbuild/stylecop.json) files.

@@ -77,7 +77,7 @@ module FromQSharp =
                 |> List.collect parseArgs
 
         override this.OnNamespace(ns: QsNamespace) =
-            this.SharedState.Namespace <- ns.Name.Value
+            this.SharedState.Namespace <- ns.Name
             base.OnNamespace ns
 
         override this.OnCallableDeclaration(callable: QsCallable) =
@@ -88,7 +88,7 @@ module FromQSharp =
                 this.SharedState.KnownRegisters <- Set.empty
                 this.SharedState.Sectors <- List.empty
                 this.SharedState.GateQueue <- List.empty
-                this.SharedState.Operation <- callable.FullName.Name.Value
+                this.SharedState.Operation <- callable.FullName.Name
 
                 // parse qubit and register arguments
                 let argNames = parseArgs callable.ArgumentTuple
@@ -147,7 +147,7 @@ module FromQSharp =
 
         member this.FlattenNames: (SymbolTuple -> string list) =
             function
-            | VariableName name -> [ name.Value ]
+            | VariableName name -> [ name ]
             | VariableNameTuple t ->
                 List.collect this.FlattenNames
                 <| List.ofArray (t.ToArray())
@@ -192,21 +192,21 @@ module FromQSharp =
                 | Identifier (var, _) ->
                     match var with
                     | LocalVariable local ->
-                        if this.SharedState.KnownQubits.Contains local.Value
-                        then Some(Single local.Value)
-                        else failwithf "Unknown qubit identifier: %s" local.Value
+                        if this.SharedState.KnownQubits.Contains local
+                        then Some(Single local)
+                        else failwithf "Unknown qubit identifier: %s" local
                     | _ -> None
                 | ArrayItem (indexable, index) ->
                     match indexable.Expression with
                     | Identifier (var, _) ->
                         match var with
                         | LocalVariable identifier ->
-                            if this.SharedState.KnownRegisters.Contains identifier.Value then
+                            if this.SharedState.KnownRegisters.Contains identifier then
                                 match index.Expression with
-                                | IntLiteral lit -> Some(Register(identifier.Value, int32 lit))
+                                | IntLiteral lit -> Some(Register(identifier, int32 lit))
                                 | _ -> None
                             else
-                                failwithf "Unknown register identifier: %s" identifier.Value
+                                failwithf "Unknown register identifier: %s" identifier
                         | _ -> None
                     | _ -> None
                 | _ -> None
@@ -236,7 +236,7 @@ module FromQSharp =
                 match lhs.Expression with
                 | Identifier (var, _) ->
                     match var with
-                    | GlobalCallable glob -> Some(glob.Namespace.Value, glob.Name.Value)
+                    | GlobalCallable glob -> Some(glob.Namespace, glob.Name)
                     | _ -> None
                 | _ -> None
 
@@ -259,7 +259,7 @@ module FromQSharp =
         let transform = Transform()
 
         let namespaces =
-            List.filter (fun ns -> not (ns.Name.Value.StartsWith("Microsoft.Quantum")))
+            List.filter (fun ns -> not (ns.Name.StartsWith("Microsoft.Quantum")))
                 (List.ofArray (compilation.Namespaces.ToArray()))
 
         List.iter (transform.Namespaces.OnNamespace >> ignore) namespaces

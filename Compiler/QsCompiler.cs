@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Common;
 using Microsoft.CodeAnalysis;
@@ -79,14 +80,16 @@ namespace Compiler
         public QsCompilation? Compilation { get; private set; }
 
         /// <inheritdoc/>
-        public async Task Compile(string qsharpCode, bool execute = false)
+        public async Task Compile(string qsharpCode)
         {
+            bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
+
             // to load our custom rewrite step, we need to point Q# compiler config at our current assembly
             var config = new CompilationLoader.Configuration
             {
-                IsExecutable = execute,
+                IsExecutable = execute, // do we have an uncommented @EntryPoint?
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
-                RewriteSteps = new (string, string?)[]
+                RewriteStepAssemblies = new (string, string?)[]
                 {
                     (Assembly.GetExecutingAssembly().Location, null),
                 },
@@ -106,11 +109,23 @@ namespace Compiler
 
             using (new ScopedTimer("Compiling Q# code", logger))
             {
-                compilationLoader = new CompilationLoader(
-                    _ => new Dictionary<Uri, string> { { new Uri(Path.GetFullPath(filename)), qsharpCode } }.ToImmutableDictionary(),
-                    load => cachedRefs ??= load(qsharpReferences),
-                    config,
-                    new EventLogger(str => OnDiagnostics?.Invoke(this, str)));
+                try
+                {
+                    compilationLoader = new CompilationLoader(
+                        _ => new Dictionary<Uri, string> { { new Uri(Path.GetFullPath(filename)), qsharpCode } }.ToImmutableDictionary(),
+                        load => cachedRefs ??= load(qsharpReferences!), // never null
+                        config,
+                        new EventLogger(str => OnDiagnostics?.Invoke(this, str)));
+                }
+                catch (NullReferenceException)
+                {
+                    // Bond DLL deserialization throws this from QDK v0.13.* onwards when IsExecutable is true but the user provides no @EntryPoint
+                    // We have unit tests assuring that this should never happen
+                    // This try/catch block exists just to be extra safe
+                    logger.LogError($"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
+                    OnDiagnostics?.Invoke(this, "No entry point operation specified.\nDecorate the main method with the @EntryPoint attribute.");
+                    return;
+                }
             }
 
             InMemoryEmitter.FilesGenerated -= Handler;
@@ -126,7 +141,6 @@ namespace Compiler
                 // if there are any errors, exit
                 if (diags.Any(d => d.Severity == DiagnosticSeverity.Error))
                 {
-                    logger.LogWarning("There were errors in Q# compilation, aborting");
                     return;
                 }
             }
@@ -136,6 +150,7 @@ namespace Compiler
 
             if (Compilation == null || !execute)
             {
+                OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
                 return;
             }
 
@@ -194,7 +209,7 @@ namespace Compiler
             Assembly qsharpAssembly = qsharpLoadContext.LoadFromStream(peStream);
 
             // get the @Entrypoint() operation
-            QsQualifiedName? entryPoint = compilationLoader.CompilationOutput.EntryPoints.FirstOrDefault();
+            QsQualifiedName? entryPoint = compilationLoader.CompilationOutput?.EntryPoints.FirstOrDefault();
 
             if (entryPoint == null)
             {
@@ -203,7 +218,7 @@ namespace Compiler
                 return;
             }
 
-            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == entryPoint.Name.Value);
+            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == entryPoint.Name);
 
             if (type != null)
             {
