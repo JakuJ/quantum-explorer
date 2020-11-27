@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DatabaseHandler
 {
+    /// <summary>
+    /// <see cref="CodeInformation"/> represents a record in database.
+    /// </summary>
     public class CodeInformation
     {
         public Guid Id { get; set; }
