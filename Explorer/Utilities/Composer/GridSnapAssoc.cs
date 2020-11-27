@@ -49,8 +49,9 @@ namespace Explorer.Utilities.Composer
             }
             catch (ArgumentException ex)
             {
-                logger.LogError("Cannot associate! {0}, {1}", snapId, gateId);
-                throw ex;
+                logger?.LogError("Cannot associate! {0}, {1}", snapId, gateId);
+                logger?.LogError(ex.Message);
+                return true;
             }
         }
 
@@ -86,13 +87,18 @@ namespace Explorer.Utilities.Composer
                 gate2Snap.Remove(gateId);
 
                 // Connect the gate ID to the new snap ID.
-                Associate(snapId, gateId);
+                bool err = Associate(snapId, gateId);
+                if (err)
+                {
+                    err = Associate(oldSnapId, gateId);
+                }
+
                 GatePositionChanged.Invoke(oldSnapId, snapId);
             }
             catch (KeyNotFoundException ex)
             {
-                logger.LogError("Old snap key not found while reassociating!");
-                logger.LogInformation("Moved gate: {0}, new snap: {1}", gateId, snapId);
+                logger?.LogError("Old snap key not found while reassociating!");
+                logger?.LogInformation("Moved gate: {0}, new snap: {1}", gateId, snapId);
                 Print();
                 throw ex;
             }
@@ -114,12 +120,12 @@ namespace Explorer.Utilities.Composer
         {
             foreach (KeyValuePair<string, string> kvp in snap2Gate)
             {
-                logger.LogInformation("snap {0}, gate {1}", kvp.Key, kvp.Value);
+                logger?.LogInformation("snap {0}, gate {1}", kvp.Key, kvp.Value);
             }
 
             foreach (KeyValuePair<string, string> kvp in gate2Snap)
             {
-                logger.LogInformation("gate {0}, snap {1}", kvp.Key, kvp.Value);
+                logger?.LogInformation("gate {0}, snap {1}", kvp.Key, kvp.Value);
             }
         }
     }

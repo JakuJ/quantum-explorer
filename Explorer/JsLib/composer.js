@@ -24,20 +24,24 @@ export function initGrids() {
       $(snap).droppable({
         // only accept gates if no gate is already on this snap point
         accept: async () => {
+          if(snap.classList.contains('half'))
+            return false;
           return !await assocRef.invokeMethodAsync('GateId', snap.id);
         },
         // update associations on gate dropped
         drop: async (event, {draggable}) => {
           const gateID = draggable[0].id;
 
-          if(snap.classList.contains('half'))
-          {
+          if(snap.classList.contains('half')) {
             console.log('dropped on half snap');
 
             // insert a new column
             await gridRef.invokeMethodAsync('Expand', snap.id);
           }
-          await assocRef.invokeMethodAsync('Reassociate', gateID, snap.id);
+          else { // we do not associate to the half snaps!
+            await assocRef.invokeMethodAsync('Reassociate', gateID, snap.id);
+          }
+          draggable[0].style.left = "-1px";
         },
         tolerance: "fit"
       });

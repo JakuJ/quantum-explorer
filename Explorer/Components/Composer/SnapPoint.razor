@@ -4,12 +4,16 @@
 
 @code {
 
-    public SnapPoint(int x, int y, bool half = false)
+    public SnapPoint(Action<SnapPoint> addPoint, int x, int y, bool half = false)
     {
         X = x;
         Y = y;
         Half = half;
+        addSnapPoint = addPoint;
+        addSnapPoint.Invoke(this);
     }
+
+    private Action<SnapPoint> addSnapPoint { get; }
 
     public bool Half { get; }
 
@@ -24,4 +28,6 @@
     private string XOffset => $"{XCoord}px";
 
     private string HalfClass => Half ? "half" : "";
+
+    public override string ToString() => $"[{X},{Y}]{HalfClass} {Id.Take(10)}";
 }
