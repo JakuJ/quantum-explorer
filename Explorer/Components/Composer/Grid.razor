@@ -93,6 +93,7 @@
             throw new ArgumentOutOfRangeException("Old snap does not belong to the gates grid");
         if(newSnap.X >= gates.GetLength(0) || newSnap.Y >= gates.GetLength(1))
             throw new ArgumentOutOfRangeException("New snap does not belong to the gates grid");
+        Logger.LogInformation("Moving the gate from {0} to {1}", oldSnap, newSnap);
         GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
         gates = GetGates();
         StateHasChanged();
@@ -107,8 +108,8 @@
     [JSInvokable]
     public void Expand(string snapId)
     {
-        Logger.LogInformation("Expanding {0}", snapId);
         var point = snapPoints[snapId];
+        Logger.LogInformation("Expanding at {0}", point);
         GateGrid.InsertColumn(point.X);
         gates = GetGates();
         StateHasChanged();
