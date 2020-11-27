@@ -151,7 +151,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private void CreateDisplayList() //transforms chosen operation state to displayable list
+    /// <summary>
+    /// Transforms chosen operation state to displayable list binded to chart
+    /// </summary>
+    private void CreateDisplayList()
     {
         List<(int idx, Complex v)>? list = (dataType == "Arguments") ? selectedOperation?.Arguments : selectedOperation?.Results;
 
@@ -171,8 +174,10 @@
             Imaginary = pair.v.Imaginary
         });
     }
-
-    private void ShowOperationState(TreeEventArgs args) //displays chart when operation choosen
+    /// <summary>
+    /// Displays chart on operation choosing
+    /// </summary>
+    private void ShowOperationState(TreeEventArgs args)
     {
         if (args.Value is OperationState state)
         {
@@ -181,7 +186,10 @@
         }
     }
 
-    private void ZerosSwitch(ChangeEventArgs checkedValue) //filter zero states and update chart
+    /// <summary>
+    /// Filter zero states and update chart
+    /// </summary>
+    private void ZerosSwitch(ChangeEventArgs checkedValue)
     {
         showZeros = checkedValue.Value is bool value && value;
         if (selectedOperation != null)
@@ -190,7 +198,10 @@
         }
     }
 
-    private void DataTypeChanged(ChangeEventArgs e) //switch between arguments/results and update chart
+    /// <summary>
+    /// Switch between operation's arguments and results, then update the chart
+    /// </summary>
+    private void DataTypeChanged(ChangeEventArgs e)
     {
         string? selected = e.Value?.ToString();
         if (selected == null || selected == dataType) return;

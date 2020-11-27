@@ -32,8 +32,8 @@
         }
     }
 
-    /// <summary>Asynchronously sets Language Server status of editor in <see cref="LsStatus"/> object.</summary>
-    /// <param name="target"><see cref="LsStatus"/> component to set status in.</param>
+    /// <summary>Saves the reference to an instance of <see cref="LsStatus"/> to be used by the JS Editor class.</summary>
+    /// <param name="target"><see cref="LsStatus"/> component instance to pass to the Editor class on the JS side.</param>
     /// <returns>An awaitable <see cref="Task"/>.</returns>
     public async Task SetStatusReference(LsStatus target)
     {
