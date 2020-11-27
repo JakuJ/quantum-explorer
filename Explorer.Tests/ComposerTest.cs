@@ -26,7 +26,7 @@ namespace Explorer.Tests
             // Arrange
             using var ctx = new Bunit.TestContext();
             ctx.Services.AddMockJSRuntime();
-            ctx.Services.TryAddScoped<ILogger<System.Index>>(_ => new Mock<ILogger<System.Index>>().Object);
+            ctx.Services.TryAddScoped<ILogger<Grid>>(_ => new Mock<ILogger<Grid>>().Object);
             ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
             var cut = ctx.RenderComponent<Composer>();
 
