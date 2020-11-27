@@ -55,7 +55,7 @@ namespace Explorer.Tests
 
             // Act
             var vis = ctx.RenderComponent<Visualizer>();
-            vis.Find("ul > li:nth-child(2)>a").Click();
+            vis.Find("ul > li:nth-child(2)>a").Click(); // click second tab
 
             // Assert
             Assert.False(vis.Find("ul > li:first-child>a").ClassList.Contains("active"), "First tab should not be selected");
@@ -71,9 +71,9 @@ namespace Explorer.Tests
 
             // Act
             var vis = ctx.RenderComponent<Visualizer>();
-            vis.Find("ul > li:nth-child(2)>a").Click();
+            vis.Find("ul > li:nth-child(2)>a").Click(); // click second tab
 
-            vis.Find("ul > li:first-child>a").Click();
+            vis.Find("ul > li:first-child>a").Click(); // click first tab
 
             // Assert
             Assert.True(vis.Find("ul > li:first-child>a").ClassList.Contains("active"), "First tab should be selected");
