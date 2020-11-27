@@ -12,13 +12,9 @@ namespace DatabaseHandler
         {
             context = ctx;
         }
-        public (string name, string code) GetCode(string key)
+        public (string name, string code) GetCode(Guid key)
         {
-            if(!Guid.TryParse(key, out Guid id))
-            {
-                throw new ArgumentException("Incorrect key value");
-            }
-            var codeInfo = context.CodeInformations.FirstOrDefault(c => c.Id == id);
+            var codeInfo = context.CodeInformations.FirstOrDefault(c => c.Id == key);
             if(codeInfo == null)
             {
                 throw new KeyNotFoundException("Could not find code matching given key");
@@ -26,13 +22,13 @@ namespace DatabaseHandler
             return (codeInfo.CodeName, codeInfo.Code);
         }
 
-        public string SaveCode(string name, string code)
+        public Guid SaveCode(string name, string code)
         {
             CodeInformation codeInformation = new() { CodeName = name, Code = code, ShareTime = DateTime.Now };
             context.CodeInformations.Add(codeInformation);
             context.SaveChanges();
 
-            return codeInformation.Id.ToString();
+            return codeInformation.Id;
         }
     }
 }

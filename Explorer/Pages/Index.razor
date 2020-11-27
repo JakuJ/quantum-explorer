@@ -1,4 +1,7 @@
 @page "/"
+@page "/{LoadedCodeId:guid}"
+@using System.Text
+@using Microsoft.Extensions.Logging
 @using Compiler
 @using DatabaseHandler
 @using Microsoft.Quantum.QsCompiler.SyntaxTree
@@ -46,6 +49,13 @@
 
     private readonly StringBuilder output = new();
 
+    RenderFragment Components => new PanelRenderer().Render(tree);
+
+    readonly PanelTree tree = new(PanelTree.Alignment.Horizontal);
+
+    // TODO: end-to-end tests
+    // Until then, all methods in this class are excluded from code coverage
+    [ExcludeFromCodeCoverage]
     protected override void OnInitialized()
     {
         base.OnInitialized();

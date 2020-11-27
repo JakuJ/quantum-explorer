@@ -6,8 +6,8 @@ namespace DatabaseHandler
 {
     public interface ICodeDatabaseHandler
     {
-        public string SaveCode(string name, string code);
+        public Guid SaveCode(string name, string code);
 
-        public (string name, string code) GetCode(string key);
+        public (string name, string code) GetCode(Guid key);
     }
 }
