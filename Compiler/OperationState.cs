@@ -7,7 +7,6 @@ namespace Compiler
     /// <summary>
     /// A class for keeping information about quantum operation.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     public class OperationState
     {
         /// <summary>
