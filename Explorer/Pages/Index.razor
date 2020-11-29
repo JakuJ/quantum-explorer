@@ -49,14 +49,13 @@
     {
         base.OnInitialized();
 
-    // set handlers for compiler events
         Compiler.OnDiagnostics += diagnosticsHandler;
         Compiler.OnOutput += outputHandler;
         Compiler.OnCompilation += compilationHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
     }
 
-    /// <summary>On-click handler for the "Compile & Run" button.</summary>
+    /// <summary>On-click handler for the compilation button.</summary>
     private async Task OnCompile()
     {
         await toggleCompilation(true);
@@ -121,7 +120,7 @@
 
     #endregion
 
-    /// <summary>Toggle the progressbar and whether the "Compile & Run" button is enabled.</summary>
+    /// <summary>Toggle the progressbar and whether the compilation button is enabled.</summary>
     private async Task toggleCompilation(bool running)
     {
         progress.Running = running;

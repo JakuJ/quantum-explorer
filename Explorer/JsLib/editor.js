@@ -193,6 +193,7 @@ export class Editor {
         // Dispose when the connection is closed by the server
         connection.onClose(async () => {
           disposable.dispose();
+          await statusRef.invokeMethodAsync('SetState', 'Disconnected');
         });
       },
     });
