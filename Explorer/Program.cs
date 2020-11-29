@@ -34,11 +34,12 @@ namespace Explorer
                 {
                     webBuilder.UseStartup<Startup>();
 
-                    // This environment variable is set when running on Heroku
-                    string? port = Environment.GetEnvironmentVariable("PORT");
-                    if (port != null)
+                    string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
+                    if (environment == "Staging")
                     {
-                        webBuilder.UseUrls($"http://*:{port}");
+                        string port = Environment.GetEnvironmentVariable("PORT")!; // provided by the platform, never null
+                        webBuilder.UseUrls($"http://*:{port}");                    // https is managed automatically
                     }
                 });
     }

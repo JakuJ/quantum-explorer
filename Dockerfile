@@ -3,6 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 # Set node environment
 ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
+ARG LS_HOST=localhost
+ENV LS_HOST=${LS_HOST}
 
 # Install npm
 RUN apk add --update npm

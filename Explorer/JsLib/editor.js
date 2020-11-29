@@ -12,9 +12,8 @@ import {v4 as uuidv4} from 'uuid';
 //#region Constants
 
 // Websocket connection
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const PRODUCTION_HOST = 'qexplorer-ls.herokuapp.com';
-const WEBSOCKET_ENDPOINT = 'monaco-editor';
+const IS_DEVELOPMENT = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging';
+const LS_HOST = process.env.LS_HOST || 'localhost:8091';
 
 // Custom editor theme identifiers
 const LIGHT_THEME_NAME = 'vs-code-custom-light-theme';
@@ -140,9 +139,9 @@ export class Editor {
     });
 
     // create the web socket
-    const url = IS_PRODUCTION
-      ? `wss://${PRODUCTION_HOST}/${WEBSOCKET_ENDPOINT}`
-      : `ws://localhost:8091/${WEBSOCKET_ENDPOINT}`;
+    const url = IS_DEVELOPMENT
+      ? `ws://localhost:8091/monaco-editor`
+      : `wss://${LS_HOST}/monaco-editor`;
     const webSocket = createWebSocket(url);
 
     // listen when the web socket is opened
@@ -161,7 +160,7 @@ export class Editor {
 
         con.onLogMessage(async ({message}) => {
           // log detailed LS connection messages outside production
-          if (!IS_PRODUCTION) {
+          if (IS_DEVELOPMENT) {
             console.log(message);
           }
 
@@ -227,7 +226,7 @@ function createWebSocket(url) {
     reconnectionDelayGrowFactor: 1.3,
     connectionTimeout: 10000,
     maxRetries: Infinity,
-    debug: !IS_PRODUCTION,
+    debug: IS_DEVELOPMENT,
   };
   return new ReconnectingWebSocket(url, [], socketOptions);
 }

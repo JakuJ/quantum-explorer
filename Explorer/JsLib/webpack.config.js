@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging';
 
 module.exports = {
   mode: isDev ? 'development' : 'production',
@@ -58,8 +58,8 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      // TODO: Use os.tempdir() for local development when qsharp-compiler#737 gets resolved
-      'process.env.TEMP_DIR': JSON.stringify('/tmp'),
+      'process.env.LS_HOST': JSON.stringify(process.env.LS_HOST),
+      'process.env.TEMP_DIR': JSON.stringify('/tmp'), // TODO: Use os.tempdir() for local development on Windows
     })
   ]
 };

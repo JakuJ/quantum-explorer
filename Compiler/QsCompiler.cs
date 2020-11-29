@@ -34,23 +34,26 @@ namespace Compiler
         {
             // necessary references to compile our Q# program
             qsharpReferences ??= new[]
-            {
-                "Microsoft.Quantum.Standard",
-                "Microsoft.Quantum.QSharp.Core",
-                "Microsoft.Quantum.Runtime.Core",
-            }.Select(x => Assembly.Load(new AssemblyName(x))).Select(a => a.Location).ToArray();
+                {
+                    "Microsoft.Quantum.Standard",
+                    "Microsoft.Quantum.QSharp.Core",
+                    "Microsoft.Quantum.Runtime.Core",
+                }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
+                 .ToArray();
 
             // necessary references to compile C# simulation of the Q# compilation
             csharpReferences ??= new[]
-            {
-                "Microsoft.Quantum.Simulators",
-                "Microsoft.Quantum.EntryPointDriver",
-                "System.CommandLine",
-                "System.Runtime",
-                "netstandard",
-                "System.Collections.Immutable",
-                typeof(object).Assembly.FullName,
-            }.Select(x => Assembly.Load(new AssemblyName(x!))).Select(a => a.Location).Concat(qsharpReferences).ToArray();
+                {
+                    "Microsoft.Quantum.Simulators",
+                    "Microsoft.Quantum.EntryPointDriver",
+                    "System.CommandLine",
+                    "System.Runtime",
+                    "netstandard",
+                    "System.Collections.Immutable",
+                    typeof(object).Assembly.FullName!, // never null
+                }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
+                 .Concat(qsharpReferences)
+                 .ToArray();
         }
 
         /// <summary>Initializes a new instance of the <see cref="QsCompiler"/> class.</summary>

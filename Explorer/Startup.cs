@@ -19,14 +19,14 @@ namespace Explorer
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsProduction())
+            if (env.IsDevelopment())
             {
-                app.UseExceptionHandler("/Error")
-                   .UseHttpsRedirection();
+                app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseDeveloperExceptionPage();
+                app.UseExceptionHandler("/Error")
+                   .UseHttpsRedirection();
             }
 
             app.UseRouting()
