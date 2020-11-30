@@ -28,7 +28,6 @@ namespace Compiler
 
         private readonly ILogger<QsCompiler> logger;
         private readonly string filename = $"__{UniqueId.CreateUniqueId()}__.qs";
-        private readonly List<FilesEmittedArgs> eventQueue = new();
 
         private static void InitializeReferences()
         {
@@ -85,26 +84,17 @@ namespace Compiler
             // do we have an uncommented @EntryPoint?
             bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
 
-            // to load our custom rewrite step, we need to point Q# compiler config at our current assembly
+            // to load our custom rewrite step, we need to point Q# compiler config at the rewrite step
+            InMemoryEmitter emitter = new();
             var config = new CompilationLoader.Configuration
             {
                 IsExecutable = execute,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
-                RewriteStepAssemblies = new (string, string?)[]
+                RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
-                    (Assembly.GetExecutingAssembly().Location, null),
+                    (emitter, null),
                 },
             };
-
-            // set up a handler to intercept generated C# code
-            void Handler(object? sender, FilesEmittedArgs args)
-            {
-                eventQueue.Add(args);
-            }
-
-            eventQueue.Clear();
-
-            InMemoryEmitter.FilesGenerated += Handler;
 
             // compile Q# code
             CompilationLoader? compilationLoader;
@@ -124,13 +114,12 @@ namespace Compiler
                     // Bond DLL deserialization throws this from QDK v0.13.* onwards when IsExecutable is true but the user provides no @EntryPoint
                     // We have unit tests assuring that this should never happen
                     // This try/catch block exists just to be extra safe
-                    logger.LogError($"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
+                    logger.LogError(
+                        $"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
                     OnDiagnostics?.Invoke(this, "No entry point operation specified.\nDecorate the main method with the @EntryPoint attribute.");
                     return;
                 }
             }
-
-            InMemoryEmitter.FilesGenerated -= Handler;
 
             // print any diagnostics
             ImmutableArray<Diagnostic> diags = compilationLoader.LoadDiagnostics;
@@ -159,22 +148,11 @@ namespace Compiler
             // report that the compilation succeeded
             OnCompilation?.Invoke(this, Compilation);
 
-            // find our generated files
-            Dictionary<string, string>? generatedFiles = (from args in eventQueue
-                                                          where args.CompilationHash == Compilation.GetHashCode()
-                                                          select args.FileContents).FirstOrDefault();
-
-            if (generatedFiles == null)
-            {
-                logger.LogError("Couldn't find generated files in the event queue");
-                return;
-            }
-
             CSharpCompilation? csharpCompilation;
             using (new ScopedTimer("Compiling C# driver code", logger))
             {
                 // we captured the emitted C# syntax trees into a static variable in the rewrite step
-                IEnumerable<SyntaxTree> syntaxTrees = generatedFiles.Select(x => CSharpSyntaxTree.ParseText(x.Value));
+                IEnumerable<SyntaxTree> syntaxTrees = emitter.FileContents.Select(x => CSharpSyntaxTree.ParseText(x.Value));
 
                 // compile C# code
                 // make sure to pass in the C# references as Roslyn's metadata references
