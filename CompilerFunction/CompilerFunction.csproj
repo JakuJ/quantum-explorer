@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.7" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.11" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,5 +25,20 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+
+  <PropertyGroup>
+    <RuntimeFolder Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">osx</RuntimeFolder>
+    <RuntimeFolder Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">linux</RuntimeFolder>
+    <RuntimeFolder Condition=" '$(OS)' == 'Windows_NT' ">win</RuntimeFolder>
+  </PropertyGroup>
+
+  <Target Name="Copy runtime for local development" AfterTargets="AfterBuild">
+    <Exec Command="echo $(OutDir)" />
+    <Exec Command="cp $(OutDir)runtimes/$(RuntimeFolder)-x64/native/Microsoft.Quantum.Simulator.Runtime.dll $(OutDir)bin/Microsoft.Quantum.Simulator.Runtime.dll" />
+  </Target>
+
+  <Target Name="Copy linux runtime for Azure" AfterTargets="AfterPublish">
+    <Exec Command="cp $(PublishDir)bin/runtimes/linux-x64/native/Microsoft.Quantum.Simulator.Runtime.dll $(PublishDir)bin/Microsoft.Quantum.Simulator.Runtime.dll" />
+  </Target>
 
 </Project>

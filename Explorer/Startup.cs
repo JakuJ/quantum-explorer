@@ -14,11 +14,14 @@ namespace Explorer
     [ExcludeFromCodeCoverage]
     public class Startup
     {
-        public Startup(IConfiguration configuration) => Configuration = configuration;
+        private IWebHostEnvironment env;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+            => (Configuration, this.env) = (configuration, env);
 
         public IConfiguration Configuration { get; }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             if (env.IsDevelopment())
             {
@@ -44,8 +47,14 @@ namespace Explorer
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
-            // services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
-            services.AddScoped<ICompiler>(_ => new CompilerFunctionFacade());
+            if (env.IsProduction())
+            {
+                services.AddScoped<ICompiler>(_ => new AzureFunctionCompiler());
+            }
+            else
+            {
+                services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
+            }
         }
     }
 }

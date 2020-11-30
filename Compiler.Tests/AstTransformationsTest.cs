@@ -33,8 +33,11 @@ namespace Compiler.Tests
                 string code = await Helpers.GetSourceFile(path);
                 var compiler = new QsCompiler(Helpers.ConsoleLogger);
 
+                Dictionary<string, GateGrid> gates = null!;
+                compiler.OnGrids += (_, grids) => { gates = grids; };
+
                 await compiler.Compile(code);
-                return FromQSharp.GetGates(compiler.Compilation);
+                return gates;
             }
         }
 
@@ -221,9 +224,11 @@ namespace Compiler.Tests
             QsCompiler compiler = new(Helpers.ConsoleLogger);
             string[] qualifiedNames = operations.Select(x => $"{path}.{x}").ToArray();
 
+            Dictionary<string, GateGrid> gates = null!;
+            compiler.OnGrids += (_, grids) => { gates = grids; };
+
             // Act
             await compiler.Compile(code);
-            var gates = FromQSharp.GetGates(compiler.Compilation);
 
             // Assert
             Assert.AreEqual(qualifiedNames, gates.Keys.ToArray(), "All declared operations should be listed.");
@@ -237,9 +242,11 @@ namespace Compiler.Tests
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
             string[] qualifiedNames = { "Ns1.Op1", "Ns2.Op1", "Ns2.Op2", "Ns3.Op2" };
 
+            Dictionary<string, GateGrid> gates = null!;
+            compiler.OnGrids += (_, grids) => { gates = grids; };
+
             // Act
             await compiler.Compile(code);
-            var gates = FromQSharp.GetGates(compiler.Compilation);
 
             // Assert
             Assert.AreEqual(qualifiedNames, gates.Keys.ToArray(), "All declared operations should be listed.");
@@ -254,9 +261,11 @@ namespace Compiler.Tests
             string code = await Helpers.GetSourceFile(path);
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
 
+            Dictionary<string, GateGrid> gates = null!;
+            compiler.OnGrids += (_, grids) => { gates = grids; };
+
             // Act
             await compiler.Compile(code);
-            var gates = FromQSharp.GetGates(compiler.Compilation);
 
             // Assert
             Assert.IsEmpty(gates, "Traversing the AST should find no operations.");
@@ -285,9 +294,11 @@ namespace Compiler.Tests
             string code = await Helpers.GetSourceFile("LocalOps");
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
 
+            GateGrid grid = null!;
+            compiler.OnGrids += (_, grids) => { grid = grids["LocalOps.MotherOp"]; };
+
             // Act
             await compiler.Compile(code);
-            GateGrid? grid = FromQSharp.GetGates(compiler.Compilation)["LocalOps.MotherOp"];
 
             // Assert
             Assert.AreEqual(1, grid.Gates.Count(), "There should be 1 gate in the grid");
@@ -354,9 +365,11 @@ namespace Compiler.Tests
                 ("SingleAndRegArgs", 5, 4, 0, false),
             };
 
+            GateGrid grid = null!;
+            compiler.OnGrids += (_, grids) => { grid = grids["Arguments.TestOp"]; };
+
             // Act
             await compiler.Compile(code);
-            GateGrid? grid = FromQSharp.GetGates(compiler.Compilation)["Arguments.TestOp"];
 
             // Assert
             foreach ((QuantumGate gate, int x, int y) in grid.Gates)

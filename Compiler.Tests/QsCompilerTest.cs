@@ -18,6 +18,7 @@ namespace Compiler.Tests
             // Arrange
             string code = await Helpers.GetSourceFile(file);
             QsCompiler compiler = new(Helpers.ConsoleLogger);
+            var compiled = false;
 
             compiler.OnDiagnostics += (_, s) =>
             {
@@ -28,11 +29,13 @@ namespace Compiler.Tests
                 }
             };
 
+            compiler.OnGrids += (_, _) => { compiled = true; };
+
             // Act
             await compiler.Compile(code);
 
             // Assert
-            Assert.IsNotNull(compiler.Compilation, "Compilation should be successful");
+            Assert.IsTrue(compiled, "Compilation should be successful");
         }
 
         [Test]
@@ -41,6 +44,7 @@ namespace Compiler.Tests
             // Arrange
             string sourceCode = await Helpers.GetSourceFile("HelloWorld");
             QsCompiler compiler = new(Helpers.ConsoleLogger);
+            var compiled = false;
             var executed = false;
 
             compiler.OnDiagnostics += (_, s) => { Assert.Fail($"There should be no diagnostics emitted! Got: {s}"); };
@@ -51,11 +55,13 @@ namespace Compiler.Tests
                 Assert.AreEqual("Hello World!\n", s, "Intercepted output must be correct.");
             };
 
+            compiler.OnGrids += (_, _) => { compiled = true; };
+
             // Act
             await compiler.Compile(sourceCode);
 
             // Assert
-            Assert.IsNotNull(compiler.Compilation, "Compilation should be successful");
+            Assert.IsTrue(compiled, "Compilation should be successful");
             Assert.IsTrue(executed, "Execution must emit output.");
         }
 
@@ -66,6 +72,7 @@ namespace Compiler.Tests
             // Arrange
             string sourceCode = await Helpers.GetSourceFile(path);
             QsCompiler compiler = new(Helpers.ConsoleLogger);
+            var compiled = false;
 
             compiler.OnDiagnostics += (_, s) =>
             {
@@ -77,12 +84,13 @@ namespace Compiler.Tests
             };
 
             compiler.OnOutput += (_, _) => { Assert.Fail("Code should not execute"); };
+            compiler.OnGrids += (_, _) => { compiled = true; };
 
             // Act
             await compiler.Compile(sourceCode);
 
             // Assert
-            Assert.IsNotNull(compiler.Compilation, "Q# compilation should succeed");
+            Assert.IsTrue(compiled, "Q# compilation should succeed");
         }
     }
 }
