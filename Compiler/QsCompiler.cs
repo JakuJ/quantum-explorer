@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AstTransformations;
 using Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,7 +27,7 @@ namespace Compiler
         private static string[]? csharpReferences;
         private static References? cachedRefs;
 
-        private readonly ILogger<QsCompiler> logger;
+        private readonly ILogger logger;
         private readonly string filename = $"__{UniqueId.CreateUniqueId()}__.qs";
 
         private static void InitializeReferences()
@@ -56,8 +57,8 @@ namespace Compiler
         }
 
         /// <summary>Initializes a new instance of the <see cref="QsCompiler"/> class.</summary>
-        /// <param name="logger">A <see cref="Logger"/> instance to log compilation messages with.</param>
-        public QsCompiler(ILogger<QsCompiler> logger)
+        /// <param name="logger">An <see cref="ILogger"/> instance to log compilation messages with.</param>
+        public QsCompiler(ILogger logger)
         {
             this.logger = logger;
             InitializeReferences();
@@ -67,7 +68,7 @@ namespace Compiler
         public event EventHandler<string>? OnDiagnostics;
 
         /// <inheritdoc/>
-        public event EventHandler<QsCompilation>? OnCompilation;
+        public event EventHandler<Dictionary<string, GateGrid>>? OnGrids;
 
         /// <inheritdoc/>
         public event EventHandler<string>? OnOutput;
@@ -75,8 +76,7 @@ namespace Compiler
         /// <inheritdoc/>
         public event EventHandler<List<OperationState>>? OnStatesRecorded;
 
-        /// <inheritdoc/>
-        public QsCompilation? Compilation { get; private set; }
+        private QsCompilation? Compilation { get; set; }
 
         /// <inheritdoc/>
         public async Task Compile(string qsharpCode)
@@ -146,7 +146,7 @@ namespace Compiler
             }
 
             // report that the compilation succeeded
-            OnCompilation?.Invoke(this, Compilation);
+            OnGrids?.Invoke(this, FromQSharp.GetGates(Compilation));
 
             CSharpCompilation? csharpCompilation;
             using (new ScopedTimer("Compiling C# driver code", logger))
@@ -163,7 +163,7 @@ namespace Compiler
             // print any diagnostics
             var csharpDiagnostics = csharpCompilation
                                    .GetDiagnostics()
-                                   .Where(d => d is { Severity: not Hidden, Id: not "CS1701" or "CS1702" })
+                                   .Where(d => d is { Severity: not Hidden, Id: not "CS1701" and not "CS1702" })
                                    .ToList();
             if (csharpDiagnostics.Any())
             {

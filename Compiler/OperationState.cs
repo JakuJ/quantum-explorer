@@ -21,11 +21,6 @@ namespace Compiler
         public string Name { get; }
 
         /// <summary>
-        /// Gets the parent operation.
-        /// </summary>
-        public OperationState? Parent { get; private set; }
-
-        /// <summary>
         /// Gets a list of operations that are run inside this operation.
         /// </summary>
         public List<OperationState> Children { get; } = new();
@@ -39,15 +34,5 @@ namespace Compiler
         /// Gets or sets a list of complex numbers that represent quantum states of results represented by index.
         /// </summary>
         public List<(int Idx, Complex Value)>? Results { get; set; }
-
-        /// <summary>
-        /// Adds child operation.
-        /// </summary>
-        /// <param name="child">Child operation run in this operation.</param>
-        public void AddOperation(OperationState child)
-        {
-            child.Parent = this;
-            Children.Add(child);
-        }
     }
 }

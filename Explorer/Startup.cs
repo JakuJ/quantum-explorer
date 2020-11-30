@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Compiler;
+using CompilerService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -42,7 +43,9 @@ namespace Explorer
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
+
+            // services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
+            services.AddScoped<ICompiler>(_ => new CompilerFunctionFacade());
         }
     }
 }

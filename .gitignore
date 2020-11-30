@@ -10,3 +10,4 @@ node_modules/
 TestResults/
 *.DotSettings
 .ionide/
+local.settings.json

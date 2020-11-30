@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
 
@@ -9,6 +10,8 @@ namespace Compiler
     public class StateRecorder
     {
         private readonly CustomDumper dumper;
+
+        private readonly Dictionary<OperationState, OperationState> parents = new();
 
         private OperationState currentOperation;
 
@@ -31,7 +34,10 @@ namespace Compiler
         private void OnOperationStartHandler(ICallable operation, IApplyData input)
         {
             var opState = new OperationState(operation.Name);
-            currentOperation.AddOperation(opState);
+
+            currentOperation.Children.Add(opState);
+            parents[opState] = currentOperation;
+
             currentOperation = opState;
             dumper.Dump();
             currentOperation.Arguments = dumper.Values;
@@ -41,7 +47,7 @@ namespace Compiler
         {
             dumper.Dump();
             currentOperation.Results = dumper.Values;
-            currentOperation = currentOperation.Parent!; // an operation that's ending always has a parent operation
+            currentOperation = parents[currentOperation];
         }
     }
 }

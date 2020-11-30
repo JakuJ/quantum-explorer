@@ -4,10 +4,12 @@
 
   <PropertyGroup>
     <RootNamespace>Compiler</RootNamespace>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup Label="Projects">
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
   </ItemGroup>
 
   <ItemGroup Label="Packages">

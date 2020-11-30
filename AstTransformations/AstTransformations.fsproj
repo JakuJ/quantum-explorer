@@ -3,7 +3,7 @@
     <Import Project="..\msbuild\Source.props" />
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
         <LangVersion>5.0</LangVersion>
     </PropertyGroup>
 
@@ -11,10 +11,7 @@
         <Compile Include="Helpers.fs" />
         <Compile Include="Sectors.fs" />
         <Compile Include="FromQSharp.fs" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Compiler\Compiler.csproj" />
+        <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 
 open System.Collections.Generic
 open System.Linq
-open Compiler
+open Common
 open Helpers
 open Sectors
 open Microsoft.Quantum.QsCompiler.SyntaxTokens
