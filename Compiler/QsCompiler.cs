@@ -138,15 +138,13 @@ namespace Compiler
 
             // communicate that the Q# compilation was successful
             Compilation = compilationLoader.CompilationOutput;
+            OnGrids?.Invoke(this, FromQSharp.GetGates(Compilation));
 
             if (Compilation == null || !execute)
             {
                 OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
                 return;
             }
-
-            // report that the compilation succeeded
-            OnGrids?.Invoke(this, FromQSharp.GetGates(Compilation));
 
             CSharpCompilation? csharpCompilation;
             using (new ScopedTimer("Compiling C# driver code", logger))
