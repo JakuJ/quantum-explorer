@@ -33,18 +33,25 @@ namespace Compiler.AzureFunction.Connection
             log.LogInformation($"Sending code to Azure Function at {Endpoint}");
 
             var content = new StringContent(code, Encoding.UTF8, "text/plain");
-            HttpResponseMessage response = await client.PostAsync(Endpoint, content);
-            string responseString = await response.Content.ReadAsStringAsync();
 
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return responseString;
-            }
+                HttpResponseMessage response = await client.PostAsync(Endpoint, content);
+                string responseString = await response.Content.ReadAsStringAsync();
 
-            string message = $"Got response code {response.StatusCode} from Azure Function.";
-            log.LogError(message);
-            log.LogError($"Response string: {responseString}");
-            return null;
+                if (response.IsSuccessStatusCode)
+                {
+                    return responseString;
+                }
+
+                log.LogError($"Got response code {response.StatusCode} from Azure Function.");
+                return null;
+            }
+            catch (HttpRequestException e)
+            {
+                log.LogError(e.Message);
+                return null;
+            }
         }
     }
 }
