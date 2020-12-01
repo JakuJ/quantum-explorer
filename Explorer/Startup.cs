@@ -1,12 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using Compiler;
-using CompilerService;
+using Compiler.AzureFunction;
+using Compiler.AzureFunction.Connection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.JSInterop;
 
 namespace Explorer
 {
@@ -16,9 +16,9 @@ namespace Explorer
     {
         public Startup(IWebHostEnvironment env) => Env = env;
 
-        private static IWebHostEnvironment? Env { get; set; }
+        private IWebHostEnvironment Env { get; }
 
-        public static void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app)
         {
             if (Env.IsDevelopment())
             {
@@ -38,15 +38,19 @@ namespace Explorer
                 });
         }
 
-        public static void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<IWebHostEnvironment>(_ => Env!); // always set in the constructor
+            services.AddSingleton(_ => Env);
 
             if (Env.IsProduction())
             {
-                services.AddScoped<ICompiler>(container => new AzureFunctionCompiler(container.GetRequiredService<ILogger<AzureFunctionCompiler>>()));
+                services.AddScoped<ICompiler>(container =>
+                {
+                    var client = new AzureFunctionClient(container.GetRequiredService<ILogger<AzureFunctionClient>>());
+                    return new AzureFunctionCompiler(client, container.GetRequiredService<ILogger<AzureFunctionCompiler>>());
+                });
             }
             else
             {

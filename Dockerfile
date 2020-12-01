@@ -13,7 +13,7 @@ WORKDIR /source
 COPY msbuild/ msbuild/
 COPY Explorer/*.csproj Explorer/
 COPY Compiler/*.csproj Compiler/
-COPY CompilerFunction/*.csproj CompilerFunction/
+COPY Compiler.AzureFunction/*.csproj Compiler.AzureFunction/
 COPY Common/*.csproj Common/
 COPY AstTransformations/*.fsproj AstTransformations/
 RUN dotnet restore Explorer/Explorer.csproj
@@ -29,7 +29,7 @@ ENV NODE_ENV=${NODE_ENV}
 # Build the app
 COPY Explorer/ Explorer/
 COPY Compiler/ Compiler/
-COPY CompilerFunction/ CompilerFunction/
+COPY Compiler.AzureFunction/ Compiler.AzureFunction/
 COPY Common/ Common/
 COPY AstTransformations/ AstTransformations/
 WORKDIR Explorer

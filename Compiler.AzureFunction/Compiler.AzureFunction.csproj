@@ -4,7 +4,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
-    <RootNamespace>CompilerService</RootNamespace>
+    <RootNamespace>Compiler.AzureFunction</RootNamespace>
     <_FunctionsSkipCleanOutput>true</_FunctionsSkipCleanOutput>
   </PropertyGroup>
 
@@ -33,7 +33,6 @@
   </PropertyGroup>
 
   <Target Name="Copy runtime for local development" AfterTargets="AfterBuild">
-    <Exec Command="echo $(OutDir)" />
     <Exec Command="cp $(OutDir)runtimes/$(RuntimeFolder)-x64/native/Microsoft.Quantum.Simulator.Runtime.dll $(OutDir)bin/Microsoft.Quantum.Simulator.Runtime.dll" />
   </Target>
 

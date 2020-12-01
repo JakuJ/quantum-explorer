@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
-using Common;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
 using NUnit.Framework;
 
-namespace Compiler.Tests
+namespace Common.Tests
 {
     [TestFixture]
     [Parallelizable]

@@ -11,8 +11,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
+    <ProjectReference Include="..\Compiler.AzureFunction\Compiler.AzureFunction.csproj" />
     <ProjectReference Include="..\Compiler\Compiler.csproj" />
-    <ProjectReference Include="..\CompilerFunction\CompilerFunction.csproj" />
   </ItemGroup>
 
   <ItemGroup Label="Package references">
