@@ -1,19 +1,22 @@
 # Quantum Explorer
+
 ![.NET Core](https://github.com/JakuJ/quantum-explorer/workflows/.NET%20Core/badge.svg)
 [![codecov](https://codecov.io/gh/JakuJ/quantum-explorer/branch/develop/graph/badge.svg?token=D74R7H1V3O)](https://codecov.io/gh/JakuJ/quantum-explorer)
 
 This repository holds the code behind the Quantum Explorer, an interactive Q# playground.
 
-# Requirements
+# Building
+
+## Requirements
 
 Make sure you have the following installed:
 
-- .NET 5 SDK and runtime for the main app
+- .NET 5 SDK and runtime
+- .NET Core 3.1 SDK and runtime
 - npm
-- Docker
-- .NET 3.1 SDK and runtime for the language server (or just use Docker)
+- Docker (optional)
 
-# Building
+## Main app
 
 Use the `dotnet` CLI:
 
@@ -28,38 +31,59 @@ dotnet run --project Explorer
 dotnet test
 ```
 
-# Language server
+# Deployment
 
-The language server is in a separate repository added as a submodule to this one. For development purposes, the app can be run inside a Docker container.
+We use two versions of the app deployed at all times to the cloud(s).
 
-```shell
-# using docker-compose
-docker-compose up --build language-server
+## Development
 
-# or using Docker manually
-cd qsharp-compiler-mirror
-docker build -t language-server .
-docker run -p 8091:8091 -t language-server
+The development version of the app, tracking the `develop` branch is running at https://qexplorer.herokuapp.com. The
+deployment happens automatically using a push hook configured in Heroku.
+
+The runtime config involves setting **config vars** as follows:
+
+| Variable | Value |
+|---|---|
+| ASPNETCORE_ENVIRONMENT | Development |
+| LANGUAGE_SERVER_URL | wss://qexplorer-ls.herokuapp.com |
+
+This version of the application executes Q# compilation and simulation on the same server as the app itself.
+
+## Production
+
+The production version of the app is deployed to an Azure Web App for Containers running
+at https://quantum-explorer.azurewebsites.net.
+
+The deployment is performed manually by pushing the Docker container (or rather, its build context, the build is remote) to Azure Container Repository (ACR).
+Run the following Azure CLI commands from the root folder of the repository:
+
+```shell 
+az acr build --registry QuantumExplorer --image explorer:<tag> --build-arg NODE_ENV=production --verbose .
 ```
 
-By default, the app runs on port `8091`.
+where `<tag>` is the docker image tag for the release (e.g. `latest` or `1.0`).
 
-If you want to build locally, you must first execute the `bootstrap.ps1` script at the root of the `qsharp-compiler-mirror` repository
-with the correct value of the `NUGET_VERSION` environment variable (defined in the [Dockerfile](./qsharp-compiler-mirror/Dockerfile) for the language server).
+The runtime config involves setting **application settings** as follows:
 
-```shell
-# On MacOS or Linux, pwsh is the Powershell binary
-NUGET_VERSION=0.14.2011120240 pwsh bootstrap.ps1
+| Variable | Value |
+|---|---|
+| ASPNETCORE_ENVIRONMENT | Production |
+| LANGUAGE_SERVER_URL | wss://language-server.azurewebsites.net  |
+| FUNCTION_ENDPOINT | https://qs-compiler.azurewebsites.net/api/CompilerFunction |
 
-# On Windows, in Powershell
-$Env:NUGET_VERSION=0.14.2011120240
-bootstrap.ps1
+This version of the application executes Q# compilation and simulation using the Azure Function from
+the `Compiler.AzureFunction` project.
 
-# build and run the Language Server afterwards
-cd src/QsCompiler/ServerRunner
-dotnet run
-```
+### Azure Functions app
 
-# Code style
+The Q# compiler module used in production is deployed to Azure Functions.
+In order to push a new version of the app, open this repository in VS Code with the Azure Functions extension installed.
+Rebuild the `Compiler.AzureFunction` project and deploy from the extension to the `qs-compiler` Azure Functions app.
+
+# Notes
+
+## Code style
+
 This repository uses a Roslyn-based analyzer called [StyleCop](https://github.com/DotNetAnalyzers/StyleCopAnalyzers).
-Configuration of style enforcement rules and their severities can be done by modifying the [Ruleset](msbuild/Common.ruleset) and [config](msbuild/stylecop.json) files.
+Configuration of style enforcement rules and their severities can be done by modifying
+the [Ruleset](msbuild/Common.ruleset) and [config](msbuild/stylecop.json) files.

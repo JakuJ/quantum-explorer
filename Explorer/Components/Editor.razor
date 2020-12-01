@@ -20,7 +20,7 @@
         if (firstRender)
         {
             bool isDevelopment = Env.IsDevelopment();
-            string lsHost = Environment.GetEnvironmentVariable("LS_HOST") ?? "localhost:8091";
+            string lsHost = Environment.GetEnvironmentVariable("LANGUAGE_SERVER_URL") ?? "ws://localhost:8091";
             editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef, lsHost, isDevelopment);
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +34,14 @@ namespace Explorer
                 {
                     webBuilder.UseStartup<Startup>()
                               .UseStaticWebAssets();
+
+                    string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+                    if (environment == "Development")
+                    {
+                        // the PORT variable is provided by Heroku, 8091 is for local development
+                        string port = Environment.GetEnvironmentVariable("PORT") ?? "8091";
+                        webBuilder.UseUrls($"http://*:{port}");
+                    }
                 });
     }
 }

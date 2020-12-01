@@ -65,7 +65,7 @@ let statusRef = null;
 export class Editor {
 
   // Setup the Q# editor and establish a connection to the language server if possible
-  static async InitializeEditor(element, ls_host, is_development) {
+  static async InitializeEditor(element, server_url, is_development) {
     element.innerHTML = '';
 
     window.editorsDict = window.editorsDict || {};
@@ -136,7 +136,7 @@ export class Editor {
     });
 
     // create the web socket
-    const url = `${is_development ? 'ws' : 'wss'}://${ls_host}/monaco-editor`;
+    const url = `${server_url}/monaco-editor`;
     const webSocket = createWebSocket(url, is_development);
 
     // listen when the web socket is opened

@@ -1,6 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 
 # Install .NET Core 3.1 SDK
+ENV DOTNET_NOLOGO=true
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=true
 RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb; \
     dpkg -i packages-microsoft-prod.deb; \
     apt-get update; \
