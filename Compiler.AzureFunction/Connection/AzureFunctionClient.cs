@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace Compiler.AzureFunction.Connection
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage] // TODO: Integration tests
     public class AzureFunctionClient : IHttpClient
     {
         private static readonly string Endpoint;
