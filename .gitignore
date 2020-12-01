@@ -11,3 +11,4 @@ TestResults/
 *.DotSettings
 .ionide/
 local.settings.json
+launchSettings.json

@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Common;
 using Compiler;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace CompilerService
@@ -11,7 +12,23 @@ namespace CompilerService
     /// <inheritdoc/>
     public class AzureFunctionCompiler : ICompiler
     {
-        private static readonly HttpClient Client = new ();
+        private static readonly string Endpoint;
+
+        private static readonly HttpClient Client = new();
+
+        private readonly ILogger log;
+
+        static AzureFunctionCompiler()
+        {
+            string? endpoint = Environment.GetEnvironmentVariable("FUNCTION_ENDPOINT");
+            Endpoint = endpoint ?? throw new Exception("FUNCTION_ENDPOINT environment variable not set. Cannot use Azure Functions.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AzureFunctionCompiler"/> class.
+        /// </summary>
+        /// <param name="log">An <see cref="ILogger"/> instance used for logging.</param>
+        public AzureFunctionCompiler(ILogger log) => this.log = log;
 
         /// <inheritdoc/>
         public event EventHandler<string>? OnDiagnostics;
@@ -30,20 +47,55 @@ namespace CompilerService
         {
             var content = new StringContent(code);
 
-            // HttpResponseMessage response = await Client.PostAsync("http://localhost:7071/api/CompilerFunction", content);
-            HttpResponseMessage response = await Client.PostAsync("https://qs-compiler.azurewebsites.net/api/CompilerFunction", content);
-
+            log.LogInformation($"Sending code to Azure Function at {Endpoint}");
+            HttpResponseMessage response = await Client.PostAsync(Endpoint, content);
             string responseString = await response.Content.ReadAsStringAsync();
 
-            Payload payload = JsonConvert.DeserializeObject<Payload>(responseString, new JsonSerializerSettings
+            if (!response.IsSuccessStatusCode)
             {
-                MaxDepth = 128,
-            })!; // either it throws, or it's not null
+                string message = $"Got response code {response.StatusCode} from Azure Function.";
+                log.LogError(message);
+                log.LogError($"Response string: {responseString}");
+                OnDiagnostics?.Invoke(this, $"There was an issue while processing your code. Try again later. (status: {response.StatusCode})");
+                return;
+            }
 
-            OnDiagnostics?.Invoke(this, payload.Diagnostics!);
-            OnOutput?.Invoke(this, payload.Output!);
-            OnGrids?.Invoke(this, payload.Grids!);
-            OnStatesRecorded?.Invoke(this, payload.States!);
+            Payload payload;
+
+            try
+            {
+                JsonSerializerSettings settings = new() { MaxDepth = 128 };
+                payload = JsonConvert.DeserializeObject<Payload>(responseString, settings)
+                       ?? throw new Exception("Payload received from Azure Function was null");
+            }
+            catch (Exception e)
+            {
+                log.LogError(e.Message);
+                log.LogError($"Response string: {responseString}");
+
+                OnDiagnostics?.Invoke(this, "There was an issue while processing your code. Try again later.");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(payload.Diagnostics))
+            {
+                OnDiagnostics?.Invoke(this, payload.Diagnostics);
+            }
+
+            if (!string.IsNullOrEmpty(payload.Output))
+            {
+                OnOutput?.Invoke(this, payload.Output);
+            }
+
+            if (payload.Grids != null)
+            {
+                OnGrids?.Invoke(this, payload.Grids);
+            }
+
+            if (payload.States != null)
+            {
+                OnStatesRecorded?.Invoke(this, payload.States);
+            }
         }
     }
 }

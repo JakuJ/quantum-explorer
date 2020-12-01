@@ -1,4 +1,7 @@
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Hosting
 @inject IJSRuntime JSRuntime
+@inject IWebHostEnvironment Env
 
 <div id="editor" @ref="editorRootRef"></div>
 
@@ -16,7 +19,9 @@
     {
         if (firstRender)
         {
-            editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef);
+            bool isDevelopment = Env.IsDevelopment();
+            string lsHost = Environment.GetEnvironmentVariable("LS_HOST") ?? "localhost:8091";
+            editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef, lsHost, isDevelopment);
         }
     }
 

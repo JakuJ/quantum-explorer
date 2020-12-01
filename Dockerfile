@@ -19,13 +19,12 @@ COPY AstTransformations/*.fsproj AstTransformations/
 RUN dotnet restore Explorer/Explorer.csproj
 
 # Install npm
-RUN apt install -y npm
+RUN curl -sL https://deb.nodesource.com/setup_15.x | bash - && \
+    apt-get install -y nodejs
 
 # Set node environment
 ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
-ARG LS_HOST=localhost
-ENV LS_HOST=${LS_HOST}
 
 # Build the app
 COPY Explorer/ Explorer/
@@ -41,10 +40,6 @@ FROM build AS publish
 RUN dotnet publish -c Release --no-build -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
-
-# Set ASP.NET Core runtime environment
-ARG ASPNETCORE_ENVIRONMENT=Development
-ENV ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
 
 # Install libgomp required by Q# at run time
 RUN apk add --update libgomp

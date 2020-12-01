@@ -1,5 +1,5 @@
 const path = require('path');
-const webpack = require('webpack');
+
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
@@ -55,11 +55,6 @@ module.exports = {
         '!toggleHighContrast',
         '!toggleTabFocusMode',
       ],
-    }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      'process.env.LS_HOST': JSON.stringify(process.env.LS_HOST),
-      'process.env.TEMP_DIR': JSON.stringify('/tmp'), // TODO: Use os.tempdir() for local development on Windows
     })
   ]
 };

@@ -3,10 +3,10 @@ using Compiler;
 using CompilerService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 
 namespace Explorer
 {
@@ -14,23 +14,19 @@ namespace Explorer
     [ExcludeFromCodeCoverage]
     public class Startup
     {
-        private IWebHostEnvironment env;
+        public Startup(IWebHostEnvironment env) => Env = env;
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
-            => (Configuration, this.env) = (configuration, env);
+        private static IWebHostEnvironment? Env { get; set; }
 
-        public IConfiguration Configuration { get; }
-
-        public void Configure(IApplicationBuilder app)
+        public static void Configure(IApplicationBuilder app)
         {
-            if (env.IsDevelopment())
+            if (Env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseExceptionHandler("/Error")
-                   .UseHttpsRedirection();
+                app.UseExceptionHandler("/Error");
             }
 
             app.UseRouting()
@@ -42,14 +38,15 @@ namespace Explorer
                 });
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        public static void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddSingleton<IWebHostEnvironment>(_ => Env!); // always set in the constructor
 
-            if (env.IsProduction())
+            if (Env.IsProduction())
             {
-                services.AddScoped<ICompiler>(_ => new AzureFunctionCompiler());
+                services.AddScoped<ICompiler>(container => new AzureFunctionCompiler(container.GetRequiredService<ILogger<AzureFunctionCompiler>>()));
             }
             else
             {

@@ -8,10 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Common\Common.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Include="Helpers.fs" />
         <Compile Include="Sectors.fs" />
         <Compile Include="FromQSharp.fs" />
-        <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 
 </Project>

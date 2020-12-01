@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Hosting;
@@ -26,21 +25,14 @@ namespace Explorer
                .CreateDefaultBuilder(args)
                .ConfigureLogging(logBuilder =>
                 {
-                    logBuilder.AddConsole();
-                    logBuilder.AddDebug();
-                    logBuilder.AddEventSourceLogger();
+                    logBuilder.AddConsole()
+                              .AddDebug()
+                              .AddEventSourceLogger();
                 })
                .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
-
-                    string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-
-                    if (environment == "Staging")
-                    {
-                        string port = Environment.GetEnvironmentVariable("PORT")!; // provided by the platform, never null
-                        webBuilder.UseUrls($"http://*:{port}");                    // https is managed automatically
-                    }
+                    webBuilder.UseStartup<Startup>()
+                              .UseStaticWebAssets();
                 });
     }
 }
