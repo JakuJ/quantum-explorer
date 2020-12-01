@@ -70,9 +70,13 @@ The runtime config involves setting **application settings** as follows:
 | ASPNETCORE_ENVIRONMENT | Production |
 | LANGUAGE_SERVER_URL | wss://language-server.azurewebsites.net  |
 | FUNCTION_ENDPOINT | https://qs-compiler.azurewebsites.net/api/CompilerFunction |
+| FUNCTION_KEY | \<default key from the Azure Function "App keys" panel> |
 
 This version of the application executes Q# compilation and simulation using the Azure Function from
 the `Compiler.AzureFunction` project.
+
+In order to access the production endpoint, the `FUNCTION_KEY` environment variable has to be provided.
+Otherwise, the `401 Unauthorized` status code is returned. 
 
 ### Azure Functions app
 

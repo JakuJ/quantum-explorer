@@ -12,6 +12,7 @@ namespace Compiler.AzureFunction.Connection
     public class AzureFunctionClient : IHttpClient
     {
         private static readonly string Endpoint;
+        private static readonly string? FunctionsKey;
 
         private readonly ILogger log;
 
@@ -19,8 +20,10 @@ namespace Compiler.AzureFunction.Connection
 
         static AzureFunctionClient()
         {
-            string? endpoint = Environment.GetEnvironmentVariable("FUNCTION_ENDPOINT");
-            Endpoint = endpoint ?? throw new Exception("FUNCTION_ENDPOINT environment variable not set. Cannot use Azure Functions.");
+            Endpoint = Environment.GetEnvironmentVariable("FUNCTION_ENDPOINT")
+                    ?? throw new Exception("FUNCTION_ENDPOINT environment variable not set. Cannot use Azure Functions.");
+
+            FunctionsKey = Environment.GetEnvironmentVariable("FUNCTION_KEY");
         }
 
         /// <summary>Initializes a new instance of the <see cref="AzureFunctionClient"/> class.</summary>
@@ -33,6 +36,15 @@ namespace Compiler.AzureFunction.Connection
             log.LogInformation($"Sending code to Azure Function at {Endpoint}");
 
             var content = new StringContent(code, Encoding.UTF8, "text/plain");
+
+            if (FunctionsKey == null)
+            {
+                log.LogWarning("FUNCTION_KEY environment variable not set. Connection will be refused unless its authorization level is Anonymous.");
+            }
+            else
+            {
+                content.Headers.Add("x-functions-key", FunctionsKey);
+            }
 
             try
             {
