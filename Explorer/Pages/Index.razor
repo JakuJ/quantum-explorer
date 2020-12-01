@@ -85,7 +85,6 @@
         if (!firstRender) return;
 
         await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
-        await Editor.SetStatusReference(status);
     }
 
     #region Compilation event handlers

@@ -52,10 +52,6 @@ trim_trailing_whitespace = false
 [*.{htm, html, js, jsm, ts, tsx, css, sass, scss, less, svg, vue}]
 indent_size = 2
 
-# Batch Files
-[*.{cmd, bat}]
-end_of_line = crlf
-
 # Bash Files
 [*.sh]
 end_of_line = lf
