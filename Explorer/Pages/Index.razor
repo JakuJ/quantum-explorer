@@ -23,7 +23,7 @@
     <div class="content">
         <div id="splitPanes">
             <div id="left-pane" class="split split-horizontal split-content">
-                <Editor @ref="Editor" InitialCode=@GetCodeFromDatabse()/>
+                <Editor @ref="Editor" GetInitialCode="@GetCodeFromDatabse"/>
             </div>
             <div id="right-pane" class="split split-horizontal">
                 <div id="top-pane" class="split split-content">
