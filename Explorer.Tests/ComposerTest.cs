@@ -4,6 +4,7 @@ using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
 using Explorer.Components.Composer;
+using Explorer.Utilities.Composer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -27,6 +28,8 @@ namespace Explorer.Tests
             using var ctx = new Bunit.TestContext();
             ctx.Services.AddMockJSRuntime();
             ctx.Services.TryAddScoped<ILogger<Grid>>(_ => new Mock<ILogger<Grid>>().Object);
+            ctx.Services.TryAddScoped<ILogger<Gate>>(_ => new Mock<ILogger<Gate>>().Object);
+            ctx.Services.TryAddScoped<ILogger<GridSnapAssoc>>(_ => new Mock<ILogger<GridSnapAssoc>>().Object);
             ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
             var cut = ctx.RenderComponent<Composer>();
 

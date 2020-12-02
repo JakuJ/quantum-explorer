@@ -3,8 +3,14 @@
 </div>
 
 @code {
+    private string _name = "";
+
     [Parameter]
-    public string Name { get; set; } = "";
+    public string Name
+    { 
+        get => _name;
+        set => _name = value ?? "";
+    }
 
     private string DisplayedName => (Name.Length > 8) ? $"{Name.Substring(0, 6)}.." : Name;
 }

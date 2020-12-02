@@ -16,6 +16,7 @@ namespace Common.Tests
             Assert.AreEqual(howMany, new HashSet<string>(ids).Count, "Unique identifiers should be unique");
         }
 
+        [Ignore("Identifiers changed from GUID-s to numbers")]
         [Test]
         public void StartsWithF()
         {
