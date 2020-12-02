@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AstTransformations;
 using Common;
 using NUnit.Framework;
 
@@ -261,14 +260,10 @@ namespace Compiler.Tests
             string code = await Helpers.GetSourceFile(path);
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
 
-            Dictionary<string, GateGrid> gates = null!;
-            compiler.OnGrids += (_, grids) => { gates = grids; };
+            compiler.OnGrids += (_, _) => Assert.Fail("No grids should be returned.");
 
-            // Act
+            // Act && Assert
             await compiler.Compile(code);
-
-            // Assert
-            Assert.IsEmpty(gates, "Traversing the AST should find no operations.");
         }
 
         [TestCaseSource(typeof(AllocationSources), nameof(AllocationSources.Sources))]

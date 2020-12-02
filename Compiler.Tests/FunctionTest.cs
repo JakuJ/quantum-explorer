@@ -27,7 +27,8 @@ namespace Compiler.Tests
             await compiler.Compile(code);
         }
 
-        public async Task ReturnsDiagnosticsFromInvalidCode(string file)
+        [Test]
+        public async Task ReturnsDiagnosticsFromInvalidCode()
         {
             // Arrange
             const string code = "namespace test { function }"; // invalid code

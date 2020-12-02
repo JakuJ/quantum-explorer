@@ -138,7 +138,12 @@ namespace Compiler
 
             // communicate that the Q# compilation was successful
             Compilation = compilationLoader.CompilationOutput;
-            OnGrids?.Invoke(this, FromQSharp.GetGates(Compilation));
+
+            Dictionary<string, GateGrid> grids = FromQSharp.GetGates(Compilation);
+            if (Compilation != null && grids.Count > 0)
+            {
+                OnGrids?.Invoke(this, grids);
+            }
 
             if (Compilation == null || !execute)
             {
