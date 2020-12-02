@@ -1,4 +1,4 @@
-<svg height="@(height)" width="@(width)" style="position:absolute;">
+<svg height="@(Height)" width="@(Width)" style="position:absolute;">
   <line x1="@(X1)" y1="@(Y1)" x2="@(X2)" y2="@(Y2)" style="stroke:var(--text);stroke-width:2" />
   Sorry, your browser does not support inline SVG.
 </svg>
@@ -16,7 +16,7 @@
     [Parameter]
     public int Y2 { get; set; } = 20;
 
-    private int width => (X2 - X1 == 0) ? 40 : (X2 - X1);
+    private int Width => (X2 - X1 == 0) ? 40 : (X2 - X1);
 
-    private int height => (Y2 - Y1 == 0) ? 40 : (Y2 - Y1);
+    private int Height => (Y2 - Y1 == 0) ? 40 : (Y2 - Y1);
 }

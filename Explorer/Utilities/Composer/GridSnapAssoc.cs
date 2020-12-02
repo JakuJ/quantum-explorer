@@ -10,7 +10,7 @@ namespace Explorer.Utilities.Composer
     /// </summary>
     public class GridSnapAssoc
     {
-        private readonly ILogger logger;
+        private readonly ILogger logger = null!;
 
         private readonly Dictionary<string, string> snap2Gate = new Dictionary<string, string>();
 
@@ -41,18 +41,21 @@ namespace Explorer.Utilities.Composer
         /// <returns>Error code.</returns>
         public bool Associate(string snapId, string gateId)
         {
-            try
+            if (snap2Gate.ContainsKey(snapId))
             {
-                snap2Gate.Add(snapId, gateId);
-                gate2Snap.Add(gateId, snapId);
-                return false;
-            }
-            catch (ArgumentException ex)
-            {
-                logger?.LogError("Cannot associate! {0}, {1}", snapId, gateId);
-                logger?.LogError(ex.Message);
+                logger.LogInformation("Snap ID already associated {0}", snapId);
                 return true;
             }
+
+            if (gate2Snap.ContainsKey(gateId))
+            {
+                logger.LogInformation("Gate ID already associated {0}", gateId);
+                return true;
+            }
+
+            snap2Gate.Add(snapId, gateId);
+            gate2Snap.Add(gateId, snapId);
+            return false;
         }
 
         /// <summary>Get the GateID basing on the SnapID.</summary>
@@ -73,35 +76,49 @@ namespace Explorer.Utilities.Composer
             return gate2Snap.ContainsKey(gateId) ? gate2Snap[gateId] : null;
         }
 
+        /// <summary>
+        /// Disconnect the gate ID from the old snap ID.
+        /// </summary>
+        /// <param name="gateId">The gate ID.</param>
+        /// <returns>Old snap ID.</returns>
+        private string Deassociate(string gateId)
+        {
+            try
+            {
+                var oldSnapId = gate2Snap[gateId];
+                snap2Gate.Remove(oldSnapId);
+                gate2Snap.Remove(gateId);
+                return oldSnapId;
+            }
+            catch (KeyNotFoundException)
+            {
+                logger?.LogError("Old snap key not found while deassociating! gateId: {0}", gateId);
+                Print();
+                throw;
+            }
+        }
+
         /// <summary>Reassociate the gate with the new snap.</summary>
         /// <param name="gateId">Reassociated Gate ID.</param>
         /// <param name="snapId">The new Snap ID.</param>
         [JSInvokable]
         public void Reassociate(string gateId, string snapId)
         {
-            // Disconnect the gate ID from the old snap ID.
-            try
-            {
-                var oldSnapId = gate2Snap[gateId];
-                snap2Gate.Remove(oldSnapId);
-                gate2Snap.Remove(gateId);
+            // Disconnect the gate ID.
+            var oldSnapId = Deassociate(gateId);
 
-                // Connect the gate ID to the new snap ID.
-                bool err = Associate(snapId, gateId);
+            // Connect the gate ID to the new snap ID.
+            bool err = Associate(snapId, gateId);
+            if (err)
+            {
+                err = Associate(oldSnapId, gateId);
                 if (err)
                 {
-                    err = Associate(oldSnapId, gateId);
+                    throw new Exception("Cannot reassociate to the old snap!");
                 }
+            }
 
-                GatePositionChanged.Invoke(oldSnapId, snapId);
-            }
-            catch (KeyNotFoundException)
-            {
-                logger?.LogError("Old snap key not found while reassociating!");
-                logger?.LogInformation("Moved gate: {0}, new snap: {1}", gateId, snapId);
-                Print();
-                throw;
-            }
+            GatePositionChanged.Invoke(oldSnapId, snapId);
         }
 
         /// <summary>

@@ -1,42 +1,35 @@
-@using Microsoft.AspNetCore.Hosting
 @using Compiler
 @using Explorer.Utilities.Composer
 @using Microsoft.Extensions.Logging
 @using static Utilities.Rendering
 @using System.ComponentModel.DataAnnotations
 @inject IJSRuntime JsRuntime
-@inject IWebHostEnvironment Environment;
 @inject ILogger<Grid> Logger;
+@inject ILogger<GridSnapAssoc> LoggerAssoc;
 
-<div id="grid">
-    @for (var y = 0; y < gates.GetLength(1); y++)
+<div class="grid-container">
+    @for (var y = 0; y < GateGrid.Height; y++)
     {
-        <div class="grid-row">
-            <Line X1=0 X2=@(40*gates.GetLength(0))/>
-            @for (var x = 0; x < gates.GetLength(0); x++)
-            {
-                var (localX, localY) = (x, y);
+        <div class="grid-outer-row">
+            <RowID Name=@(GateGrid.Names[y]) />
+            <div class="grid-row">
+                <Line X1=0 X2=@(40*GateGrid.Width) />
+                @for (var x = 0; x < GateGrid.Width; x++)
+                {
+                    // Snap point on the cell
+                    var cellSnapPoint = new SnapPoint(AddSnapPoint, x, y);
+                    @RenderContent(cellSnapPoint)
 
-                // Snap point on the cell
-                var cellSnapPoint = new SnapPoint(AddSnapPoint, x, y);
-                @RenderContent(cellSnapPoint)
+                    // Snap point between the cells
+                    var halfSnapPoint = new SnapPoint(AddSnapPoint, x, y, true);
+                    @RenderContent(halfSnapPoint)
 
-                // Snap point between the cells
-                var halfSnapPoint = new SnapPoint(AddSnapPoint, x, y, true);
-                @RenderContent(halfSnapPoint)
+                    var localQGate = gates[x,y];
+                    var localCellSnapId = cellSnapPoint.Id;
 
-                <Cell>
-                    @{
-                        var quantumGate = gates[localX, localY];
-                        if (quantumGate != null)
-                        {
-                            var gate = new Gate(Environment, quantumGate.Name);
-                            gridSnapAssoc.Associate(cellSnapPoint.Id, gate.Id);
-                            @RenderContent(gate)
-                        }
-                    }
-                </Cell>
-            }
+                    <Cell QuantumGate=@(localQGate) Associate="Associate" CellSnapPointId=@(localCellSnapId) />
+                }
+            </div>
         </div>
     }
 </div>
@@ -44,37 +37,17 @@
 @code {
 
     [Parameter]
-    [Required]
-    public GateGrid GateGrid { get; set; }
+    public GateGrid GateGrid { get; set; } = null!;
 
-    private QuantumGate[,] gates;
+    private QuantumGate[,] gates = null!;
 
-    private Dictionary<string, SnapPoint> snapPoints;
+    private Dictionary<string, SnapPoint> snapPoints = new Dictionary<string, SnapPoint>();
 
-    private GridSnapAssoc gridSnapAssoc;
-
-    public Grid()
-    {
-        snapPoints = new Dictionary<string, SnapPoint>();
-        gridSnapAssoc = new GridSnapAssoc(Logger, MoveGate);
-        GateGrid = new GateGrid();
-        gates = null!;
-    }
-
-    protected override void OnParametersSet()
-    {
-        gates = GetGates();
-        StateHasChanged();
-    }
-
-    protected override async void OnAfterRender(bool firstRender)
-    {
-        await JsRuntime.InvokeVoidAsync("Library.initGrids");
-        await SetReferences();
-    }
+    private GridSnapAssoc gridSnapAssoc = null!;
 
     private QuantumGate[,] GetGates()
     {
+        Logger.LogInformation("GetGates calling");
         gridSnapAssoc.Clear();
         snapPoints.Clear();
         var arr = new QuantumGate[GateGrid.Width, GateGrid.Height];
@@ -84,6 +57,20 @@
         }
         return arr;
     }
+
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("OnInitialized calling");
+        gridSnapAssoc = new GridSnapAssoc(LoggerAssoc, MoveGate);
+        gates = GetGates();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Logger.LogInformation("After render method calling");
+        await SetReferences();
+    }
+
 
     private void MoveGate(string oldSnapId, string newSnapId)
     {
@@ -98,6 +85,8 @@
         gates = GetGates();
         StateHasChanged();
     }
+
+    private bool Associate(string snapId, string gateId) => gridSnapAssoc.Associate(snapId, gateId);
 
     private void AddSnapPoint(SnapPoint point)
     {
@@ -117,6 +106,10 @@
 
     private async Task SetReferences()
     {
+        Logger.LogInformation("Setting the grid references");
+        await JsRuntime.InvokeVoidAsync("Library.initGrids");
+
+        // disposable !!!
         var gridRef = DotNetObjectReference.Create(this);
         var assocRef = DotNetObjectReference.Create(gridSnapAssoc);
 

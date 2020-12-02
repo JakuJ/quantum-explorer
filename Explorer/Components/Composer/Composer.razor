@@ -4,17 +4,17 @@
 <div class="overflow-hidden">
     @if (gateGrid != null)
     {
-        <Grid GateGrid="@(gateGrid)"/>
+        <Grid GateGrid="@(gateGrid)" />
     }
 </div>
 
 @code {
-    private GateGrid gateGrid = new GateGrid();
+    private GateGrid? gateGrid = null;
 
     public async Task UpdateGridsAsync(Dictionary<string, GateGrid> ast)
     {
         // force the underlying Gate component to render from scratch
-        gateGrid = new GateGrid();
+        gateGrid = null;
         await InvokeAsync(StateHasChanged);
 
         gateGrid = ast.Last().Value; //GateGridToArray(ast.First().Value);

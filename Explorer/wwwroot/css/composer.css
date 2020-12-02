@@ -1,8 +1,13 @@
-#grid {
-  height: auto;
-  width: auto;
+.grid-container {
+  height: 100%;
+  width: 100%;
   padding: 2px;
   display: inline-block;
+  overflow: auto;
+}
+
+.grid-outer-row {
+  display: inline-flex;
 }
 
 .grid-row {
@@ -11,7 +16,8 @@
   height: 40px;
   margin: 5px 0;
   display: -ms-flexbox;
-  display: flex;
+  display: inline-flex;
+  overflow: visible;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
 }
@@ -46,4 +52,17 @@
 
 .gate-name {
   vertical-align: middle;
+}
+
+.row-id {
+  width: 80px;
+  min-width: 80px;
+  height: 40px;
+  line-height: 40px;
+  margin: 5px 0;
+  padding-left: 5px;
+  float: left;
+  text-align: left;
+  background: var(--accent);
+  z-index: 98;
 }

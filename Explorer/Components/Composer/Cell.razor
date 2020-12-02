@@ -1,10 +1,22 @@
+@using Compiler
+
 <div class="grid-cell">
-    @ChildContent
+    @if (QuantumGate != null)
+    {
+        <Gate Name="@(QuantumGate.Name)" CellSnapPointId="@(CellSnapPointId)" Associate="Associate" @ref="gate" />
+    }
 </div>
 
 @code {
 
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public QuantumGate QuantumGate { get; set; } = null!;
 
+    [Parameter]
+    public Func<string, string, bool> Associate { get; set; } = null!;
+
+    [Parameter]
+    public string CellSnapPointId { get; set; } = null!;
+
+    private Gate? gate;
 }
