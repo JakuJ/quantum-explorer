@@ -20,7 +20,7 @@
     public string Name { get; set; } = null!;
 
     [Parameter]
-    public Action<Gate> OnDispose { get; set; }
+    public Action<Gate> OnDispose { get; set; } = null!;
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 

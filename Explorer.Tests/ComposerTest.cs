@@ -26,11 +26,11 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            ctx.Services.TryAddScoped<ILogger<Grid>>(_ => new Mock<ILogger<Grid>>().Object);
-            ctx.Services.TryAddScoped<ILogger<Gate>>(_ => new Mock<ILogger<Gate>>().Object);
-            ctx.Services.TryAddScoped<ILogger<GridSnapAssoc>>(_ => new Mock<ILogger<GridSnapAssoc>>().Object);
-            ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
-            var cut = ctx.RenderComponent<Composer>();
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Gate>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Cell>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<SnapPoint>>().Object);
+            ctx.Services.TryAddSingleton(_ => Helpers.GetMockEnvironment().Object);
 
             GateGrid grid = new();
             grid.AddGate(0, new QuantumGate("H"));

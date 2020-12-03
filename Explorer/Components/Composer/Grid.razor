@@ -14,11 +14,12 @@
                 @for (var x = 0; x < gates.GetLength(0); x++)
                 {
                     // Snap point between the cells
-                    <SnapPoint X="@x" Y="@y" Logger="@Logger" Half="@true" @ref="SnapRef"/>
+                    <SnapPoint X="@x" Y="@y" Half="@true" @ref="SnapRef"/>
 
                     QuantumGate localQGate = gates[x, y];
 
-                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>                }
+                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>
+                }
             </div>
         </div>
     }

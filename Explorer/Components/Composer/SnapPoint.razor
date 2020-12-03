@@ -1,5 +1,6 @@
 @using Common
 @using Microsoft.Extensions.Logging
+@inject ILogger<SnapPoint> Logger
 
 <div id="@Id" class="grid-snap @(Half ? "half" : "") @(Locked ? "locked" : "")" style="left: @XOffset"></div>
 
@@ -13,9 +14,6 @@
 
     [Parameter]
     public bool Half { get; set; }
-
-    [Parameter]
-    public ILogger Logger { get; set; }
 
     [Parameter]
     public bool Locked { get; set; }

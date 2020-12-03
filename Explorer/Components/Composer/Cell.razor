@@ -2,18 +2,19 @@
 @using Microsoft.Extensions.Logging
 @inject ILogger<Cell> Logger;
 
-<SnapPoint X="@X" Y="@Y" Logger="@Logger" Half="@false" @ref="snapPoint" Locked="@(QuantumGate != null)"/>
+<SnapPoint X="@X" Y="@Y" Half="@false" @ref="snapPoint" Locked="@(QuantumGate != null)"/>
 <div class="grid-cell">
     @if (QuantumGate != null)
     {
-        <Gate Name="@(QuantumGate.Name)" @ref="gate"/>    }
+        <Gate Name="@(QuantumGate.Name)" @ref="gate"/>
+    }
 </div>
 
 @code {
 
     private Gate? gate;
 
-    private SnapPoint snapPoint;
+    private SnapPoint snapPoint = null!;
 
     [Parameter]
     public QuantumGate? QuantumGate { get; set; }
@@ -25,7 +26,7 @@
     public int Y { get; set; }
 
     [Parameter]
-    public Dictionary<string, SnapPoint> SnapPoints { get; set; }
+    public Dictionary<string, SnapPoint> SnapPoints { get; set; } = null!;
 
     protected override void OnAfterRender(bool firstRender)
     {
