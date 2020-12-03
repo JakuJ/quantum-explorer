@@ -11,10 +11,12 @@
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
 @inject ICodeDatabaseHandler DatabaseHandler;
+@inject NavigationManager NavigationManager;
 
 <div class="main">
     <div class="top-row px-4">
         <Toasts />
+        <ShareButton GetSaveLink="ShareCode"></ShareButton>
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
         <LsStatus/>
         <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
@@ -23,14 +25,14 @@
     <div class="content">
         <div id="splitPanes">
             <div id="left-pane" class="split split-horizontal split-content">
-                <Editor @ref="Editor" GetInitialCode="@GetCodeFromDatabse"/>
+                <Editor @ref="Editor" GetInitialCode="@GetCodeFromDatabse" />
             </div>
             <div id="right-pane" class="split split-horizontal">
                 <div id="top-pane" class="split split-content">
-                    <Compositor @ref="Compositor"/>
+                    <Compositor @ref="Compositor" />
                 </div>
                 <div id="bottom-pane" class="split split-content">
-                    <Visualizer @ref="Visualizer"/>
+                    <Visualizer @ref="Visualizer" />
                 </div>
             </div>
         </div>
@@ -92,6 +94,7 @@
     {
         if (!firstRender) return;
 
+        await JsRuntime.InvokeVoidAsync("Library.initPopOverDestroyer");
         await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
     }
 
@@ -134,6 +137,13 @@
             return code;
         }
         return null;
+    }
+
+    private async Task<string> ShareCode()
+    {
+        string code = await Editor.GetCode();
+        Guid id = DatabaseHandler.SaveCode("", code);
+        return NavigationManager.BaseUri + id.ToString();
     }
 
 }

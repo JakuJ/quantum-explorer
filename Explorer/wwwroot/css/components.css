@@ -208,3 +208,28 @@ select:focus {
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
 }
+
+/*share button*/
+
+.share-btn {
+    margin: auto 10px;
+    padding: 0.25rem;
+    background: var(--surface);
+    color: var(--text);
+    border-color: transparent;
+}
+
+.share-popover {
+    display: flex;
+    align-items: center;
+}
+
+.share-link {
+    flex: 1;
+}
+
+.share-copy-btn {
+    flex: 0 0;
+    margin-left: 2px;
+    height: 2em;
+}
