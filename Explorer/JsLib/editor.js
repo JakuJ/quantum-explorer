@@ -221,7 +221,6 @@ function createWebSocket(url) {
     reconnectionDelayGrowFactor: 1.3,
     connectionTimeout: 10000,
     maxRetries: Infinity,
-    debug: !IS_PRODUCTION,
   };
   return new ReconnectingWebSocket(url, [], socketOptions);
 }

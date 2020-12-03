@@ -1,11 +1,9 @@
 @using Compiler
-@using Explorer.Utilities.Composer
 @using Microsoft.Extensions.Logging
 @using static Utilities.Rendering
 @using System.ComponentModel.DataAnnotations
 @inject IJSRuntime JsRuntime
 @inject ILogger<Grid> Logger;
-@inject ILogger<GridSnapAssoc> AssocLogger;
 
 <div class="grid-container">
     @for (var y = 0; y < GateGrid.Height; y++)
@@ -21,13 +19,16 @@
 
                     QuantumGate localQGate = gates[x, y];
 
-                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" Associate="@gridSnapAssoc.Associate" SnapPoints="@snapPoints"/>                }
+                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>              }
             </div>
         </div>
     }
 </div>
 
 @code {
+
+    [Parameter]
+    public GateGrid GateGrid { get; set; } = null!;
 
     private Dictionary<string, SnapPoint> snapPoints = new();
 
@@ -36,12 +37,7 @@
         set => snapPoints.Add(value.Id, value);
     }
 
-    [Parameter]
-    public GateGrid GateGrid { get; set; } = null!;
-
     private QuantumGate[,] gates = null!;
-
-    private GridSnapAssoc gridSnapAssoc = null!;
 
     private QuantumGate[,] RefreshGateArray()
     {
@@ -57,22 +53,12 @@
 
     protected override void OnInitialized()
     {
-        gridSnapAssoc = new GridSnapAssoc(AssocLogger, MoveGate);
         gates = RefreshGateArray();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-    // TODO: dispose of these
-            var gridRef = DotNetObjectReference.Create(this);
-            var assocRef = DotNetObjectReference.Create(gridSnapAssoc);
-
-            await JsRuntime.InvokeVoidAsync("Library.setReferences", gridRef, assocRef);
-        }
-
-    // Initialize draggable and droppable elements
+        // Initialize draggable and droppable elements
         await JsRuntime.InvokeVoidAsync("Library.initGrids");
     }
 

@@ -11,6 +11,6 @@ namespace Common
         /// Returns a new, unique ID.
         /// </summary>
         /// <returns>A unique id.</returns>
-        public static string CreateUniqueId() => $"id_{counter++}";
+        public static string CreateUniqueId() => $"_{counter++}";
     }
 }

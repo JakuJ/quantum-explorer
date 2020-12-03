@@ -1,7 +1,7 @@
 @using Common
 @using Microsoft.Extensions.Logging
 
-<div id="@Id" class="grid-snap @HalfClass" style="left: @XOffset"></div>
+<div id="@Id" class="grid-snap @(Half ? "half" : "") @(Locked ? "locked" : "")" style="left: @XOffset"></div>
 
 @code {
 
@@ -14,12 +14,18 @@
     [Parameter]
     public bool Half { get; set; }
 
-    [Parameter] // HACK
+    [Parameter]
     public ILogger Logger { get; set; }
+
+    [Parameter]
+    public bool Locked { get; set; }
 
     protected override void OnInitialized()
     {
-        Logger.LogInformation($"Initialized snap {Id} at {X}, {Y} {HalfClass}");
+        if (!Half)
+        {
+            Logger.LogInformation($"Initialized snap {Id} at {X}, {Y}");
+        }
     }
 
     public string Id { get; } = UniqueId.CreateUniqueId();
@@ -28,8 +34,6 @@
 
     private string XOffset => $"{XCoord}px";
 
-    private string HalfClass => Half ? "half" : "";
-
-    public override string ToString() => $"[{X},{Y}]{HalfClass} {Id}";
+    public override string ToString() => $"[{X},{Y}] {Id} {Half}";
 
 }
