@@ -1,22 +1,49 @@
 @using Compiler
+@using Microsoft.Extensions.Logging
+@inject ILogger<Cell> Logger;
 
+<SnapPoint X="@X" Y="@Y" Logger="@Logger" Half="@false" @ref="SnapPoint"/>
 <div class="grid-cell">
     @if (QuantumGate != null)
     {
-        <Gate Name="@(QuantumGate.Name)" CellSnapPointId="@(CellSnapPointId)" Associate="Associate" @ref="gate" />
-    }
+        <Gate Name="@(QuantumGate.Name)" @ref="Gate"/>    }
 </div>
 
 @code {
 
     [Parameter]
-    public QuantumGate QuantumGate { get; set; } = null!;
+    public QuantumGate? QuantumGate { get; set; }
 
     [Parameter]
-    public Func<string, string, bool> Associate { get; set; } = null!;
+    public int X { get; set; }
 
     [Parameter]
-    public string CellSnapPointId { get; set; } = null!;
+    public int Y { get; set; }
 
-    private Gate? gate;
+    [Parameter]
+    public Func<string, string, bool> Associate { get; set; }
+
+    [Parameter]
+    public Dictionary<string, SnapPoint> SnapPoints { get; set; }
+
+    public SnapPoint SnapPoint { get; set; }
+
+    public Gate? Gate
+    {
+        set
+        {
+            if (value == null) return;
+            Logger.LogInformation($"Cell associating gate {value.Id} with snap {SnapPoint.Id}");
+            Associate(SnapPoint.Id, value.Id);
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            SnapPoints.Add(SnapPoint.Id, SnapPoint);
+        }
+    }
+
 }

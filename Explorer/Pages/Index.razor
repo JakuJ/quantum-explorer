@@ -72,7 +72,7 @@
                 async t =>
                 {
                     await toggleCompilation(false);
-                    string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
+                    var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
                     Visualizer.SetOutput(messages);
                 },
                 TaskContinuationOptions.OnlyOnFaulted);

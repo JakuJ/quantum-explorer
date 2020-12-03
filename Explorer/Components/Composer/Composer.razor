@@ -17,7 +17,7 @@
         gateGrid = null;
         await InvokeAsync(StateHasChanged);
 
-        gateGrid = ast.Last().Value; //GateGridToArray(ast.First().Value);
+        gateGrid = ast.Last().Value;
         await InvokeAsync(StateHasChanged);
     }
 }

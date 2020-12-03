@@ -6,5 +6,5 @@
     [Parameter]
     public string Name { get; set; } = "";
 
-    private string DisplayedName => (Name.Length > 8) ? $"{Name.Substring(0, 6)}.." : Name;
+    private string DisplayedName => Name.Length > 8 ? $"{Name.Substring(0, 6)}.." : Name;
 }

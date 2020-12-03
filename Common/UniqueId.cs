@@ -1,5 +1,3 @@
-using System;
-
 namespace Common
 {
     /// <summary>
@@ -7,16 +5,12 @@ namespace Common
     /// </summary>
     public static class UniqueId
     {
+        private static int counter = 0;
+
         /// <summary>
         /// Returns a new, unique ID.
-        /// Due to use in HTML element identifiers, these IDs always start with a character.
         /// </summary>
-        /// <returns>A string of 32 hexadecimal digits that starts with a character 'f'.</returns>
-        public static string CreateUniqueId()
-        {
-            byte[] bytes = Guid.NewGuid().ToByteArray();
-            bytes[3] |= 0xF0;
-            return new Guid(bytes).ToString("N");
-        }
+        /// <returns>A unique id.</returns>
+        public static string CreateUniqueId() => $"id_{counter++}";
     }
 }

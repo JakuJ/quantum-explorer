@@ -1,25 +1,26 @@
 @using Common
+@using Microsoft.Extensions.Logging
 
 <div id="@Id" class="grid-snap @HalfClass" style="left: @XOffset"></div>
 
 @code {
 
-    public SnapPoint(Action<SnapPoint> addPoint, int x, int y, bool half = false)
+    [Parameter]
+    public int X { get; set; }
+
+    [Parameter]
+    public int Y { get; set; }
+
+    [Parameter]
+    public bool Half { get; set; }
+
+    [Parameter] // HACK
+    public ILogger Logger { get; set; }
+
+    protected override void OnInitialized()
     {
-        X = x;
-        Y = y;
-        Half = half;
-        addSnapPoint = addPoint;
-        addSnapPoint.Invoke(this);
+        Logger.LogInformation($"Initialized snap {Id} at {X}, {Y} {HalfClass}");
     }
-
-    private Action<SnapPoint> addSnapPoint { get; }
-
-    public bool Half { get; }
-
-    public int X { get;}
-
-    public int Y { get; }
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
@@ -30,4 +31,5 @@
     private string HalfClass => Half ? "half" : "";
 
     public override string ToString() => $"[{X},{Y}]{HalfClass} {Id}";
+
 }
