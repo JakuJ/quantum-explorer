@@ -1,8 +1,8 @@
 @using Compiler
 @using Microsoft.Extensions.Logging
-@using System.ComponentModel.DataAnnotations
 @inject IJSRuntime JsRuntime
 @inject ILogger<Grid> Logger;
+@implements IDisposable
 
 <div class="grid-container">
     @for (var y = 0; y < gates.GetLength(1); y++)
@@ -18,8 +18,7 @@
 
                     QuantumGate localQGate = gates[x, y];
 
-                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>
-                }
+                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>                }
             </div>
         </div>
     }
@@ -39,15 +38,7 @@
 
     private QuantumGate[,] gates = null!;
 
-    private QuantumGate[,] RefreshGateArray()
-    {
-        var arr = new QuantumGate[GateGrid.Width, GateGrid.Height];
-        foreach ((QuantumGate gate, int x, int y) in GateGrid.Gates)
-        {
-            arr[x, y] = gate;
-        }
-        return arr;
-    }
+    private DotNetObjectReference<Grid>? reference;
 
     protected override void OnInitialized()
     {
@@ -58,12 +49,17 @@
     {
         if (firstRender)
         {
-            var reference = DotNetObjectReference.Create(this); // TODO: Dispose!
+            reference = DotNetObjectReference.Create(this);
             await JsRuntime.InvokeVoidAsync("Library.setReferences", reference);
         }
 
-        // Initialize draggable and droppable elements
         await JsRuntime.InvokeVoidAsync("Library.initGrids");
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        reference?.Dispose();
     }
 
     [JSInvokable]
@@ -91,6 +87,16 @@
         GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
 
         ForceRerender();
+    }
+
+    private QuantumGate[,] RefreshGateArray()
+    {
+        var arr = new QuantumGate[GateGrid.Width, GateGrid.Height];
+        foreach ((QuantumGate gate, int x, int y) in GateGrid.Gates)
+        {
+            arr[x, y] = gate;
+        }
+        return arr;
     }
 
     private void ForceRerender()
