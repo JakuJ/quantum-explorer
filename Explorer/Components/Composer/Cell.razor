@@ -6,8 +6,7 @@
 <div class="grid-cell">
     @if (QuantumGate != null)
     {
-        <Gate Name="@(QuantumGate.Name)" @ref="gate" />
-    }
+        <Gate Name="@(QuantumGate.Name)" @ref="gate"/>    }
 </div>
 
 @code {
@@ -33,6 +32,11 @@
         if (firstRender)
         {
             SnapPoints.Add(snapPoint.Id, snapPoint);
+        }
+
+        if (gate != null)
+        {
+            SnapPoints[gate.Id] = snapPoint;
         }
     }
 

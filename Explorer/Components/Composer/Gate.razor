@@ -1,9 +1,7 @@
-@using Microsoft.Extensions.Logging
 @using Microsoft.AspNetCore.Hosting
 @using Common
 @using System.IO
 @inject IWebHostEnvironment Environment
-@inject ILogger<Gate> Logger;
 
 <div id="@Id" class="gate">
     @if (CheckIconPath())
@@ -12,7 +10,7 @@
     }
     else
     {
-        <span class="gate-name">@Id</span>
+        <span class="gate-name">@Name</span>
     }
 </div>
 
@@ -33,11 +31,6 @@
     {
         string iconPath = Path.Combine(Environment.WebRootPath, IconPath);
         return File.Exists(iconPath);
-    }
-
-    protected override void OnInitialized()
-    {
-        Logger.LogInformation("Initialized gate {0}", Id);
     }
 
 }

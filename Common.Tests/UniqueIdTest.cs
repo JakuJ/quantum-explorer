@@ -17,13 +17,13 @@ namespace Common.Tests
         }
 
         [Test]
-        public void StartsWithF()
+        public void DoesNotStartWithDigit()
         {
             const int howMany = 100;
             for (var i = 0; i < howMany; i++)
             {
                 string id = UniqueId.CreateUniqueId();
-                Assert.AreEqual('f', id[0], "Unique identifiers should begin with the character 'f'");
+                Assert.IsFalse(int.TryParse(id.Substring(0, 1), out int _), "Unique identifiers should not begin with digits");
             }
         }
     }

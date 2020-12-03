@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AngleSharp.Dom;
 using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using TestContext = Bunit.TestContext;
 
 namespace Explorer.Tests
 {
@@ -16,19 +18,15 @@ namespace Explorer.Tests
     [Parallelizable]
     public class ComposerTest
     {
-        /// <summary>
-        /// Renders the composer.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Test]
         public async Task RendersComposer()
         {
             // Arrange
-            using var ctx = new Bunit.TestContext();
+            using var ctx = new TestContext();
             ctx.Services.AddMockJSRuntime();
-            ctx.Services.TryAddScoped<ILogger<Grid>>(_ => new Mock<ILogger<Grid>>().Object);
-            ctx.Services.TryAddSingleton<IWebHostEnvironment>(_ => Helpers.GetMockEnvironment().Object);
-            var cut = ctx.RenderComponent<Composer>();
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
+            ctx.Services.TryAddSingleton(_ => Helpers.GetMockEnvironment().Object);
+            IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
 
             var grid = new GateGrid();
             grid.AddGate(0, new QuantumGate("H"));
@@ -43,7 +41,7 @@ namespace Explorer.Tests
             cut.Find(".gate-name").TextContent.MarkupMatches("H");
 
             // Check if the icon is displayed
-            var src = cut.Find("img").Attributes.GetNamedItem("src");
+            IAttr src = cut.Find("img").Attributes.GetNamedItem("src");
             Assert.AreEqual(src.Value, "images/icons/MResetZ.svg");
         }
     }

@@ -1,3 +1,9 @@
+let gridRef = null;
+
+export function setReferences(ref) {
+  gridRef = ref;
+}
+
 export function initGrids() {
   // make gates draggable
   $('.gate').draggable({
@@ -13,24 +19,18 @@ export function initGrids() {
   document.querySelectorAll('.grid-snap').forEach(
     snap => {
       $(snap).droppable({
-        accept: (_) => {
+        accept: () => {
           return !snap.classList.contains('locked');
         },
         // update associations on gate dropped
         drop: async (event, {draggable}) => {
           const gateID = draggable[0].id;
 
-          if (snap.classList.contains('locked')) {
-            console.log('Dropped on a locked snap');
-          }
-
           if (snap.classList.contains('half')) {
-            console.log('Dropped between columns, expanding');
+            await gridRef.invokeMethodAsync('Expand', gateID, snap.id);
           } else {
-            console.log('Dropped on a column, reassociating');
+            await gridRef.invokeMethodAsync('Move', gateID, snap.id);
           }
-
-          // draggable[0].style.left = '0';
         },
         tolerance: 'fit'
       });
