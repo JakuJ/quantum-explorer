@@ -79,5 +79,40 @@ namespace DatabaseHandler.Tests
             Assert.AreEqual(name, savedCode?.CodeName);
             Assert.AreEqual(false, savedCode?.Example);
         }
+
+        [Test]
+        public void ReturnsEmptyListWhenNoExamples()
+        {
+            // Arrange
+            CodeDbContext dbContext = GetCodeDbContext();
+            CodeDatabaseHandler databaseHandler = new(dbContext);
+
+            // Act
+            var list = databaseHandler.GetExamples();
+
+            // Assert
+            Assert.IsEmpty(list);
+        }
+
+        [Test]
+        public void ReturnsExamplesInDb()
+        {
+            // Arrange
+            CodeDbContext dbContext = GetCodeDbContext();
+            dbContext.CodeInformations.AddRange(
+                new CodeInformation() { CodeName = "TestName1", Code = "TestCode1", Example = true, ShareTime = DateTime.Now },
+                new CodeInformation() { CodeName = "TestName2", Code = "TestCode2", Example = true, ShareTime = DateTime.Now }
+            );
+            dbContext.SaveChanges();
+            CodeDatabaseHandler databaseHandler = new(dbContext);
+
+            // Act
+            var list = databaseHandler.GetExamples();
+
+            // Assert
+            Assert.AreEqual(2, list.Count);
+            Assert.AreEqual(("TestName1", "TestCode1"), list[0]);
+            Assert.AreEqual(("TestName2", "TestCode2"), list[1]);
+        }
     }
 }

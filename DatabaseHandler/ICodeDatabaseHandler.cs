@@ -20,5 +20,11 @@ namespace DatabaseHandler
         /// <param name="code">Saved code.</param>
         /// <returns><see cref="Guid"/> key of the code in database.</returns>
         public (string name, string code) GetCode(Guid key);
+
+        /// <summary>
+        /// Gets all codes marked as examples in database.
+        /// </summary>
+        /// <returns>List of codes and their names.</returns>
+        public List<(string name, string code)> GetExamples();
     }
 }
