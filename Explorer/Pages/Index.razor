@@ -51,6 +51,9 @@
 
     private readonly StringBuilder output = new();
 
+    private string sharedCode = null;
+    private string sharedLink = null;
+
     [Parameter]
     public Guid? LoadedCodeId { get; set; }
 
@@ -142,8 +145,11 @@
     private async Task<string> ShareCode()
     {
         string code = await Editor.GetCode();
+        if (sharedCode != null && sharedCode == code) return sharedLink;
+        sharedCode = code;
         Guid id = DatabaseHandler.SaveCode("", code);
-        return NavigationManager.BaseUri + id.ToString();
+        sharedLink = NavigationManager.BaseUri + id.ToString();
+        return sharedLink;
     }
 
 }
