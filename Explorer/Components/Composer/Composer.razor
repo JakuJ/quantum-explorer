@@ -13,11 +13,11 @@
 
     public async Task UpdateGridsAsync(Dictionary<string, GateGrid> ast)
     {
-        // force the underlying Gate component to render from scratch
+        // force the underlying Grid component to render from scratch
         gateGrid = null;
         await InvokeAsync(StateHasChanged);
 
-        gateGrid = ast.Last().Value; //GateGridToArray(ast.First().Value);
+        gateGrid = ast.Last().Value;
         await InvokeAsync(StateHasChanged);
     }
 }

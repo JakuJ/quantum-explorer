@@ -1,9 +1,7 @@
+@using Microsoft.AspNetCore.Hosting
 @using Common
 @using System.IO
-@using Microsoft.AspNetCore.Hosting
-@using Microsoft.Extensions.Logging
 @inject IWebHostEnvironment Environment
-@inject ILogger<Gate> Logger;
 
 <div id="@Id" class="gate">
     @if (CheckIconPath())
@@ -22,10 +20,7 @@
     public string Name { get; set; } = null!;
 
     [Parameter]
-    public string CellSnapPointId { get; set; } = null!;
-
-    [Parameter]
-    public Func<string, string, bool> Associate { get; set; } = null!;
+    public Action<Gate> OnDispose { get; set; }
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
@@ -34,17 +29,8 @@
     /// Checks if the proper icon exists
     private bool CheckIconPath()
     {
-        var iconPath = Path.Combine(Environment.WebRootPath, IconPath);
+        string iconPath = Path.Combine(Environment.WebRootPath, IconPath);
         return File.Exists(iconPath);
     }
 
-    protected override void OnInitialized()
-    {
-        Logger.LogInformation("Init gate {0}", Id);
-        bool res = Associate.Invoke(CellSnapPointId, Id);
-        if(res == false)
-            Logger.LogInformation("Associated successfully! snap: {} gate: {}", CellSnapPointId, Id);
-        else
-            Logger.LogWarning("Cannot associate! snap: {} gate: {}", CellSnapPointId, Id);
-    }
 }

@@ -1,22 +1,16 @@
-using System;
-
 namespace Common
 {
     /// <summary>
-    /// A class allowing for creation of unique IDs that are safe to use as the HTML 'id' properties.
+    /// A class allowing for creation of unique IDs that are safe to use as HTML 'id' properties.
     /// </summary>
     public static class UniqueId
     {
+        private static long counter;
+
         /// <summary>
         /// Returns a new, unique ID.
-        /// Due to use in HTML element identifiers, these IDs always start with a character.
         /// </summary>
-        /// <returns>A string of 32 hexadecimal digits that starts with a character 'f'.</returns>
-        public static string CreateUniqueId()
-        {
-            byte[] bytes = Guid.NewGuid().ToByteArray();
-            bytes[3] |= 0xF0;
-            return new Guid(bytes).ToString("N");
-        }
+        /// <returns>A unique id.</returns>
+        public static string CreateUniqueId() => $"_{counter++}";
     }
 }

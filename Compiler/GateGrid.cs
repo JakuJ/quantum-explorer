@@ -91,7 +91,7 @@ namespace Compiler
 
             if (grid[x][y] != null)
             {
-                grid.Insert(x, EmptyColumn());
+                InsertColumn(x);
             }
 
             grid[x][y] = gate;
@@ -109,10 +109,10 @@ namespace Compiler
         }
 
         /// <summary>Insert an empty column before the one with the provided index.</summary>
-        /// <param name="columnBefore">Index of the column directly before the inserted one.</param>
-        public void InsertColumn(int columnBefore)
+        /// <param name="columnRight">Index of the column right to the inserted one.</param>
+        public void InsertColumn(int columnRight)
         {
-            grid.Insert(columnBefore, EmptyColumn());
+            grid.Insert(columnRight, EmptyColumn());
         }
 
         /// <summary>Removes the gate at a given position.</summary>

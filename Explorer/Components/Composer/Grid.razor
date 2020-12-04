@@ -1,34 +1,24 @@
 @using Compiler
-@using Explorer.Utilities.Composer
 @using Microsoft.Extensions.Logging
-@using static Utilities.Rendering
-@using System.ComponentModel.DataAnnotations
 @inject IJSRuntime JsRuntime
 @inject ILogger<Grid> Logger;
-@inject ILogger<GridSnapAssoc> LoggerAssoc;
+@implements IDisposable
 
 <div class="grid-container">
-    @for (var y = 0; y < GateGrid.Height; y++)
+    @for (var y = 0; y < gates.GetLength(1); y++)
     {
         <div class="grid-outer-row">
-            <RowID Name=@(GateGrid.Names[y]) />
+            <RowID Name="@(GateGrid.Names[y])"/>
             <div class="grid-row">
-                <Line X1=0 X2=@(40*GateGrid.Width) />
-                @for (var x = 0; x < GateGrid.Width; x++)
+                <Line X1="0" X2="@(40 * GateGrid.Width)"/>
+                @for (var x = 0; x < gates.GetLength(0); x++)
                 {
-                    // Snap point on the cell
-                    var cellSnapPoint = new SnapPoint(AddSnapPoint, x, y);
-                    @RenderContent(cellSnapPoint)
-
                     // Snap point between the cells
-                    var halfSnapPoint = new SnapPoint(AddSnapPoint, x, y, true);
-                    @RenderContent(halfSnapPoint)
+                    <SnapPoint X="@x" Y="@y" Logger="@Logger" Half="@true" @ref="SnapRef"/>
 
-                    var localQGate = gates[x,y];
-                    var localCellSnapId = cellSnapPoint.Id;
+                    QuantumGate localQGate = gates[x, y];
 
-                    <Cell QuantumGate=@(localQGate) Associate="Associate" CellSnapPointId=@(localCellSnapId) />
-                }
+                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>                }
             </div>
         </div>
     }
@@ -39,82 +29,83 @@
     [Parameter]
     public GateGrid GateGrid { get; set; } = null!;
 
+    private Dictionary<string, SnapPoint> snapPoints = new();
+
+    private SnapPoint SnapRef
+    {
+        set => snapPoints.Add(value.Id, value);
+    }
+
     private QuantumGate[,] gates = null!;
 
-    private Dictionary<string, SnapPoint> snapPoints = new Dictionary<string, SnapPoint>();
+    private DotNetObjectReference<Grid>? reference;
 
-    private GridSnapAssoc gridSnapAssoc = null!;
-
-    private QuantumGate[,] GetGates()
+    protected override void OnInitialized()
     {
-        Logger.LogInformation("GetGates calling");
-        gridSnapAssoc.Clear();
-        snapPoints.Clear();
+        gates = RefreshGateArray();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            reference = DotNetObjectReference.Create(this);
+            await JsRuntime.InvokeVoidAsync("Library.setReferences", reference);
+        }
+
+        await JsRuntime.InvokeVoidAsync("Library.initGrids");
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        reference?.Dispose();
+    }
+
+    [JSInvokable]
+    public void Expand(string gateId, string snapId)
+    {
+        SnapPoint oldSnap = snapPoints[gateId];
+        SnapPoint newSnap = snapPoints[snapId];
+
+        Logger.LogInformation("Expanding at snap {0}", newSnap);
+
+        GateGrid.InsertColumn(newSnap.X + 1);
+        GateGrid.MoveGate(oldSnap.X + (newSnap.X < oldSnap.X ? 1 : 0), oldSnap.Y, newSnap.X + 1, newSnap.Y);
+
+        ForceRerender();
+    }
+
+    [JSInvokable]
+    public void Move(string gateId, string snapId)
+    {
+        SnapPoint oldSnap = snapPoints[gateId];
+        SnapPoint newSnap = snapPoints[snapId];
+
+        Logger.LogInformation("Moving the gate from snap {0} to snap {1}", oldSnap, newSnap);
+
+        GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
+
+        ForceRerender();
+    }
+
+    private QuantumGate[,] RefreshGateArray()
+    {
         var arr = new QuantumGate[GateGrid.Width, GateGrid.Height];
-        foreach ((var gate, int x, int y) in GateGrid.Gates)
+        foreach ((QuantumGate gate, int x, int y) in GateGrid.Gates)
         {
             arr[x, y] = gate;
         }
         return arr;
     }
 
-    protected override void OnInitialized()
+    private void ForceRerender()
     {
-        Logger.LogInformation("OnInitialized calling");
-        gridSnapAssoc = new GridSnapAssoc(LoggerAssoc, MoveGate);
-        gates = GetGates();
-    }
+        gates = new QuantumGate[gates.GetLength(0), gates.GetLength(1)];
+        StateHasChanged();
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        Logger.LogInformation("After render method calling");
-        await SetReferences();
-    }
-
-
-    private void MoveGate(string oldSnapId, string newSnapId)
-    {
-        var oldSnap = snapPoints[oldSnapId];
-        var newSnap = snapPoints[newSnapId];
-        if(oldSnap.X >= gates.GetLength(0) || oldSnap.Y >= gates.GetLength(1))
-            throw new ArgumentOutOfRangeException("Old snap does not belong to the gates grid");
-        if(newSnap.X >= gates.GetLength(0) || newSnap.Y >= gates.GetLength(1))
-            throw new ArgumentOutOfRangeException("New snap does not belong to the gates grid");
-        Logger.LogInformation("Moving the gate from {0} to {1}", oldSnap, newSnap);
-        GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
-        gates = GetGates();
+        gates = RefreshGateArray();
         StateHasChanged();
     }
 
-    private bool Associate(string snapId, string gateId) => gridSnapAssoc.Associate(snapId, gateId);
-
-    private void AddSnapPoint(SnapPoint point)
-    {
-        snapPoints.Add(point.Id, point);
-    }
-
-    /// Expand the grid by adding a new column
-    [JSInvokable]
-    public void Expand(string snapId)
-    {
-        var point = snapPoints[snapId];
-        Logger.LogInformation("Expanding at {0}", point);
-        GateGrid.InsertColumn(point.X);
-        gates = GetGates();
-        StateHasChanged();
-    }
-
-    private async Task SetReferences()
-    {
-        Logger.LogInformation("Setting the grid references");
-        await JsRuntime.InvokeVoidAsync("Library.initGrids");
-
-        // disposable !!!
-        var gridRef = DotNetObjectReference.Create(this);
-        var assocRef = DotNetObjectReference.Create(gridSnapAssoc);
-
-        await JsRuntime.InvokeVoidAsync(
-            "Library.setReferences",
-            gridRef, assocRef);
-    }
 }
