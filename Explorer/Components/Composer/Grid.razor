@@ -41,7 +41,7 @@
 
     private DotNetObjectReference<Grid>? reference;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
         gates = RefreshGateArray();
     }

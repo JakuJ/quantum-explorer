@@ -4,36 +4,44 @@
 @inject ILogger<Composer> Logger
 
 <div class="overflow-hidden" style="height: 100%">
-    <RadzenTabs Change=@OnChange style="height: inherit">
-        <Tabs>
-            @foreach (var kvp in _ast)
+    <div>
+        <ul class="nav nav-tabs">
+            @foreach (var key in _ast.Keys)
             {
-                @if(kvp.Value != null)
-                {
-                    <RadzenTabsItem Text="@(kvp.Key)" >
-                        <Grid GateGrid="@(kvp.Value)"/>
-                    </RadzenTabsItem>
-                }
+                <li class="nav-item">
+                    <a class="nav-link noselect @(selectedKey == key ? "active" : "")" @onclick="@(() => OnTabChange(key))">@key</a>
+                </li>
             }
-        </Tabs>
-    </RadzenTabs>
+        </ul>
+    </div>
+    <div class="vis-content">
+        @if (_ast.ContainsKey(selectedKey))
+        {
+            <Grid GateGrid="@(_ast[selectedKey])"/>
+        }
+    </div>
 </div>
 
 @code {
     private Dictionary<string, GateGrid> _ast = new();
 
+    private string selectedKey = "";
+
     public async Task UpdateGridsAsync(Dictionary<string, GateGrid> ast)
     {
         // force the underlying Grid component to render from scratch
         _ast.Clear();
+        selectedKey = "";
         await InvokeAsync(StateHasChanged);
 
         _ast = ast;
+        selectedKey = _ast.First().Key ?? "";
         await InvokeAsync(StateHasChanged);
     }
 
-    void OnChange(int index)
+    void OnTabChange(string key)
     {
-        Logger.LogInformation($"Tab with index {index} was selected.");
+        selectedKey = key;
+        Logger.LogInformation($"Tab with key {key} was selected.");
     }
 }
