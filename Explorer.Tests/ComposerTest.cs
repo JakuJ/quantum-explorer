@@ -5,7 +5,6 @@ using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
 using Explorer.Components.Composer;
-using Explorer.Utilities.Composer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
