@@ -123,7 +123,7 @@ namespace Explorer.Tests
 
                 if (addAsChild)
                 {
-                    states[^1].AddOperation(operation);
+                    states[^1].Children.Add(operation);
                 }
                 else
                 {

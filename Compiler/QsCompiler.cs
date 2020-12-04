@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AstTransformations;
 using Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,36 +27,38 @@ namespace Compiler
         private static string[]? csharpReferences;
         private static References? cachedRefs;
 
-        private readonly ILogger<QsCompiler> logger;
+        private readonly ILogger logger;
         private readonly string filename = $"__{UniqueId.CreateUniqueId()}__.qs";
-        private readonly List<FilesEmittedArgs> eventQueue = new();
 
         private static void InitializeReferences()
         {
             // necessary references to compile our Q# program
             qsharpReferences ??= new[]
-            {
-                "Microsoft.Quantum.Standard",
-                "Microsoft.Quantum.QSharp.Core",
-                "Microsoft.Quantum.Runtime.Core",
-            }.Select(x => Assembly.Load(new AssemblyName(x))).Select(a => a.Location).ToArray();
+                {
+                    "Microsoft.Quantum.Standard",
+                    "Microsoft.Quantum.QSharp.Core",
+                    "Microsoft.Quantum.Runtime.Core",
+                }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
+                 .ToArray();
 
             // necessary references to compile C# simulation of the Q# compilation
             csharpReferences ??= new[]
-            {
-                "Microsoft.Quantum.Simulators",
-                "Microsoft.Quantum.EntryPointDriver",
-                "System.CommandLine",
-                "System.Runtime",
-                "netstandard",
-                "System.Collections.Immutable",
-                typeof(object).Assembly.FullName,
-            }.Select(x => Assembly.Load(new AssemblyName(x!))).Select(a => a.Location).Concat(qsharpReferences).ToArray();
+                {
+                    "Microsoft.Quantum.Simulators",
+                    "Microsoft.Quantum.EntryPointDriver",
+                    "System.CommandLine",
+                    "System.Runtime",
+                    "netstandard",
+                    "System.Collections.Immutable",
+                    typeof(object).Assembly.FullName!, // never null
+                }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
+                 .Concat(qsharpReferences)
+                 .ToArray();
         }
 
         /// <summary>Initializes a new instance of the <see cref="QsCompiler"/> class.</summary>
-        /// <param name="logger">A <see cref="Logger"/> instance to log compilation messages with.</param>
-        public QsCompiler(ILogger<QsCompiler> logger)
+        /// <param name="logger">An <see cref="ILogger"/> instance to log compilation messages with.</param>
+        public QsCompiler(ILogger logger)
         {
             this.logger = logger;
             InitializeReferences();
@@ -65,7 +68,7 @@ namespace Compiler
         public event EventHandler<string>? OnDiagnostics;
 
         /// <inheritdoc/>
-        public event EventHandler<QsCompilation>? OnCompilation;
+        public event EventHandler<Dictionary<string, GateGrid>>? OnGrids;
 
         /// <inheritdoc/>
         public event EventHandler<string>? OnOutput;
@@ -73,8 +76,7 @@ namespace Compiler
         /// <inheritdoc/>
         public event EventHandler<List<OperationState>>? OnStatesRecorded;
 
-        /// <inheritdoc/>
-        public QsCompilation? Compilation { get; private set; }
+        private QsCompilation? Compilation { get; set; }
 
         /// <inheritdoc/>
         public async Task Compile(string qsharpCode)
@@ -82,26 +84,17 @@ namespace Compiler
             // do we have an uncommented @EntryPoint?
             bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
 
-            // to load our custom rewrite step, we need to point Q# compiler config at our current assembly
+            // to load our custom rewrite step, we need to point Q# compiler config at the rewrite step
+            InMemoryEmitter emitter = new();
             var config = new CompilationLoader.Configuration
             {
                 IsExecutable = execute,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
-                RewriteStepAssemblies = new (string, string?)[]
+                RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
-                    (Assembly.GetExecutingAssembly().Location, null),
+                    (emitter, null),
                 },
             };
-
-            // set up a handler to intercept generated C# code
-            void Handler(object? sender, FilesEmittedArgs args)
-            {
-                eventQueue.Add(args);
-            }
-
-            eventQueue.Clear();
-
-            InMemoryEmitter.FilesGenerated += Handler;
 
             // compile Q# code
             CompilationLoader? compilationLoader;
@@ -121,13 +114,12 @@ namespace Compiler
                     // Bond DLL deserialization throws this from QDK v0.13.* onwards when IsExecutable is true but the user provides no @EntryPoint
                     // We have unit tests assuring that this should never happen
                     // This try/catch block exists just to be extra safe
-                    logger.LogError($"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
+                    logger.LogError(
+                        $"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
                     OnDiagnostics?.Invoke(this, "No entry point operation specified.\nDecorate the main method with the @EntryPoint attribute.");
                     return;
                 }
             }
-
-            InMemoryEmitter.FilesGenerated -= Handler;
 
             // print any diagnostics
             ImmutableArray<Diagnostic> diags = compilationLoader.LoadDiagnostics;
@@ -147,23 +139,15 @@ namespace Compiler
             // communicate that the Q# compilation was successful
             Compilation = compilationLoader.CompilationOutput;
 
+            Dictionary<string, GateGrid> grids = FromQSharp.GetGates(Compilation);
+            if (Compilation != null && grids.Count > 0)
+            {
+                OnGrids?.Invoke(this, grids);
+            }
+
             if (Compilation == null || !execute)
             {
                 OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
-                return;
-            }
-
-            // report that the compilation succeeded
-            OnCompilation?.Invoke(this, Compilation);
-
-            // find our generated files
-            Dictionary<string, string>? generatedFiles = (from args in eventQueue
-                                                          where args.CompilationHash == Compilation.GetHashCode()
-                                                          select args.FileContents).FirstOrDefault();
-
-            if (generatedFiles == null)
-            {
-                logger.LogError("Couldn't find generated files in the event queue");
                 return;
             }
 
@@ -171,7 +155,7 @@ namespace Compiler
             using (new ScopedTimer("Compiling C# driver code", logger))
             {
                 // we captured the emitted C# syntax trees into a static variable in the rewrite step
-                IEnumerable<SyntaxTree> syntaxTrees = generatedFiles.Select(x => CSharpSyntaxTree.ParseText(x.Value));
+                IEnumerable<SyntaxTree> syntaxTrees = emitter.FileContents.Select(x => CSharpSyntaxTree.ParseText(x.Value));
 
                 // compile C# code
                 // make sure to pass in the C# references as Roslyn's metadata references
@@ -182,7 +166,7 @@ namespace Compiler
             // print any diagnostics
             var csharpDiagnostics = csharpCompilation
                                    .GetDiagnostics()
-                                   .Where(d => d is { Severity: not Hidden, Id: not "CS1701" or "CS1702" })
+                                   .Where(d => d is { Severity: not Hidden, Id: not "CS1701" and not "CS1702" })
                                    .ToList();
             if (csharpDiagnostics.Any())
             {

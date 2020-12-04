@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using Common;
 
-namespace Compiler
+namespace Common
 {
     /// <summary>Represents a grid of quantum gates.</summary>
     public class GateGrid

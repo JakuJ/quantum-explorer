@@ -11,11 +11,6 @@ import {v4 as uuidv4} from 'uuid';
 
 //#region Constants
 
-// Websocket connection
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const PRODUCTION_HOST = 'qexplorer-ls.herokuapp.com';
-const WEBSOCKET_ENDPOINT = 'monaco-editor';
-
 // Custom editor theme identifiers
 const LIGHT_THEME_NAME = 'vs-code-custom-light-theme';
 const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
@@ -23,8 +18,9 @@ const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 // URIs for the language server
 const UUID = uuidv4();
 const WORKSPACE_NAME = `${UUID}-workspace`;
-const WORKSPACE_URI = monaco.Uri.parse(`file://${process.env.TEMP_DIR}/qsharp/${WORKSPACE_NAME}`);
-const FILE_URI = monaco.Uri.parse(`file://${process.env.TEMP_DIR}/qsharp/${WORKSPACE_NAME}/_content_.qs`);
+const TEMP_DIR = '/tmp';
+const WORKSPACE_URI = monaco.Uri.parse(`file://${TEMP_DIR}/qsharp/${WORKSPACE_NAME}`);
+const FILE_URI = monaco.Uri.parse(`file://${TEMP_DIR}/qsharp/${WORKSPACE_NAME}/_content_.qs`);
 const LANGUAGE_ID = 'qsharp';
 
 // Paths to files in the syntax directory
@@ -69,7 +65,7 @@ let statusRef = null;
 export class Editor {
 
   // Setup the Q# editor and establish a connection to the language server if possible
-  static async InitializeEditor(element) {
+  static async InitializeEditor(element, server_url, is_development) {
     element.innerHTML = '';
 
     window.editorsDict = window.editorsDict || {};
@@ -140,10 +136,8 @@ export class Editor {
     });
 
     // create the web socket
-    const url = IS_PRODUCTION
-      ? `wss://${PRODUCTION_HOST}/${WEBSOCKET_ENDPOINT}`
-      : `ws://localhost:8091/${WEBSOCKET_ENDPOINT}`;
-    const webSocket = createWebSocket(url);
+    const url = `${server_url}/monaco-editor`;
+    const webSocket = createWebSocket(url, is_development);
 
     // listen when the web socket is opened
     listen({
@@ -161,7 +155,7 @@ export class Editor {
 
         con.onLogMessage(async ({message}) => {
           // log detailed LS connection messages outside production
-          if (!IS_PRODUCTION) {
+          if (is_development) {
             console.log(message);
           }
 
@@ -220,14 +214,14 @@ function getThemeName() {
   return localStorage.getItem('theme') === 'dark' ? DARK_THEME_NAME : LIGHT_THEME_NAME;
 }
 
-function createWebSocket(url) {
+function createWebSocket(url, is_development) {
   const socketOptions = {
     maxReconnectionDelay: 10000,
     minReconnectionDelay: 1000,
     reconnectionDelayGrowFactor: 1.3,
     connectionTimeout: 10000,
     maxRetries: Infinity,
-    debug: !IS_PRODUCTION,
+    debug: is_development,
   };
   return new ReconnectingWebSocket(url, [], socketOptions);
 }

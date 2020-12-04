@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
+    <ProjectReference Include="..\Compiler.AzureFunction\Compiler.AzureFunction.csproj" />
     <ProjectReference Include="..\Compiler\Compiler.csproj" />
   </ItemGroup>
 
@@ -20,6 +21,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
     <PackageReference Include="Radzen.Blazor" Version="2.16.0" />
   </ItemGroup>
 

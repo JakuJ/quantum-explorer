@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
 
-namespace Compiler
+namespace Common
 {
     /// <inheritdoc />
     /// <summary>A simplified representation of a quantum gate meant to be used in the compositor.</summary>

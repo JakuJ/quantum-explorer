@@ -2,7 +2,6 @@
 @using System.Text
 @using Microsoft.Extensions.Logging
 @using Compiler
-@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -51,17 +50,18 @@
 
         Compiler.OnDiagnostics += diagnosticsHandler;
         Compiler.OnOutput += outputHandler;
-        Compiler.OnCompilation += compilationHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
     }
 
     /// <summary>On-click handler for the compilation button.</summary>
     private async Task OnCompile()
     {
+        if (progress.Running) return;
+
         await toggleCompilation(true);
         output.Clear();
 
-        Visualizer.SetPlaceholder("Compiling");
+        Visualizer.SetPlaceholder("Processing...");
 
         string code = await Editor.GetCode();
 
@@ -71,7 +71,7 @@
                 async t =>
                 {
                     await toggleCompilation(false);
-                    string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
+                    var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
                     Visualizer.SetOutput(messages);
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
@@ -85,18 +85,9 @@
         if (!firstRender) return;
 
         await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
-        await Editor.SetStatusReference(status);
     }
 
     #region Compilation event handlers
-
-    private void compilationHandler(object _, QsCompilation compilation)
-    {
-        if (output.Length == 0) // no diagnostics
-        {
-            Visualizer.SetPlaceholder("Executing");
-        }
-    }
 
     private async void diagnosticsHandler(object _, string val)
     {

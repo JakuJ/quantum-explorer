@@ -1,6 +1,7 @@
 using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -17,12 +18,12 @@ namespace Explorer.Tests
         private static TestContext InitializeContext()
         {
             TestContext ctx = new();
+
             ctx.Services.AddMockJSRuntime();
-
-            // Mock the compiler
             ctx.Services.AddSingleton(_ => Mock.Of<ICompiler>());
-
+            ctx.Services.AddSingleton(_ => Mock.Of<IWebHostEnvironment>());
             ctx.Services.AddLogging(builder => builder.AddConsole());
+
             return ctx;
         }
 

@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "Common.Test
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AstTransformations", "AstTransformations\AstTransformations.fsproj", "{63DA55C3-0DEF-4503-9913-C42456CA7C98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler.AzureFunction", "Compiler.AzureFunction\Compiler.AzureFunction.csproj", "{2FB8101F-D164-4BE5-AB4B-9E51C1D47D64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -50,6 +52,10 @@ Global
 		{63DA55C3-0DEF-4503-9913-C42456CA7C98}.Debug|x64.Build.0 = Debug|Any CPU
 		{63DA55C3-0DEF-4503-9913-C42456CA7C98}.Release|x64.ActiveCfg = Release|Any CPU
 		{63DA55C3-0DEF-4503-9913-C42456CA7C98}.Release|x64.Build.0 = Release|Any CPU
+		{2FB8101F-D164-4BE5-AB4B-9E51C1D47D64}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2FB8101F-D164-4BE5-AB4B-9E51C1D47D64}.Debug|x64.Build.0 = Debug|Any CPU
+		{2FB8101F-D164-4BE5-AB4B-9E51C1D47D64}.Release|x64.ActiveCfg = Release|Any CPU
+		{2FB8101F-D164-4BE5-AB4B-9E51C1D47D64}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
