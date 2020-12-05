@@ -18,6 +18,12 @@
     public async Task<string> GetCode()
     => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
 
+    /// <summary>Asynchronously sets code in Editor component.</summary>
+    /// <param name="code">Code to be set</param>
+    /// <returns>An awaitable <see cref="Task"/>.</returns>
+    public async Task SetCode(string code)
+    => await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code).AsTask();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

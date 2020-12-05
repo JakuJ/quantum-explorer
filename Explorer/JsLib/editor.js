@@ -200,6 +200,11 @@ export class Editor {
     return window.editorsDict[id].getValue();
   }
 
+  // Set code  in the editor
+  static SetCode(id, code) {
+    return window.editorsDict[id].setValue(code);
+  }
+
   // Save the reference to the LS connection status component
   static SetStatusReference(ref) {
     statusRef = ref;
