@@ -16,7 +16,7 @@
 <div class="main">
     <div class="top-row px-4">
         <Toasts />
-        <ExamplesDropdown/>
+        <ExamplesDropdown OnSelected="@(code => Editor.SetCode(code))"/>
         <ShareButton GetSaveLink="ShareCode"></ShareButton>
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
         <LsStatus/>
