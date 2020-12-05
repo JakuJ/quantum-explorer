@@ -1,0 +1,47 @@
+@using DatabaseHandler
+@inject ICodeDatabaseHandler DatabaseHandler;
+
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button"
+            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false" @onclick="OnClick">
+        Dropdown button
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        @if (items == null)
+        {
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in items)
+            {
+                <a class="dropdown-item" @onclick="@(()=>OnPicked(item.code))">@item.name</a>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Action<string>? OnSelected { get; set; } = null;
+
+    List<(string name, string code)>? items;
+
+    private void OnClick()
+    {
+        items = DatabaseHandler.GetExamples();
+    }
+
+    private void OnPicked(string code)
+    {
+        if(OnSelected!= null)
+        {
+            OnSelected.Invoke(code);
+        }
+    }
+}

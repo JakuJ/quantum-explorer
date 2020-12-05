@@ -4,14 +4,16 @@ using DatabaseHandler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DatabaseHandler.Migrations
 {
     [DbContext(typeof(CodeDbContext))]
-    partial class CodeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201205003356_Initialize")]
+    partial class Initialize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,24 +42,6 @@ namespace DatabaseHandler.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CodeInformations");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("29a1a908-0690-49ee-a1b0-fc214bb277c7"),
-                            Code = "CodeFor1",
-                            CodeName = "Code1",
-                            Example = true,
-                            ShareTime = new DateTime(2020, 12, 5, 1, 56, 29, 63, DateTimeKind.Local).AddTicks(5511)
-                        },
-                        new
-                        {
-                            Id = new Guid("e09144d9-cb21-4461-938b-f8d4e1feaa20"),
-                            Code = "CodeFor2",
-                            CodeName = "Code2",
-                            Example = true,
-                            ShareTime = new DateTime(2020, 12, 5, 1, 56, 29, 65, DateTimeKind.Local).AddTicks(7235)
-                        });
                 });
 #pragma warning restore 612, 618
         }
