@@ -203,6 +203,27 @@ namespace Common
             }
         }
 
+        /// <summary>Remove empty rows (qubits) from the grid.</summary>
+        public void RemoveEmptyRows()
+        {
+            int[] indices = Names
+                           .Enumerate()
+                           .Where(x => x.Item == null)
+                           .Select(x => x.Index)
+                           .Reverse()
+                           .ToArray();
+
+            Names.RemoveAll(x => x == null);
+
+            foreach (var column in grid)
+            {
+                foreach (int index in indices)
+                {
+                    column.RemoveAt(index);
+                }
+            }
+        }
+
         /// <inheritdoc/>
         [ExcludeFromCodeCoverage] // Reason: used as a placeholder until the Compositor is done
         public override string ToString()

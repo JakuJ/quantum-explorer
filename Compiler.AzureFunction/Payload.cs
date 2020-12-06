@@ -15,7 +15,7 @@ namespace Compiler.AzureFunction
         public string? Diagnostics { get; set; }
 
         /// <summary>Gets or sets GateGrids extracted from the compilation.</summary>
-        public Dictionary<string, GateGrid>? Grids { get; set; }
+        public Dictionary<string, List<GateGrid>>? Grids { get; set; }
 
         /// <summary>Gets or sets quantum states intercepted during the simulation.</summary>
         public List<OperationState>? States { get; set; }

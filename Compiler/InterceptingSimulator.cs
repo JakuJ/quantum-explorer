@@ -30,7 +30,7 @@ namespace Compiler
         /// <summary>
         /// Gets the GateGrids constructed by tracing operation applications in this simulator.
         /// </summary>
-        public Dictionary<string, GateGrid> Grids { get; } = new();
+        public Dictionary<string, List<GateGrid>> Grids { get; } = new();
 
         /// <summary>
         /// Gets the messages intercepted during simulation.
@@ -50,8 +50,9 @@ namespace Compiler
             // Get qubits affected by this operation
             Qubit[]? qubits = data.Qubits?.ToArray();
 
-            if (qubits != null && Grids.TryGetValue(currentOperation.Peek(), out var grid))
+            if (qubits != null && Grids.TryGetValue(currentOperation.Peek(), out var grids))
             {
+                GateGrid grid = grids.Last();
                 int x = grid.Width;
 
                 foreach ((int index, var qubit) in qubits.Enumerate())
@@ -66,6 +67,9 @@ namespace Compiler
 
         private void EndOperationCallHandler(ICallable op, IApplyData data)
         {
+            // Remove unnecessary qubits
+            Grids.GetValueOrDefault(currentOperation.Peek())?.Last().RemoveEmptyRows();
+
             currentOperation.Pop();
         }
 
@@ -74,10 +78,17 @@ namespace Compiler
             // Set current operation
             currentOperation.Push(op);
 
-            if (!Grids.ContainsKey(op) && (!skipIntrinsic || !op.StartsWith("Microsoft.Quantum")))
+            if (skipIntrinsic && op.StartsWith("Microsoft.Quantum"))
             {
-                Grids.Add(op, new GateGrid());
+                return;
             }
+
+            if (!Grids.ContainsKey(op))
+            {
+                Grids.Add(op, new List<GateGrid>());
+            }
+
+            Grids[op].Add(new GateGrid());
         }
 
         /// <summary>The overriding definition for the Message operation.</summary>

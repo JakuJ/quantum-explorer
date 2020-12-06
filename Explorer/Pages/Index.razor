@@ -51,13 +51,16 @@
         Compiler.OnDiagnostics += diagnosticsHandler;
         Compiler.OnOutput += outputHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
-        Compiler.OnGrids += async (_, grids) =>
+        Compiler.OnGrids += async (_, s) =>
         {
             StringBuilder builder = new();
-            foreach ((string op, GateGrid grid) in grids)
+            foreach ((string op, List<GateGrid> grids) in s)
             {
                 builder.AppendLine(op);
-                builder.AppendLine(grid.ToString());
+                foreach (GateGrid grid in grids)
+                {
+                    builder.AppendLine(grid.ToString());
+                }
             }
             await Compositor.SetText(builder.ToString());
         };

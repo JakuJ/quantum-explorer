@@ -67,7 +67,7 @@ namespace Compiler
         public event EventHandler<string>? OnDiagnostics;
 
         /// <inheritdoc/>
-        public event EventHandler<Dictionary<string, GateGrid>>? OnGrids;
+        public event EventHandler<Dictionary<string, List<GateGrid>>>? OnGrids;
 
         /// <inheritdoc/>
         public event EventHandler<string>? OnOutput;
@@ -213,7 +213,11 @@ namespace Compiler
 
                 OnOutput?.Invoke(this, sim.Messages);
                 OnStatesRecorded?.Invoke(this, recorder.Root.Children);
-                OnGrids?.Invoke(this, sim.Grids);
+
+                if (sim.Grids.Count > 0)
+                {
+                    OnGrids?.Invoke(this, sim.Grids);
+                }
             }
             else
             {

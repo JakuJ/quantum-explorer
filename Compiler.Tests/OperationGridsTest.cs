@@ -9,18 +9,18 @@ namespace Compiler.Tests
 {
     [TestFixture]
     [Parallelizable]
-    public class AstTransformationsTest
+    public class OperationGridsTest
     {
         private static class DeclarationSources
         {
             internal static object[] Sources => new object[]
             {
-                new object[] { "Library", new[] { "RandomBit", "RandomInt" } },
-                new object[] { "MultipleOperations", new[] { "EntanglePair", "IdentityGate", "NoOp", "RandomBit" } },
+                new object[] { "Library", new[] { "Main", "RandomBit", "RandomInt" } },
+                new object[] { "MultipleOperations", new[] { "Main", "EntanglePair", "IdentityGate", "NoOp", "RandomBit" } },
                 new object[]
                 {
                     "AllocatedQubitOps",
-                    new[] { "AllocateFive", "AllocateFiveAndApplyGates", "AllocateOne", "AllocateOneAndApplyGates", "Tuples" },
+                    new[] { "Main", "AllocateFive", "AllocateFiveAndApplyGates", "AllocateOne", "AllocateOneAndApplyGates", "Tuples" },
                 },
             };
         }
@@ -230,7 +230,7 @@ namespace Compiler.Tests
             await compiler.Compile(code);
 
             // Assert
-            Assert.AreEqual(qualifiedNames, gates.Keys.ToArray(), "All declared operations should be listed.");
+            Assert.AreEqual(qualifiedNames.ToHashSet(), gates.Keys.ToHashSet(), "All declared operations should be listed.");
         }
 
         [Test]
