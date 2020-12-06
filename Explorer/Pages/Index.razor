@@ -1,5 +1,6 @@
 @page "/"
 @using System.Text
+@using Common
 @using Microsoft.Extensions.Logging
 @using Compiler
 @inject IJSRuntime JsRuntime;
@@ -10,7 +11,7 @@
     <div class="top-row px-4">
         <Toasts/>
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
-        <LsStatus @ref="status"/>
+        <LsStatus/>
         <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
     </div>
     <Progress @ref="progress"></Progress>
@@ -38,7 +39,6 @@
     private Compositor Compositor;
     private Visualizer Visualizer;
 
-    private LsStatus status;
     private Progress progress;
     private ElementReference compileButtonRef;
 
@@ -51,6 +51,16 @@
         Compiler.OnDiagnostics += diagnosticsHandler;
         Compiler.OnOutput += outputHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
+        Compiler.OnGrids += async (_, grids) =>
+        {
+            StringBuilder builder = new();
+            foreach ((string op, GateGrid grid) in grids)
+            {
+                builder.AppendLine(op);
+                builder.AppendLine(grid.ToString());
+            }
+            await Compositor.SetText(builder.ToString());
+        };
     }
 
     /// <summary>On-click handler for the compilation button.</summary>

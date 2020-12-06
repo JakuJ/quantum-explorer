@@ -1,1 +1,13 @@
-<div class="vis-placeholder">This is where the composer will be</div>
+<textarea>@text</textarea>
+
+@code {
+
+    private string text = "This is where the composer will be";
+
+    public async Task SetText(string t)
+    {
+        text = t;
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using AstTransformations;
 using Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -139,12 +138,6 @@ namespace Compiler
             // communicate that the Q# compilation was successful
             Compilation = compilationLoader.CompilationOutput;
 
-            Dictionary<string, GateGrid> grids = FromQSharp.GetGates(Compilation);
-            if (Compilation != null && grids.Count > 0)
-            {
-                OnGrids?.Invoke(this, grids);
-            }
-
             if (Compilation == null || !execute)
             {
                 OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
@@ -220,6 +213,7 @@ namespace Compiler
 
                 OnOutput?.Invoke(this, sim.Messages);
                 OnStatesRecorded?.Invoke(this, recorder.Root.Children);
+                OnGrids?.Invoke(this, sim.Grids);
             }
             else
             {

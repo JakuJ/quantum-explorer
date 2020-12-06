@@ -69,6 +69,12 @@ input.rename-input {
   border-color: transparent transparent var(--accent) transparent;
 }
 
+/* Composer */
+
+textarea {
+  resize: both !important; /* TODO: Remove*/
+}
+
 /* Visualizer */
 
 .visualizer {
