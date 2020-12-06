@@ -268,7 +268,7 @@ module FromQSharp =
                         qubitIDs
                         |> List.zip [ 0 .. qubitIDs.Length - 1 ]
                         |> List.collect (fun (i, (refs, isArr)) ->
-                            List.map (fun ref -> (ref, QuantumGate(name, ns, i, isArr, lhs))) refs)
+                            List.map (fun ref -> (ref, QuantumGate(name, ns, i))) refs)
 
                     this.SharedState.GateQueue <- this.SharedState.GateQueue @ [ columnsToAdd ]
 

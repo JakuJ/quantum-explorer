@@ -14,6 +14,7 @@ namespace Compiler
         private readonly bool skipIntrinsic;
         private readonly StringBuilder funnel = new();
         private readonly Stack<string> currentOperation = new();
+        private readonly Dictionary<string, List<GateGrid>> grids = new();
 
         /// <inheritdoc cref="QuantumSimulator"/>
         /// <summary>
@@ -28,14 +29,25 @@ namespace Compiler
         }
 
         /// <summary>
-        /// Gets the GateGrids constructed by tracing operation applications in this simulator.
-        /// </summary>
-        public Dictionary<string, List<GateGrid>> Grids { get; } = new();
-
-        /// <summary>
         /// Gets the messages intercepted during simulation.
         /// </summary>
         public string Messages => funnel.ToString();
+
+        /// <summary>
+        /// Gets the GateGrids constructed by tracing operation applications in this simulator.
+        /// </summary>
+        /// <returns>A dictionary mapping operation names to a list of gate grids.</returns>
+        public Dictionary<string, List<GateGrid>> GetGrids()
+        {
+            Dictionary<string, List<GateGrid>> ret = new();
+
+            foreach ((string op, List<GateGrid> gridList) in grids)
+            {
+                ret.Add(op, gridList.ToHashSet().ToList());
+            }
+
+            return ret;
+        }
 
         private static void OnAllocate(IQArray<Qubit> qubits)
         {
@@ -50,7 +62,7 @@ namespace Compiler
             // Get qubits affected by this operation
             Qubit[]? qubits = data.Qubits?.ToArray();
 
-            if (qubits != null && Grids.TryGetValue(currentOperation.Peek(), out var grids))
+            if (qubits != null && this.grids.TryGetValue(currentOperation.Peek(), out var grids))
             {
                 GateGrid grid = grids.Last();
                 int x = grid.Width;
@@ -68,7 +80,7 @@ namespace Compiler
         private void EndOperationCallHandler(ICallable op, IApplyData data)
         {
             // Remove unnecessary qubits
-            Grids.GetValueOrDefault(currentOperation.Peek())?.Last().RemoveEmptyRows();
+            grids.GetValueOrDefault(currentOperation.Peek())?.Last().RemoveEmptyRows();
 
             currentOperation.Pop();
         }
@@ -83,12 +95,12 @@ namespace Compiler
                 return;
             }
 
-            if (!Grids.ContainsKey(op))
+            if (!grids.ContainsKey(op))
             {
-                Grids.Add(op, new List<GateGrid>());
+                grids.Add(op, new List<GateGrid>());
             }
 
-            Grids[op].Add(new GateGrid());
+            grids[op].Add(new GateGrid());
         }
 
         /// <summary>The overriding definition for the Message operation.</summary>

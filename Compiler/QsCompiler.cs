@@ -214,9 +214,11 @@ namespace Compiler
                 OnOutput?.Invoke(this, sim.Messages);
                 OnStatesRecorded?.Invoke(this, recorder.Root.Children);
 
-                if (sim.Grids.Count > 0)
+                Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
+
+                if (grids.Count > 0)
                 {
-                    OnGrids?.Invoke(this, sim.Grids);
+                    OnGrids?.Invoke(this, grids);
                 }
             }
             else

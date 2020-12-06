@@ -45,9 +45,9 @@ namespace Common
                     for (var x = 0; x < Width; x++)
                     {
                         QuantumGate? gate = grid[x][y];
-                        if (gate != null)
+                        if (gate.HasValue)
                         {
-                            yield return (gate, x, y);
+                            yield return (gate.Value, x, y);
                         }
                     }
                 }
@@ -121,7 +121,7 @@ namespace Common
 
             QuantumGate? gate = grid[x][y];
 
-            if (gate == null)
+            if (!gate.HasValue)
             {
                 throw new ArgumentException($"There is no gate at location ({x}, {y})");
             }
@@ -130,27 +130,23 @@ namespace Common
 
             if (moving)
             {
-                return gate;
+                return gate.Value;
             }
 
             // Remove all other gates of the same operation if this one was not part of an array
-            if (!gate.ArgArray)
+            for (x = 0; x < Width; x++)
             {
-                for (x = 0; x < Width; x++)
+                for (y = 0; y < Height; y++)
                 {
-                    for (y = 0; y < Height; y++)
+                    if (gate.Value.SameOperation(grid[x][y]))
                     {
-                        if (gate.SameOperation(grid[x][y]))
-                        {
-                            grid[x][y] = null;
-                        }
+                        grid[x][y] = null;
                     }
                 }
             }
 
             Shrink();
-
-            return gate;
+            return gate.Value;
         }
 
         /// <summary>
@@ -238,15 +234,9 @@ namespace Common
                     builder.Append(' ');
 
                     QuantumGate? gate = grid[x][y];
-                    if (gate != null)
+                    if (gate.HasValue)
                     {
-                        builder.Append($"[{gate.Name} arg{gate.ArgIndex}");
-                        if (gate.ArgArray)
-                        {
-                            builder.Append(" A");
-                        }
-
-                        builder.Append(']');
+                        builder.Append($"[{gate.Value.Name} arg{gate.Value.ArgIndex}]");
                     }
                     else
                     {
@@ -258,6 +248,35 @@ namespace Common
             }
 
             return builder.ToString();
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
+        {
+            if (obj is GateGrid other)
+            {
+                return Names.SequenceEqual(other.Names) && Gates.SequenceEqual(other.Gates);
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = Names.Aggregate(19, (current, foo) => current * 31 + foo?.GetHashCode() ?? 0);
+
+                foreach ((QuantumGate a, int b, int c) in Gates)
+                {
+                    hash = hash * 31 + a.GetHashCode();
+                    hash = hash * 31 + b.GetHashCode();
+                    hash = hash * 31 + c.GetHashCode();
+                }
+
+                return hash;
+            }
         }
 
         private bool BoundsCheck(int x, int y)
