@@ -26,5 +26,10 @@ namespace DatabaseHandler
         /// </summary>
         /// <returns>List of codes and their names.</returns>
         public List<(string name, string code)> GetExamples();
+
+        /// <summary>
+        /// Checks if database is available.
+        /// </summary>
+        public bool CheckConnection();
     }
 }
