@@ -18,8 +18,8 @@
         <Toasts />
         @if (DatabaseHandler.CheckConnection())
         {
-            <ExamplesDropdown OnSelected="@(code => Editor.SetCode(code))" />
-            <ShareButton GetSaveLink="ShareCode"></ShareButton>
+            <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" />
+            <ShareButton GetCode="@(() => Editor.GetCode())"></ShareButton>
         }
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
         <LsStatus/>
@@ -54,9 +54,6 @@
     private ElementReference compileButtonRef;
 
     private readonly StringBuilder output = new();
-
-    private string sharedCode = null;
-    private string sharedLink = null;
 
     [Parameter]
     public Guid? LoadedCodeId { get; set; }
@@ -144,16 +141,6 @@
             return code;
         }
         return null;
-    }
-
-    private async Task<string> ShareCode()
-    {
-        string code = await Editor.GetCode();
-        if (sharedCode != null && sharedCode == code) return sharedLink;
-        sharedCode = code;
-        Guid id = DatabaseHandler.SaveCode("", code);
-        sharedLink = NavigationManager.BaseUri + id.ToString();
-        return sharedLink;
     }
 
 }

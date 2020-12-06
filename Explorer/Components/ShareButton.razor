@@ -1,4 +1,7 @@
+@using DatabaseHandler
 @inject IJSRuntime JsRuntime;
+@inject ICodeDatabaseHandler DatabaseHandler;
+@inject NavigationManager NavigationManager;
 
 <div>
     <button class="bar-btn" id="popoverShareButton" @onclick="OnClicked">Share</button>
@@ -13,14 +16,21 @@
 
 @code {
     [Parameter]
-    public Func<Task<string>>? GetSaveLink { get; set; }
+    public Func<Task<string>>? GetCode { get; set; }
 
-    string link = "";
+    string sharedLink = "";
+    string? sharedCode = null;
 
     private async Task OnClicked()
     {
-        if (GetSaveLink == null) return;
-        link = await GetSaveLink.Invoke();
-        await JsRuntime.InvokeVoidAsync("Library.showSharePopOver", link);
+        if (GetCode == null) return;
+        string code = await GetCode.Invoke();
+        if (sharedCode == null || sharedCode != code)
+        {
+            sharedCode = code;
+            Guid id = DatabaseHandler.SaveCode("", code);
+            sharedLink = NavigationManager.BaseUri + id.ToString();
+        }
+        await JsRuntime.InvokeVoidAsync("Library.showSharePopOver", sharedLink);
     }
 }
