@@ -2,10 +2,10 @@
 @inject ICodeDatabaseHandler DatabaseHandler;
 
 <div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button"
+    <button class="bar-btn dropdown-toggle" type="button"
             id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
             aria-expanded="false" @onclick="OnClick">
-        Dropdown button
+        Examples
     </button>
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
         @if (items == null)
@@ -20,7 +20,7 @@
         {
             @foreach (var item in items)
             {
-                <a class="dropdown-item" @onclick="@(()=>OnPicked(item.code))">@item.name</a>
+                <a class="dropdown-item noselect" @onclick="@(()=>OnPicked(item.code))">@item.name</a>
             }
         }
     </div>

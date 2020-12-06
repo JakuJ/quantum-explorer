@@ -211,7 +211,7 @@ select:focus {
 
 /*share button*/
 
-.share-btn {
+.bar-btn {
     margin: auto 10px;
     padding: 0.25rem;
     background: var(--surface);

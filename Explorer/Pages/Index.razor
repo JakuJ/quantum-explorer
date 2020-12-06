@@ -16,8 +16,11 @@
 <div class="main">
     <div class="top-row px-4">
         <Toasts />
-        <ExamplesDropdown OnSelected="@(code => Editor.SetCode(code))"/>
-        <ShareButton GetSaveLink="ShareCode"></ShareButton>
+        @if (DatabaseHandler.CheckConnection())
+        {
+            <ExamplesDropdown OnSelected="@(code => Editor.SetCode(code))" />
+            <ShareButton GetSaveLink="ShareCode"></ShareButton>
+        }
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
         <LsStatus/>
         <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
@@ -135,7 +138,7 @@
 
     private string? GetCodeFromDatabse()
     {
-        if (LoadedCodeId != null)
+        if (LoadedCodeId != null && DatabaseHandler.CheckConnection())
         {
             (string _, string code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
             return code;
