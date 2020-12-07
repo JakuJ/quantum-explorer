@@ -17,9 +17,14 @@ namespace Explorer
     [ExcludeFromCodeCoverage]
     public class Startup
     {
-        public Startup(IWebHostEnvironment env) => Env = env;
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        {
+            Configuration = configuration;
+            Env = env;
+        }
 
-        private IWebHostEnvironment Env { get; }
+        public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Env { get; }
 
         public void Configure(IApplicationBuilder app)
         {
