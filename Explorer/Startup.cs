@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Compiler;
-using DatabaseHandler;
 using Compiler.AzureFunction;
 using Compiler.AzureFunction.Connection;
+using DatabaseHandler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +24,7 @@ namespace Explorer
         }
 
         public IConfiguration Configuration { get; }
+
         public IWebHostEnvironment Env { get; }
 
         public void Configure(IApplicationBuilder app)
@@ -64,9 +65,10 @@ namespace Explorer
             {
                 services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
             }
+
             services.AddDbContext<CodeDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DatabaseConnection"),
+                    Configuration.GetConnectionString(Env.IsDevelopment() ? "LocalDatabaseConnection" : "DatabaseConnection"),
                     x => x.MigrationsAssembly("DatabaseHandler")));
             services.AddScoped<ICodeDatabaseHandler, CodeDatabaseHandler>();
         }
