@@ -1,3 +1,4 @@
+@using System.IO
 @using DatabaseHandler
 @inject ICodeDatabaseHandler DatabaseHandler;
 
@@ -34,7 +35,7 @@
 
     private void OnClick()
     {
-        items = new();
+        items = GetExampleCodes("./CodeExamples/");
     }
 
     private void OnPicked(string code)
@@ -43,5 +44,18 @@
         {
             OnSelected.Invoke(code);
         }
+    }
+
+    private List<(string name, string code)> GetExampleCodes(string folderPath)
+    {
+        List<(string name, string code)> codes= new();
+        if (!Directory.Exists(folderPath)) return codes;
+        foreach (string file in Directory.EnumerateFiles(folderPath, "*.qs"))
+        {
+            string name = Path.GetFileNameWithoutExtension(file).Replace('_', ' ');
+            string code = File.ReadAllText(file);
+            codes.Add((name, code));
+        }
+        return codes;
     }
 }
