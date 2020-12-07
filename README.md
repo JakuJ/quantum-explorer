@@ -84,6 +84,16 @@ The Q# compiler module used in production is deployed to Azure Functions.
 In order to push a new version of the app, open this repository in VS Code with the Azure Functions extension installed.
 Rebuild the `Compiler.AzureFunction` project and deploy from the extension to the `qs-compiler` Azure Functions app.
 
+### Database
+
+To set up a local database from migration you should have [Entity Framework Core tools](https://docs.microsoft.com/en-us/ef/core/cli/dotnet) installed.
+
+Then change ConnectionString in `Explorer/appsetting.json` and from the root folder of the repository run:
+
+```shell
+dotnet ef database update --startup-project Explorer
+```
+
 # Notes
 
 ## Code style
