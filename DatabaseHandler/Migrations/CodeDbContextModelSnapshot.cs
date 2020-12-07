@@ -31,33 +31,12 @@ namespace DatabaseHandler.Migrations
                     b.Property<string>("CodeName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Example")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("ShareTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.ToTable("CodeInformations");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("29a1a908-0690-49ee-a1b0-fc214bb277c7"),
-                            Code = "CodeFor1",
-                            CodeName = "Code1",
-                            Example = true,
-                            ShareTime = new DateTime(2020, 12, 5, 1, 56, 29, 63, DateTimeKind.Local).AddTicks(5511)
-                        },
-                        new
-                        {
-                            Id = new Guid("e09144d9-cb21-4461-938b-f8d4e1feaa20"),
-                            Code = "CodeFor2",
-                            CodeName = "Code2",
-                            Example = true,
-                            ShareTime = new DateTime(2020, 12, 5, 1, 56, 29, 65, DateTimeKind.Local).AddTicks(7235)
-                        });
                 });
 #pragma warning restore 612, 618
         }

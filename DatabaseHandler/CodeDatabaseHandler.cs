@@ -33,18 +33,6 @@ namespace DatabaseHandler
         }
 
         /// <inheritdoc/>
-        public List<(string name, string code)> GetExamples()
-        {
-            var examples = context.CodeInformations
-                .Where(x => x.Example)
-                .OrderBy(x => x.CodeName)
-                .Select(x => new Tuple<string, string>(x.CodeName, x.Code)
-                .ToValueTuple())
-                .ToList();
-            return examples;
-        }
-
-        /// <inheritdoc/>
         public Guid SaveCode(string name, string code)
         {
             CodeInformation codeInformation = new() { CodeName = name, Code = code, ShareTime = DateTime.Now };
