@@ -1,15 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using Bunit;
 using Bunit.TestDoubles;
-using Compiler;
 using DatabaseHandler;
 using Explorer.Components;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
@@ -17,6 +11,7 @@ using TestContext = Bunit.TestContext;
 
 namespace Explorer.Tests
 {
+    [Parallelizable]
     [TestFixture]
     public class ExamplesDropdownTest
     {
@@ -28,8 +23,6 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             var mockJS = ctx.Services.AddMockJSRuntime();
-            var dbhMock = new Mock<ICodeDatabaseHandler>();
-            ctx.Services.AddSingleton(dbhMock.Object);
 
             // Act
             var ed = ctx.RenderComponent<ExamplesDropdown>();
@@ -44,8 +37,6 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             var mockJS = ctx.Services.AddMockJSRuntime();
-            var dbhMock = new Mock<ICodeDatabaseHandler>();
-            ctx.Services.AddSingleton(dbhMock.Object);
             var ed = ctx.RenderComponent<ExamplesDropdown>();
 
             // Act
@@ -62,8 +53,6 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             var mockJS = ctx.Services.AddMockJSRuntime();
-            var dbhMock = new Mock<ICodeDatabaseHandler>();
-            ctx.Services.AddSingleton(dbhMock.Object);
             var ed = ctx.RenderComponent<ExamplesDropdown>(("ExamplesFolderPath", "./nonexistingFolder/"));
             // Act
             ed.Find("#dropdownMenuButton").Click();
@@ -78,8 +67,6 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             var mockJS = ctx.Services.AddMockJSRuntime();
-            var dbhMock = new Mock<ICodeDatabaseHandler>();
-            ctx.Services.AddSingleton(dbhMock.Object);
 
             var ed = ctx.RenderComponent<ExamplesDropdown>(("ExamplesFolderPath", filesDirectory));
 
@@ -101,8 +88,6 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             var mockJS = ctx.Services.AddMockJSRuntime();
-            var dbhMock = new Mock<ICodeDatabaseHandler>();
-            ctx.Services.AddSingleton(dbhMock.Object);
 
             string selectedString = "";
             Action<string> onSelect = s => selectedString = s;
