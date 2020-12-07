@@ -18,7 +18,7 @@
         <Toasts />
         @if (DatabaseHandler.CheckConnection())
         {
-            <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" />
+            <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/"/>
             <ShareButton GetCode="@(() => Editor.GetCode())"></ShareButton>
         }
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">

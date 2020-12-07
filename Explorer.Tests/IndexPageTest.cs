@@ -20,7 +20,7 @@ namespace Explorer.Tests
         {
             TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            ctx.Services.AddSingleton<ICodeDatabaseHandler>(new Mock<ICodeDatabaseHandler>().Object);
+            ctx.Services.AddSingleton(_ => Mock.Of<ICodeDatabaseHandler>());
 
             ctx.Services.AddSingleton(_ => Mock.Of<ICompiler>());
             ctx.Services.AddSingleton(_ => Mock.Of<IWebHostEnvironment>());

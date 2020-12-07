@@ -5,9 +5,7 @@
 <div class="dropdown">
     <button class="bar-btn dropdown-toggle" type="button"
             id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
-            aria-expanded="false" @onclick="OnClick">
-        Examples
-    </button>
+            aria-expanded="false" @onclick="OnClick">Examples</button>
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
         @if (items == null)
         {
@@ -31,11 +29,17 @@
     [Parameter]
     public Action<string>? OnSelected { get; set; } = null;
 
+    [Parameter]
+    public string? ExamplesFolderPath { get; set; }
+
     List<(string name, string code)>? items;
 
     private void OnClick()
     {
-        items = GetExampleCodes("./CodeExamples/");
+        if(ExamplesFolderPath != null)
+        {
+            items = GetExampleCodes(ExamplesFolderPath);
+        }
     }
 
     private void OnPicked(string code)
