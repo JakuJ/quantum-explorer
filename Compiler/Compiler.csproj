@@ -9,6 +9,7 @@
 
   <ItemGroup Label="Projects">
     <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
+    <ProjectReference Include="..\Simulator\Simulator.csproj" />
   </ItemGroup>
 
   <ItemGroup Label="Packages">

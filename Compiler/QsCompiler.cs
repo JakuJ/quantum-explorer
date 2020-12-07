@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
+using Microsoft.Quantum.Simulation.Common;
+using Simulator;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 using Diagnostic = Microsoft.VisualStudio.LanguageServer.Protocol.Diagnostic;
 using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity;
@@ -37,6 +39,7 @@ namespace Compiler
                     "Microsoft.Quantum.Standard",
                     "Microsoft.Quantum.QSharp.Core",
                     "Microsoft.Quantum.Runtime.Core",
+                    typeof(InterceptingSimulator).Assembly.FullName,
                 }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
                  .ToArray();
 
@@ -85,12 +88,14 @@ namespace Compiler
 
             // to load our custom rewrite step, we need to point Q# compiler config at the rewrite step
             InMemoryEmitter emitter = new();
+            AllocationTagger tagger = new();
             var config = new CompilationLoader.Configuration
             {
                 IsExecutable = execute,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
+                    (tagger, null),
                     (emitter, null),
                 },
             };

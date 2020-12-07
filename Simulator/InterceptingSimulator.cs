@@ -5,8 +5,9 @@ using System.Text;
 using Common;
 using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
+using Simulator.Utils;
 
-namespace Compiler
+namespace Simulator
 {
     /// <inheritdoc />
     public class InterceptingSimulator : QuantumSimulator
@@ -15,6 +16,8 @@ namespace Compiler
         private readonly StringBuilder funnel = new();
         private readonly Stack<string> currentOperation = new();
         private readonly Dictionary<string, List<GateGrid>> grids = new();
+        private readonly Dictionary<int, string> qubitIds = new();
+        private readonly Queue<int[]> allocationQueue = new();
 
         /// <inheritdoc cref="QuantumSimulator"/>
         /// <summary>
@@ -49,12 +52,18 @@ namespace Compiler
             return ret;
         }
 
-        private static void OnAllocate(IQArray<Qubit> qubits)
+        private void OnAllocate(IQArray<Qubit> qubits)
         {
+            allocationQueue.Enqueue(qubits.Select(x => x.Id).ToArray());
+
+            // TODO: Remove debug print statements
+            Console.Write($"Allocated {qubits.Count} qubits:");
             foreach (var qubit in qubits)
             {
-                Console.WriteLine(qubit.Id);
+                Console.Write($" {qubit.Id}");
             }
+
+            Console.WriteLine();
         }
 
         private void CountOperationCalls(ICallable op, IApplyData data)
@@ -70,7 +79,7 @@ namespace Compiler
                 foreach ((int index, var qubit) in qubits.Enumerate())
                 {
                     grid.AddGate(x, qubit.Id, new QuantumGate(op.Name, op.FullName[..^(op.Name.Length + 1)], index));
-                    grid.SetName(qubit.Id, $"Q{qubit.Id}");
+                    grid.SetName(qubit.Id, qubitIds[qubit.Id]);
                 }
             }
 
@@ -80,6 +89,7 @@ namespace Compiler
         private void EndOperationCallHandler(ICallable op, IApplyData data)
         {
             // Remove unnecessary qubits
+            // TODO: Sort rows by qubit ID
             grids.GetValueOrDefault(currentOperation.Peek())?.Last().RemoveEmptyRows();
 
             currentOperation.Pop();
@@ -101,6 +111,50 @@ namespace Compiler
             }
 
             grids[op].Add(new GateGrid());
+        }
+
+        /// <summary>A custom intrinsic operation for runtime allocation tagging.</summary>
+        public class TagAllocationImpl : TagAllocation
+        {
+            private readonly InterceptingSimulator sim;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="TagAllocationImpl"/> class.
+            /// </summary>
+            /// <param name="m">The simulator owning this implementation.</param>
+            public TagAllocationImpl(InterceptingSimulator m) : base(m) => sim = m;
+
+            /// <inheritdoc/>
+            public override Func<(string, bool), QVoid> __Body__
+            {
+                get
+                {
+                    return args =>
+                    {
+                        // Q#: using (q1, qs, q2) = (Qubit(), Qubit[3 + n], Qubit())
+                        // Calls to Allocate: Allocate(1), Allocate(3 + n), Allocate(1)
+                        // Calls to TagAllocation: Tag(a, false), Tag(b, true), Tag(c, false)
+                        (var id, bool isRegister) = args;
+                        int[] ids = sim.allocationQueue.Dequeue();
+
+                        if (isRegister)
+                        {
+                            for (var i = 0; i < ids.Length; i++)
+                            {
+                                sim.qubitIds[ids[i]] = $"{id}[{i}]";
+                                Console.WriteLine($"Assigning ID {sim.qubitIds[ids[i]]} to qubit {ids[i]}");
+                            }
+                        }
+                        else
+                        {
+                            sim.qubitIds[ids[0]] = id;
+                            Console.WriteLine($"Assigning ID {id} to qubit {ids[0]}");
+                        }
+
+                        return QVoid.Instance;
+                    };
+                }
+            }
         }
 
         /// <summary>The overriding definition for the Message operation.</summary>
