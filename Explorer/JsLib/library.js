@@ -22,3 +22,7 @@ export function copyToClipboard(text) {
             alert(error);
         });
 }
+
+export function changeUrl(url) {
+    history.pushState(null, '', url);
+}

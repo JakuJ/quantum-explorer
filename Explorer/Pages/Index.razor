@@ -100,6 +100,11 @@
 
         await JsRuntime.InvokeVoidAsync("Library.initPopOverDestroyer");
         await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
+
+        if (LoadedCodeId != null)
+        {
+            await JsRuntime.InvokeVoidAsync("Library.changeUrl", NavigationManager.BaseUri);
+        }
     }
 
     #region Compilation event handlers
