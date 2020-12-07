@@ -92,15 +92,17 @@ namespace Simulator
             // TODO: Sort rows by qubit ID
             grids.GetValueOrDefault(currentOperation.Peek())?.Last().RemoveEmptyRows();
 
-            currentOperation.Pop();
+            string pop = currentOperation.Pop();
+            Console.WriteLine($"Popping {pop} off the stack");
         }
 
         private void EnterOperation(string op)
         {
             // Set current operation
             currentOperation.Push(op);
+            Console.WriteLine($"Pushing {op} onto stack");
 
-            if (skipIntrinsic && op.StartsWith("Microsoft.Quantum"))
+            if (op.StartsWith("Simulator.Utils") || (skipIntrinsic && op.StartsWith("Microsoft.Quantum")))
             {
                 return;
             }

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Common;
@@ -99,6 +100,13 @@ namespace Compiler
                     (emitter, null),
                 },
             };
+
+            // HACK: Auto-open the "Simulator.Utils" in all namespaces
+            qsharpCode = Regex.Replace(qsharpCode, @"namespace\s+\w+\s*{", match =>
+            {
+                const string text = "\nopen Simulator.Utils;";
+                return match.Value + text;
+            });
 
             // compile Q# code
             CompilationLoader? compilationLoader;

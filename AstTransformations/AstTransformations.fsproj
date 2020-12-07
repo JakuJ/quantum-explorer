@@ -8,11 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="TagCallCreation.fs" />
         <Compile Include="TagAllocations.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Common\Common.csproj" />
+        <ProjectReference Include="..\Simulator\Simulator.csproj" />
     </ItemGroup>
 
 </Project>

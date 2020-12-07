@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using AstTransformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
@@ -7,8 +9,6 @@ namespace Compiler
 {
     public class AllocationTagger : IRewriteStep
     {
-        private List<IRewriteStep.Diagnostic> diagnostics = new List<IRewriteStep.Diagnostic>();
-
         /// <inheritdoc/>
         public string Name => "AllocationTagging";
 
@@ -25,21 +25,16 @@ namespace Compiler
         public bool ImplementsTransformation => true;
 
         /// <inheritdoc/>
-        public IEnumerable<IRewriteStep.Diagnostic> GeneratedDiagnostics => diagnostics;
+        public IEnumerable<IRewriteStep.Diagnostic> GeneratedDiagnostics => new List<IRewriteStep.Diagnostic>();
 
         /// <inheritdoc/>
         public IDictionary<string, string?> AssemblyConstants { get; } = new Dictionary<string, string?>();
 
         /// <inheritdoc/>
-        public bool Transformation(QsCompilation compilation, out QsCompilation? transformed)
+        public bool Transformation(QsCompilation compilation, out QsCompilation transformed)
         {
-            transformed = compilation;
-            diagnostics.Add(new IRewriteStep.Diagnostic()
-            {
-                Message = "Applying custom rewrite step that tags allocations",
-                Severity = DiagnosticSeverity.Warning,
-                Stage = IRewriteStep.Stage.Transformation,
-            });
+            transformed = TagAllocations.TagAllocationsInCompilation(compilation);
+            Console.WriteLine("Tagged allocations");
             return true;
         }
 
