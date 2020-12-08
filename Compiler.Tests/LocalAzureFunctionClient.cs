@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using Compiler.AzureFunction;
 using Compiler.AzureFunction.Connection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ namespace Compiler.Tests
             HttpRequest request = context.Request;
             request.Body = body;
 
-            var result = await AzureFunction.Function.Run(request, Helpers.ConsoleLogger) as OkObjectResult;
+            var result = await Function.Run(request, Helpers.ConsoleLogger) as OkObjectResult;
             return result?.Value as string;
         }
 

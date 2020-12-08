@@ -8,12 +8,14 @@ namespace Common
     /// <summary>
     /// A class that measures time from object creation to its disposal.
     /// </summary>
-    /// <example><code>
+    /// <example>
+    ///     <code>
     /// using (new ScopedTimer( ...action or message... ))
     /// {
     ///     ... some code that takes a long time to execute ...
     /// }
-    /// </code></example>
+    ///     </code>
+    /// </example>
     public sealed class ScopedTimer : IDisposable
     {
         private readonly Stopwatch stopwatch;

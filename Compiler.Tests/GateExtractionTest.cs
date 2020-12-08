@@ -195,7 +195,7 @@ namespace Compiler.Tests
             // Arrange
             string code = await Helpers.GetSourceFile("Arguments");
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
-            var expected = new[]
+            (string, int, int, int)[]? expected = new[]
             {
                 ("X", 0, 0, 0),
 

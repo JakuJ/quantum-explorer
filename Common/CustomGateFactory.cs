@@ -1,5 +1,3 @@
-using Common;
-
 namespace Common
 {
     /// <summary>A class responsible for creating custom <see cref="QuantumGate"/> instances.</summary>

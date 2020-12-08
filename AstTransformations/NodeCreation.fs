@@ -5,7 +5,7 @@ open Microsoft.Quantum.QsCompiler.SyntaxTree
 open Microsoft.Quantum.QsCompiler.DataTypes
 open Microsoft.Quantum.QsCompiler.SyntaxTokens
 
-module NodeFactory =
+module NodeCreation =
     let MakeTagCall: (string * bool -> QsStatement) =
         fun (qubitID, isRegister) ->
             let name: QsQualifiedName =

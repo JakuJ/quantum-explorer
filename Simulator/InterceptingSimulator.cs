@@ -160,8 +160,11 @@ namespace Simulator
             /// <param name="m">The simulator owning this implementation.</param>
             public TagAllocationImpl(InterceptingSimulator m) : base(m) => sim = m;
 
-            /// <inheritdoc/>
+// Tuple types in signatures should have element names
+#pragma warning disable SA1414
+            /// <inheritdoc cref="TagAllocation" />
             public override Func<(string, bool), QVoid> __Body__
+#pragma warning restore SA1414
             {
                 get
                 {

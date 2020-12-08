@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="NodeFactory.fs" />
+        <Compile Include="NodeCreation.fs" />
         <Compile Include="AllocationTagging.fs" />
     </ItemGroup>
 

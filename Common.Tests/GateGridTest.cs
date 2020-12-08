@@ -67,7 +67,7 @@ namespace Common.Tests
             GateGrid grid = new();
 
             // Act & Assert
-            grid.AddGate(4, 4, new("SomeOperation")); // resizes to 5x5 then shrinks to 1x5
+            grid.AddGate(4, 4, new QuantumGate("SomeOperation")); // resizes to 5x5 then shrinks to 1x5
             Assert.AreEqual((1, 5), (grid.Width, grid.Height), "Grid should resize correctly");
 
             grid.AddGate(9, new QuantumGate("SomeOperation")); // resizes to 2x10
@@ -231,7 +231,7 @@ namespace Common.Tests
             var newGates = grid.Gates.ToArray();
 
             // Assert
-            for (int i = 0; i < gates.Length; i++)
+            for (var i = 0; i < gates.Length; i++)
             {
                 // assuming left-to-right, top-to-bottom order of grid.Gates
                 Assert.AreEqual((gates[expected[i] - '0'], i, 0), newGates[i], "Gates should be in correct order");

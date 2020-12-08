@@ -38,7 +38,7 @@ namespace Compiler
                     "Microsoft.Quantum.Standard",
                     "Microsoft.Quantum.QSharp.Core",
                     "Microsoft.Quantum.Runtime.Core",
-                    typeof(InterceptingSimulator).Assembly.FullName,
+                    typeof(InterceptingSimulator).Assembly.FullName!,
                 }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
                  .ToArray();
 

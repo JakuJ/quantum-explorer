@@ -5,7 +5,7 @@ open System.Linq
 open Microsoft.Quantum.QsCompiler.SyntaxTokens
 open Microsoft.Quantum.QsCompiler.SyntaxTree
 open Microsoft.Quantum.QsCompiler.Transformations.Core
-open NodeFactory
+open NodeCreation
 
 module AllocationTagging =
     /// State shared by all AST traversal classes/methods

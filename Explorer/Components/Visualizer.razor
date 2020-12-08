@@ -1,7 +1,5 @@
-@using Compiler;
-@using System.Diagnostics.CodeAnalysis;
-@using System.Numerics;
-
+@using Compiler
+@using System.Numerics
 <div class="visualizer vis-container">
     <div>
         <ul class="nav nav-tabs">
@@ -114,7 +112,7 @@
                 return "100%";
             }
 
-            int binLength = (int)Math.Ceiling(Math.Log2(chartData.Count()));
+            var binLength = (int)Math.Ceiling(Math.Log2(chartData.Count()));
             return 136 + (15 * (binLength + 2) + 20) * chartData.Count() + "px";
         }
     }
@@ -156,11 +154,11 @@
     /// </summary>
     private void CreateDisplayList()
     {
-        List<(int idx, Complex v)>? list = (dataType == "Arguments") ? selectedOperation?.Arguments : selectedOperation?.Results;
+        List<(int idx, Complex v)>? list = dataType == "Arguments" ? selectedOperation?.Arguments : selectedOperation?.Results;
 
         if (list == null) return;
 
-        int binLength = (int)Math.Ceiling(Math.Log2(list.Count)); //calculate number of qubits to include in labels
+        var binLength = (int)Math.Ceiling(Math.Log2(list.Count)); //calculate number of qubits to include in labels
 
         if (!showZeros)
         {
@@ -169,9 +167,9 @@
 
         chartData = list.Select(pair => new DataItem
         {
-            Idx = '|' + new String(Convert.ToString(pair.idx, 2).PadLeft(binLength, '0').Reverse().ToArray()) + '>',
+            Idx = '|' + new string(Convert.ToString(pair.idx, 2).PadLeft(binLength, '0').Reverse().ToArray()) + '>',
             Real = pair.v.Real,
-            Imaginary = pair.v.Imaginary
+            Imaginary = pair.v.Imaginary,
         });
     }
 
@@ -204,7 +202,7 @@
     /// </summary>
     private void DataTypeChanged(ChangeEventArgs e)
     {
-        string? selected = e.Value?.ToString();
+        var selected = e.Value?.ToString();
         if (selected == null || selected == dataType) return;
 
         dataType = selected;
