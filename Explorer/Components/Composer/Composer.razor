@@ -1,3 +1,4 @@
+@using System.Linq
 @using Microsoft.Extensions.Logging
 @using Compiler
 @inject IJSRuntime JsRuntime
@@ -6,7 +7,7 @@
 <div class="overflow-hidden" style="height: 100%">
     <div>
         <ul class="nav nav-tabs">
-            @foreach (var key in _ast.Keys)
+            @foreach (var key in keysNames.Select(x => x.Key))
             {
                 <li class="nav-item">
                     <a class="nav-link noselect @(selectedKey == key ? "active" : "")" @onclick="@(() => OnTabChange(key))">@key</a>
@@ -15,9 +16,9 @@
         </ul>
     </div>
     <div class="vis-content">
-        @if (_ast.ContainsKey(selectedKey))
+        @if (keysNames.ContainsKey(selectedKey) && _ast.ContainsKey(keysNames[selectedKey]))
         {
-            <Grid GateGrid="@(_ast[selectedKey])"/>
+            <Grid GateGrid="@(_ast[keysNames[selectedKey]])"/>
         }
     </div>
 </div>
@@ -25,17 +26,38 @@
 @code {
     private Dictionary<string, GateGrid> _ast = new();
 
+    private Dictionary<string, string> keysNames = new();
+
     private string selectedKey = "";
+
+    private Dictionary<string, string> KeysNames()
+    {
+        if(_ast.Count > 0)
+        {
+            int id = _ast.Keys.First().IndexOf('.');
+            if(id > -1)
+            {
+                bool sameNamespaces = _ast.Keys.All(k => k.Substring(0, id) == _ast.Keys.First().Substring(0, id));
+                if(sameNamespaces)
+                {
+                    return _ast.Keys.ToDictionary(k => k.Substring(id + 1, k.Length - id - 1));
+                }
+            }
+        }
+        return _ast.Keys.ToDictionary(k => k);
+    }
 
     public async Task UpdateGridsAsync(Dictionary<string, GateGrid> ast)
     {
         // force the underlying Grid component to render from scratch
         _ast.Clear();
+        keysNames.Clear();
         selectedKey = "";
         await InvokeAsync(StateHasChanged);
 
         _ast = ast;
-        selectedKey = _ast.First().Key ?? "";
+        keysNames = KeysNames();
+        selectedKey = keysNames.First().Key ?? "";
         await InvokeAsync(StateHasChanged);
     }
 
