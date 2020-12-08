@@ -91,7 +91,7 @@ To set up a local database from migration you should have [Entity Framework Core
 If you want to have a mssql server in a docker container run:
 ```shell
 docker pull microsoft/mssql-server-linux:2017-latest
-docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1401:1401 -d microsoft/mssql-server-linux:2017-latest
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1401:1433 -d microsoft/mssql-server-linux:2017-latest
 ```
 Then change the ConnectionString in `Explorer/appsetting.json` to:
 `"Server=127.0.0.1,1401;Database=CodeDatabase;User Id=SA;Password=YourStrong!Passw0rd;"`
