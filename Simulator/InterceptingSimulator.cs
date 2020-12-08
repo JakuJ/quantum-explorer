@@ -6,7 +6,7 @@ using System.Text;
 using Common;
 using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
-using Simulator.Utils;
+using Simulator.Custom;
 
 namespace Simulator
 {
@@ -14,7 +14,7 @@ namespace Simulator
     public class InterceptingSimulator : QuantumSimulator
     {
         private static readonly ImmutableHashSet<string> ExcludedNamespaces
-            = ImmutableHashSet.Create("Simulator.Utils", "__custom__");
+            = ImmutableHashSet.Create("Simulator.Custom", "__custom__");
 
         private readonly StringBuilder funnel = new();
 
@@ -105,7 +105,7 @@ namespace Simulator
                         {
                             case "Microsoft.Quantum.Intrinsic.CNOT":
                             case "Microsoft.Quantum.Intrinsic.CCNOT":
-                                grid.AddGate(k, qubit, new QuantumGate("X", @namespace, 0));
+                                grid.AddGate(k, qubit, new QuantumGate("X", @namespace));
                                 break;
                             default:
                                 grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));

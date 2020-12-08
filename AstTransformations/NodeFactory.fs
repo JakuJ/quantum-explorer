@@ -9,7 +9,7 @@ module NodeFactory =
     let MakeTagCall: (string * bool -> QsStatement) =
         fun (qubitID, isRegister) ->
             let name: QsQualifiedName =
-                { Namespace = "Simulator.Utils"
+                { Namespace = "Simulator.Custom"
                   Name = "TagAllocation" }
 
             let unitType = ResolvedType.New(UnitType)

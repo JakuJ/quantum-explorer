@@ -35,14 +35,6 @@ namespace Common
             }
         }
 
-        /// <summary>
-        /// Gets the gate at a given position.
-        /// </summary>
-        /// <param name="x">Row.</param>
-        /// <param name="y">Column.</param>
-        /// <returns>A gate if present at the position, null otherwise.</returns>
-        public QuantumGate? At(int x, int y) => grid.ElementAtOrDefault(x)?.ElementAtOrDefault(y);
-
         /// <summary>Gets all gates in this grid.</summary>
         public IEnumerable<(QuantumGate Gate, int X, int Y)> Gates
         {
@@ -62,10 +54,13 @@ namespace Common
             }
         }
 
-        /// <summary>Return which row on the grid corresponds to a given qubit identifier.</summary>
-        /// <param name="name">The identifier to look for.</param>
-        /// <returns>Index of the qubit corresponding to this name (-1 if not found).</returns>
-        public int IndexOfName(string name) => Names.FindIndex(x => x == name);
+        /// <summary>
+        /// Gets the gate at a given position.
+        /// </summary>
+        /// <param name="x">Row.</param>
+        /// <param name="y">Column.</param>
+        /// <returns>A gate if present at the position, null otherwise.</returns>
+        public QuantumGate? At(int x, int y) => grid.ElementAtOrDefault(x)?.ElementAtOrDefault(y);
 
         /// <summary>Set an identifier of a qubit.</summary>
         /// <param name="qubit">The index of the qubit.</param>
@@ -104,15 +99,6 @@ namespace Common
             grid[x][y] = gate;
 
             Shrink();
-        }
-
-        /// <summary>Insert an empty row above the one with the provided index.</summary>
-        /// <param name="rowBelow">Index of the row directly below the inserted one.</param>
-        /// <param name="qubitId">Identifier for the inserted row.</param>
-        public void InsertRow(int rowBelow, string qubitId)
-        {
-            Names.Insert(rowBelow, qubitId);
-            grid.ForEach(col => col.Insert(rowBelow, null));
         }
 
         /// <summary>Removes the gate at a given position.</summary>
@@ -157,42 +143,6 @@ namespace Common
         {
             QuantumGate gate = RemoveAt(xFrom, yFrom, true);
             AddGate(xTo, yTo, gate);
-        }
-
-        /// <summary>Shrinks the grid to occupy the least number of squares in each direction.</summary>
-        public void Shrink()
-        {
-            // Collapse empty columns
-            grid.RemoveAll(col => col.TrueForAll(x => x == null));
-
-            // Remove unused qubits
-            var max = 0;
-
-            for (int y = Height - 1; y >= 0; y--)
-            {
-                if (Names[y] != null)
-                {
-                    max = y + 1; // height, not index
-                    break;
-                }
-
-                for (var x = 0; x < Width; x++)
-                {
-                    if (grid[x][y] != null)
-                    {
-                        max = y + 1; // height, not index
-                        goto endLoop;
-                    }
-                }
-            }
-
-            endLoop:
-
-            if (max != Height)
-            {
-                Names.Truncate(max);
-                grid.ForEach(col => col.Truncate(max));
-            }
         }
 
         /// <summary>Remove empty rows (qubits) from the grid.</summary>
@@ -301,6 +251,41 @@ namespace Common
             }
 
             return x < Width && y < Height;
+        }
+
+        private void Shrink()
+        {
+            // Collapse empty columns
+            grid.RemoveAll(col => col.TrueForAll(x => x == null));
+
+            // Remove unused qubits
+            var max = 0;
+
+            for (int y = Height - 1; y >= 0; y--)
+            {
+                if (Names[y] != null)
+                {
+                    max = y + 1; // height, not index
+                    break;
+                }
+
+                for (var x = 0; x < Width; x++)
+                {
+                    if (grid[x][y] != null)
+                    {
+                        max = y + 1; // height, not index
+                        goto endLoop;
+                    }
+                }
+            }
+
+            endLoop:
+
+            if (max != Height)
+            {
+                Names.Truncate(max);
+                grid.ForEach(col => col.Truncate(max));
+            }
         }
 
         private void Expand(int plusWidth, int plusHeight)

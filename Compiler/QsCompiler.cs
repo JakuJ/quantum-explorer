@@ -103,12 +103,8 @@ namespace Compiler
                 },
             };
 
-            // HACK: Auto-open the "Simulator.Utils" in all namespaces
-            qsharpCode = Regex.Replace(qsharpCode, @"namespace\s+\w+\s*{", match =>
-            {
-                const string text = "\nopen Simulator.Utils;";
-                return match.Value + text;
-            });
+            // Auto-open Simulator.Custom in all namespaces
+            qsharpCode = Regex.Replace(qsharpCode, @"namespace\s+\w+\s*{", match => match.Value + "open Simulator.Custom;");
 
             // compile Q# code
             CompilationLoader? compilationLoader;

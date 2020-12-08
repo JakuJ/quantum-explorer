@@ -10,7 +10,7 @@ namespace Compiler.Tests
 {
     [TestFixture]
     [Parallelizable]
-    public class OperationGridsTest
+    public class GateExtractionTest
     {
         private static class DeclarationSources
         {
@@ -265,6 +265,35 @@ namespace Compiler.Tests
             foreach ((QuantumGate gate, int x, int y) in grid2.Gates)
             {
                 Assert.Contains((gate.Name, gate.Namespace, x, y), expected, "Gate should be present at a given position");
+            }
+        }
+
+        [Test]
+        public async Task TagsAllAllocations()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("AllocationTagging");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            (string, string[])[] expected =
+            {
+                ("AllocationTagging4.DoStuff", new[] { "q1" }),
+                ("AllocationTagging5.DoStuff", new[] { "q1", "q2", "qs[0]" }),
+                ("AllocationTagging6.DoStuff", new[] { "q" }),
+                ("AllocationTagging7.DoStuff", new[] { "x1", "x2", "x3" }),
+            };
+            Dictionary<string, List<GateGrid>>? grids = null;
+
+            compiler.OnGrids += (_, dictionary) => grids = dictionary;
+            compiler.OnDiagnostics += (_, diags) => Assert.Fail($"There should be no diagnostics, but got: {diags}");
+
+            // Act
+            await compiler.Compile(code);
+
+            // Assert
+            Assert.NotNull(grids);
+            foreach ((string op, string[] names) in expected)
+            {
+                Assert.AreEqual(names, grids![op].Single().Names.ToArray(), "Name list should be correct");
             }
         }
     }
