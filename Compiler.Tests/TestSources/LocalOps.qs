@@ -18,6 +18,7 @@ namespace LocalOps {
         return MResetZ(q);
     }
 
+    @EntryPoint()
     operation MotherOp(): Unit {
         using (q = Qubit())
         {

@@ -3,6 +3,15 @@ namespace AllocatedQubitOps {
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Measurement;
 
+    @EntryPoint()
+    operation Main(): Unit {
+        AllocateOne();
+        let x = AllocateOneAndApplyGates();
+        AllocateFive();
+        AllocateFiveAndApplyGates();
+        Tuples();
+    }
+
     // Single qubit, no gates
     operation AllocateOne() : Unit {
         using (qubit = Qubit()) {}
@@ -39,8 +48,8 @@ namespace AllocatedQubitOps {
     operation Tuples(): Unit {
         using (((q1, qs), q2) = ((Qubit(), Qubit[1]), Qubit())) {
             X(q1); // 1st row
-            Y(q2); // 3rd row
-            H(qs[0]); // 2nd row
+            Y(qs[0]); // 3rd row
+            H(q2); // 2nd row
         }
     }
 }

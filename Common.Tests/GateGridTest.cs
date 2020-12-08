@@ -387,14 +387,11 @@ namespace Common.Tests
             // Arrange
             GateGrid grid = new();
 
-            TypedExpression? exp = null; // ReferenceEquals(null, null) is true
-
             QuantumGate[] gates =
             {
-                new("Test", "TestNs", 0, false, exp),
-                new("Test", "TestNs", 1, true, exp),
-                new("Test", "TestNs", 1, true, exp),
-                new("Test", "TestNs", 2, false, exp),
+                new("Test", "TestNs"),
+                new("Test", "TestNs", 1),
+                new("Test", "TestNs", 2),
             };
 
             foreach ((int i, QuantumGate gate) in gates.Enumerate())
@@ -404,9 +401,10 @@ namespace Common.Tests
 
             // Act & Assert
             grid.RemoveAt(0, 1);
-            Assert.AreEqual(3, grid.Gates.Count(), "There should still be 3 arguments left");
+            Assert.AreEqual(2, grid.Gates.Count(), "There should be 2 gates left");
 
             grid.RemoveAt(0, 0);
+            grid.RemoveAt(0, 2);
             Assert.IsEmpty(grid.Gates, "There should be no more gates in the grid");
         }
 

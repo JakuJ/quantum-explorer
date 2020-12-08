@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Common;
@@ -14,7 +13,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
-using Microsoft.Quantum.Simulation.Common;
 using Simulator;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 using Diagnostic = Microsoft.VisualStudio.LanguageServer.Protocol.Diagnostic;
@@ -79,20 +77,24 @@ namespace Compiler
         /// <inheritdoc/>
         public event EventHandler<List<OperationState>>? OnStatesRecorded;
 
-        private QsCompilation? Compilation { get; set; }
-
         /// <inheritdoc/>
         public async Task Compile(string qsharpCode)
         {
             // do we have an uncommented @EntryPoint?
             bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
 
+            if (!execute)
+            {
+                OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
+                return;
+            }
+
             // to load our custom rewrite step, we need to point Q# compiler config at the rewrite step
             InMemoryEmitter emitter = new();
             AllocationTagger tagger = new();
             var config = new CompilationLoader.Configuration
             {
-                IsExecutable = execute,
+                IsExecutable = true,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
@@ -148,15 +150,6 @@ namespace Compiler
                 }
             }
 
-            // communicate that the Q# compilation was successful
-            Compilation = compilationLoader.CompilationOutput;
-
-            if (Compilation == null || !execute)
-            {
-                OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
-                return;
-            }
-
             CSharpCompilation? csharpCompilation;
             using (new ScopedTimer("Compiling C# driver code", logger))
             {
@@ -209,7 +202,7 @@ namespace Compiler
                 return;
             }
 
-            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == entryPoint.Name);
+            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.FullName == $"{entryPoint.Namespace}.{entryPoint.Name}");
 
             if (type != null)
             {

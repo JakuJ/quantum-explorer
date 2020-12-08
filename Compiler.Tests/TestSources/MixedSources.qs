@@ -2,6 +2,15 @@ namespace MixedSources {
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Canon;
 
+    @EntryPoint()
+    operation Main(): Unit {
+        using (qs = Qubit[6]) {
+            Mixed1(qs[0], qs[1..5]);
+            Mixed2(qs[1..5], qs[0]);
+            Mixed3(qs[0..2], qs[3..5]);
+        }
+    }
+
     operation Mixed1(q: Qubit, qs: Qubit[]): Unit {
         X(q);       // first
         H(qs[0]);   // second

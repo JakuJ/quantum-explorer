@@ -20,7 +20,7 @@ namespace Common
         public GateGrid(int height, int width) => Expand(width, height);
 
         /// <summary>Gets the array of identifiers associated with the qubits.</summary>
-        public List<string?> Names { get; } = new();
+        public List<string?> Names { get; private set; } = new();
 
         /// <summary>Gets the length of the longest lane in this grid.</summary>
         public int Width => grid.Count;
@@ -34,6 +34,14 @@ namespace Common
                 return ix ?? Names.TakeWhile(x => x != null).Count();
             }
         }
+
+        /// <summary>
+        /// Gets the gate at a given position.
+        /// </summary>
+        /// <param name="x">Row.</param>
+        /// <param name="y">Column.</param>
+        /// <returns>A gate if present at the position, null otherwise.</returns>
+        public QuantumGate? At(int x, int y) => grid.ElementAtOrDefault(x)?.ElementAtOrDefault(y);
 
         /// <summary>Gets all gates in this grid.</summary>
         public IEnumerable<(QuantumGate Gate, int X, int Y)> Gates
@@ -133,18 +141,6 @@ namespace Common
                 return gate.Value;
             }
 
-            // Remove all other gates of the same operation if this one was not part of an array
-            for (x = 0; x < Width; x++)
-            {
-                for (y = 0; y < Height; y++)
-                {
-                    if (gate.Value.SameOperation(grid[x][y]))
-                    {
-                        grid[x][y] = null;
-                    }
-                }
-            }
-
             Shrink();
             return gate.Value;
         }
@@ -216,6 +212,24 @@ namespace Common
                 foreach (int index in indices)
                 {
                     column.RemoveAt(index);
+                }
+            }
+        }
+
+        /// <summary>Sort rows in the grid by their corresponding qubit IDs, alphabetically.</summary>
+        public void SortRowsByQubitIds()
+        {
+            (int Index, string? Item)[] sorted = Names.Enumerate().OrderBy(x => x.Item).ToArray();
+            Names = sorted.Select(x => x.Item).ToList();
+
+            int[] indices = sorted.Select(x => x.Index).ToArray();
+
+            foreach (var column in grid)
+            {
+                QuantumGate?[] copy = column.ToArray();
+                foreach ((int index, int newIndex) in indices.Enumerate())
+                {
+                    column[index] = copy[newIndex];
                 }
             }
         }

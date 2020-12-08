@@ -26,9 +26,9 @@ namespace Simulator
         public InterceptingSimulator(bool skipIntrinsic = true) : base(false)
         {
             this.skipIntrinsic = skipIntrinsic;
-            OnOperationStart += CountOperationCalls;
-            OnOperationEnd += EndOperationCallHandler;
-            AfterAllocateQubits += OnAllocate;
+            OnOperationStart += OperationStartHandler;
+            OnOperationEnd += OperationEndHandler;
+            AfterAllocateQubits += AllocateQubitsHandler;
         }
 
         /// <summary>
@@ -52,22 +52,12 @@ namespace Simulator
             return ret;
         }
 
-        private void OnAllocate(IQArray<Qubit> qubits)
+        private void AllocateQubitsHandler(IQArray<Qubit> qubits) => allocationQueue.Enqueue(qubits.Select(x => x.Id).ToArray());
+
+        private void OperationStartHandler(ICallable op, IApplyData data)
         {
-            allocationQueue.Enqueue(qubits.Select(x => x.Id).ToArray());
+            Console.WriteLine($"Starting {op.FullName}");
 
-            // TODO: Remove debug print statements
-            Console.Write($"Allocated {qubits.Count} qubits:");
-            foreach (var qubit in qubits)
-            {
-                Console.Write($" {qubit.Id}");
-            }
-
-            Console.WriteLine();
-        }
-
-        private void CountOperationCalls(ICallable op, IApplyData data)
-        {
             // Get qubits affected by this operation
             Qubit[]? qubits = data.Qubits?.ToArray();
 
@@ -78,29 +68,38 @@ namespace Simulator
 
                 foreach ((int index, var qubit) in qubits.Enumerate())
                 {
-                    grid.AddGate(x, qubit.Id, new QuantumGate(op.Name, op.FullName[..^(op.Name.Length + 1)], index));
+                    int k = x;
+                    while (grid.At(k, qubit.Id) != null)
+                    {
+                        k++;
+                    }
+
+                    grid.AddGate(k, qubit.Id, new QuantumGate(op.Name, op.FullName[..^(op.Name.Length + 1)], index));
                     grid.SetName(qubit.Id, qubitIds[qubit.Id]);
                 }
             }
 
-            EnterOperation(op.FullName);
+            PushOpOnStack(op.FullName);
         }
 
-        private void EndOperationCallHandler(ICallable op, IApplyData data)
+        private void OperationEndHandler(ICallable op, IApplyData data)
         {
+            Console.WriteLine($"Exiting {op.FullName}");
+
             // Remove unnecessary qubits
-            // TODO: Sort rows by qubit ID
-            grids.GetValueOrDefault(currentOperation.Peek())?.Last().RemoveEmptyRows();
+            GateGrid? last = grids.GetValueOrDefault(currentOperation.Peek())?.Last();
+            last?.RemoveEmptyRows();
+            last?.SortRowsByQubitIds();
 
-            string pop = currentOperation.Pop();
-            Console.WriteLine($"Popping {pop} off the stack");
+            currentOperation.Pop();
         }
 
-        private void EnterOperation(string op)
+        private void PushOpOnStack(string op)
         {
+            Console.WriteLine($"Pushing {op}");
+
             // Set current operation
             currentOperation.Push(op);
-            Console.WriteLine($"Pushing {op} onto stack");
 
             if (op.StartsWith("Simulator.Utils") || (skipIntrinsic && op.StartsWith("Microsoft.Quantum")))
             {
@@ -144,13 +143,11 @@ namespace Simulator
                             for (var i = 0; i < ids.Length; i++)
                             {
                                 sim.qubitIds[ids[i]] = $"{id}[{i}]";
-                                Console.WriteLine($"Assigning ID {sim.qubitIds[ids[i]]} to qubit {ids[i]}");
                             }
                         }
                         else
                         {
                             sim.qubitIds[ids[0]] = id;
-                            Console.WriteLine($"Assigning ID {id} to qubit {ids[0]}");
                         }
 
                         return QVoid.Instance;

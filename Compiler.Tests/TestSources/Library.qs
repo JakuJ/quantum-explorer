@@ -6,6 +6,12 @@
     open Microsoft.Quantum.Convert;
     open Microsoft.Quantum.Math;
 
+    @EntryPoint()
+    operation Main() : Unit {
+        let x = RandomInt(12);
+        DoNothing();
+    }
+    
     function DoNothing() : Unit {}
     
     operation RandomBit () : Result {
