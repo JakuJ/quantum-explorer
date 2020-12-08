@@ -10,16 +10,16 @@ namespace Common
         public readonly int ArgIndex;
 
         /// <summary>The namespace of the represented operation.</summary>
-        private readonly string @namespace;
+        public readonly string Namespace;
 
         /// <summary>Initializes a new instance of the <see cref="QuantumGate"/> struct.</summary>
         /// <param name="symbol">The name of the underlying operation.</param>
         /// <param name="ns">The namespace of the underlying operation.</param>
         /// <param name="argIndex">The index of the argument in the operation call.</param>
-        public QuantumGate(string symbol, string ns = "Test", int argIndex = 0)
+        public QuantumGate(string symbol, string ns = "__unknown__", int argIndex = 0)
         {
             Name = symbol;
-            @namespace = ns;
+            Namespace = ns;
             ArgIndex = argIndex;
         }
 
@@ -28,11 +28,11 @@ namespace Common
         /// <returns>Whether this and the other gate are part of the same operation call.</returns>
         public bool SameOperation(QuantumGate? other)
             => other.HasValue
-            && @namespace == other.Value.@namespace
+            && Namespace == other.Value.Namespace
             && Name == other.Value.Name
             && ArgIndex != other.Value.ArgIndex;
 
         /// <inheritdoc/>
-        public override string ToString() => @namespace + "." + Name;
+        public override string ToString() => Namespace + "." + Name;
     }
 }

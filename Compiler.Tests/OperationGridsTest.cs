@@ -227,5 +227,45 @@ namespace Compiler.Tests
                 Assert.Contains((gate.Name, x, y, gate.ArgIndex), expected, "Gate should be present at a given position");
             }
         }
+
+        [Test]
+        public async Task ControlledOperations()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("ControlledOps");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            (string, string, int, int)[] expected =
+            {
+                ("__control__", "__custom__", 0, 0),
+                ("X", "Microsoft.Quantum.Intrinsic", 0, 1),
+                ("__control__", "__custom__", 1, 2),
+                ("X", "Microsoft.Quantum.Intrinsic", 1, 1),
+                ("__control__", "__custom__", 2, 1),
+                ("X", "Microsoft.Quantum.Intrinsic", 2, 0),
+                ("__control__", "__custom__", 3, 0),
+                ("__control__", "__custom__", 3, 1),
+                ("X", "Microsoft.Quantum.Intrinsic", 3, 2),
+            };
+            Dictionary<string, List<GateGrid>> grids = null!;
+            compiler.OnGrids += (_, dictionary) => grids = dictionary;
+
+            // Act
+            await compiler.Compile(code);
+
+            // Assert
+            GateGrid grid1 = grids["ControlledOps.UsingFunctor"].Single();
+            Assert.AreEqual(5, grid1.Gates.Count(x => x.Gate.Name == "__control__"), "There should be 5 controls in the circuit");
+            foreach ((QuantumGate gate, int x, int y) in grid1.Gates)
+            {
+                Assert.Contains((gate.Name, gate.Namespace, x, y), expected, "Gate should be present at a given position");
+            }
+
+            GateGrid grid2 = grids["ControlledOps.CNOTS"].Single();
+            Assert.AreEqual(5, grid2.Gates.Count(x => x.Gate.Name == "__control__"), "There should be 5 controls in the circuit");
+            foreach ((QuantumGate gate, int x, int y) in grid2.Gates)
+            {
+                Assert.Contains((gate.Name, gate.Namespace, x, y), expected, "Gate should be present at a given position");
+            }
+        }
     }
 }

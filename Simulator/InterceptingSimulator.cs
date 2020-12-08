@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Common;
@@ -12,20 +13,25 @@ namespace Simulator
     /// <inheritdoc />
     public class InterceptingSimulator : QuantumSimulator
     {
-        private readonly bool skipIntrinsic;
+        private static readonly ImmutableHashSet<string> ExcludedNamespaces
+            = ImmutableHashSet.Create("Simulator.Utils", "__custom__");
+
         private readonly StringBuilder funnel = new();
+
         private readonly Stack<string> currentOperation = new();
-        private readonly Dictionary<string, List<GateGrid>> grids = new();
+
+        private readonly Dictionary<string, List<GateGrid>> gateGrids = new();
+
         private readonly Dictionary<int, string> qubitIds = new();
+
         private readonly Queue<int[]> allocationQueue = new();
 
         /// <inheritdoc cref="QuantumSimulator"/>
         /// <summary>
         /// Initializes a new instance of the <see cref="InterceptingSimulator" /> class.
         /// </summary>
-        public InterceptingSimulator(bool skipIntrinsic = true) : base(false)
+        public InterceptingSimulator() : base(false)
         {
-            this.skipIntrinsic = skipIntrinsic;
             OnOperationStart += OperationStartHandler;
             OnOperationEnd += OperationEndHandler;
             AfterAllocateQubits += AllocateQubitsHandler;
@@ -44,7 +50,7 @@ namespace Simulator
         {
             Dictionary<string, List<GateGrid>> ret = new();
 
-            foreach ((string op, List<GateGrid> gridList) in grids)
+            foreach ((string op, List<GateGrid> gridList) in gateGrids)
             {
                 ret.Add(op, gridList.ToHashSet().ToList());
             }
@@ -56,56 +62,91 @@ namespace Simulator
 
         private void OperationStartHandler(ICallable op, IApplyData data)
         {
-            // Get qubits affected by this operation
-            Qubit[]? qubits = data.Qubits?.ToArray();
+            int[] qubits = (data.Qubits?.Select(x => x.Id) ?? Enumerable.Empty<int>()).ToArray();
+            int[]? controls = null;
+            string @namespace = op.FullName[..^(op.Name.Length + 1)];
 
-            if (qubits != null && this.grids.TryGetValue(currentOperation.Peek(), out var grids))
+            // Get runtime information about this operation application
+            RuntimeMetadata? metadata = op.GetRuntimeMetadata(data);
+            if (metadata != null)
+            {
+                // Check for control qubits
+                if (metadata.IsControlled)
+                {
+                    controls = metadata.Controls
+                                       .Select(x => x.Id)
+                                       .ToArray();
+                }
+            }
+
+            // Add corresponding column(s)
+            if (qubits.Length > 0 && gateGrids.TryGetValue(currentOperation.Peek(), out var grids))
             {
                 GateGrid grid = grids.Last();
                 int x = grid.Width;
 
-                foreach ((int index, var qubit) in qubits.Enumerate())
+                foreach ((int argIndex, int qubit) in qubits.Enumerate())
                 {
+                    // If a qubit occurs more than one time, move subsequent gates to the right
                     int k = x;
-                    while (grid.At(k, qubit.Id) != null)
+                    while (grid.At(k, qubit) != null)
                     {
                         k++;
                     }
 
-                    grid.AddGate(k, qubit.Id, new QuantumGate(op.Name, op.FullName[..^(op.Name.Length + 1)], index));
-                    grid.SetName(qubit.Id, qubitIds[qubit.Id]);
+                    // Create custom gates for control qubits
+                    if (controls != null && Array.IndexOf(controls, qubit) >= 0)
+                    {
+                        grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
+                    }
+                    else
+                    {
+                        switch (op.FullName)
+                        {
+                            case "Microsoft.Quantum.Intrinsic.CNOT":
+                            case "Microsoft.Quantum.Intrinsic.CCNOT":
+                                grid.AddGate(k, qubit, new QuantumGate("X", @namespace, 0));
+                                break;
+                            default:
+                                grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
+                                break;
+                        }
+                    }
+
+                    // Set qubit identifier
+                    grid.SetName(qubit, qubitIds[qubit]);
                 }
             }
 
-            PushOpOnStack(op.FullName);
+            PushOperation(op.FullName, @namespace);
         }
 
         private void OperationEndHandler(ICallable op, IApplyData data)
         {
             // Remove unnecessary qubits
-            GateGrid? last = grids.GetValueOrDefault(currentOperation.Peek())?.Last();
+            GateGrid? last = gateGrids.GetValueOrDefault(currentOperation.Peek())?.Last();
             last?.RemoveEmptyRows();
             last?.SortRowsByQubitIds();
 
             currentOperation.Pop();
         }
 
-        private void PushOpOnStack(string op)
+        private void PushOperation(string fullName, string @namespace)
         {
             // Set current operation
-            currentOperation.Push(op);
+            currentOperation.Push(fullName);
 
-            if (op.StartsWith("Simulator.Utils") || (skipIntrinsic && op.StartsWith("Microsoft.Quantum")))
+            if (fullName.StartsWith("Microsoft.Quantum") || ExcludedNamespaces.Contains(@namespace))
             {
                 return;
             }
 
-            if (!grids.ContainsKey(op))
+            if (!gateGrids.ContainsKey(fullName))
             {
-                grids.Add(op, new List<GateGrid>());
+                gateGrids.Add(fullName, new List<GateGrid>());
             }
 
-            grids[op].Add(new GateGrid());
+            gateGrids[fullName].Add(new GateGrid());
         }
 
         /// <summary>A custom intrinsic operation for runtime allocation tagging.</summary>

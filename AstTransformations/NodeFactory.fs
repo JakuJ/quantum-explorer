@@ -8,8 +8,6 @@ open Microsoft.Quantum.QsCompiler.SyntaxTokens
 module NodeFactory =
     let MakeTagCall: (string * bool -> QsStatement) =
         fun (qubitID, isRegister) ->
-            printfn "Tagging %s (%b)" qubitID isRegister
-
             let name: QsQualifiedName =
                 { Namespace = "Simulator.Utils"
                   Name = "TagAllocation" }
