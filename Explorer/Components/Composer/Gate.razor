@@ -3,14 +3,21 @@
 @using System.IO
 @inject IWebHostEnvironment Environment
 
-<div id="@Id" class="gate">
+<div id="@Id" class="gate @BorderStr">
     @if (CheckIconPath())
     {
         <img src="@(IconPath)" alt="@(Name)">
     }
     else
     {
-        <span class="gate-name">@Name</span>
+        @if (@Name == "X" || @Name == "CNOT")
+        {
+            <GateX/>
+        }
+        else
+        {
+            <span class="gate-name">@Name</span>
+        }
     }
 </div>
 
@@ -22,7 +29,26 @@
     [Parameter]
     public Action<Gate> OnDispose { get; set; } = null!;
 
+    [Parameter]
+    public bool Border { get; set; } = true;
+
+    protected override void OnParametersSet()
+    {
+        switch (Name)
+        {
+            case "X":
+                Border = false;
+                break;
+            case "CNOT":
+                Border = false;
+                // draw the line to the controlled CNOT gate
+                break;
+        }
+    }
+
     public string Id { get; } = UniqueId.CreateUniqueId();
+
+    private string BorderStr => Border ? "gate-border" : "";
 
     private string IconPath => $"images/icons/{Name}.svg";
 

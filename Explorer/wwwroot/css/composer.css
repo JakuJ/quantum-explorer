@@ -12,19 +12,18 @@
 
 .grid-row {
   position: relative;
-  width: auto;
+  width: 100%;
   height: 40px;
   margin: 5px 0;
   display: -ms-flexbox;
   display: inline-flex;
-  overflow: visible;
+  overflow: hidden;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
 }
 
 .grid-snap {
   position: absolute;
-  /*border: 1px dashed red;*/
   width: 40px;
   height: 40px;
   background: transparent;
@@ -40,23 +39,22 @@
 }
 
 .gate {
-  left: 0px;
-  top: 0px;
   width: 40px;
   height: 40px;
   float: left;
   text-align: center;
-  background: var(--background);
+  z-index: 99;
+}
+
+.gate.gate-border {
   border: var(--text);
   border-width: 2px;
   border-style: solid;
-  z-index: 99;
+  background: var(--background);
 }
 
 .gate-name {
   vertical-align: baseline;
-  font-family: 'Computer Modern Classical Serif Italic';
-  font-style: italic;
   font-size: x-large;
 }
 
