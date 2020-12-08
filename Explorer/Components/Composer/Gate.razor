@@ -1,23 +1,26 @@
-@using Microsoft.AspNetCore.Hosting
 @using Common
-@using System.IO
-@inject IWebHostEnvironment Environment
 
 <div id="@Id" class="gate @BorderStr">
-    @if (CheckIconPath())
+    @switch (@Name)
     {
-        <img src="@(IconPath)" alt="@(Name)">
-    }
-    else
-    {
-        @if (@Name == "X" || @Name == "CNOT")
-        {
+        case "MResetZ":
+            <GateMeasurement/>
+            break;
+        case "ResetAll":
+            <GateMeasurement/>
+            break;
+        case "X":
             <GateX/>
-        }
-        else
-        {
+            break;
+        case "CNOT":
+            <GateX/>
+            break;
+        case "CCNOT":
+            <GateX/>
+            break;
+        default:
             <span class="gate-name">@Name</span>
-        }
+            break;
     }
 </div>
 
@@ -49,14 +52,4 @@
     public string Id { get; } = UniqueId.CreateUniqueId();
 
     private string BorderStr => Border ? "gate-border" : "";
-
-    private string IconPath => $"images/icons/{Name}.svg";
-
-    /// Checks if the proper icon exists
-    private bool CheckIconPath()
-    {
-        string iconPath = Path.Combine(Environment.WebRootPath, IconPath);
-        return File.Exists(iconPath);
-    }
-
 }
