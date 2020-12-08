@@ -17,7 +17,7 @@
   margin: 5px 0;
   display: -ms-flexbox;
   display: inline-flex;
-  overflow: hidden;
+  overflow: visible; /* hidden fixes the overflow but hides the gates while dragging! */
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
 }
