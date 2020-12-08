@@ -2,7 +2,6 @@
 @using Compiler
 @using Microsoft.Extensions.Logging
 @using System.Text
-@using Common
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -48,22 +47,9 @@
     {
         base.OnInitialized();
 
-        Compiler.OnDiagnostics += diagnosticsHandler;
-        Compiler.OnOutput += outputHandler;
+        Compiler.OnDiagnostics += DiagnosticsHandler;
+        Compiler.OnOutput += OutputHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
-        Compiler.OnGrids += async (_, s) =>
-        {
-            StringBuilder builder = new();
-            foreach ((string op, List<GateGrid> grids) in s)
-            {
-                builder.AppendLine(op);
-                foreach (GateGrid grid in grids)
-                {
-                    builder.AppendLine(grid.ToString());
-                }
-            }
-            await Compositor.SetText(builder.ToString());
-        };
     }
 
     /// <summary>On-click handler for the compilation button.</summary>
@@ -71,7 +57,7 @@
     {
         if (progress.Running) return;
 
-        await toggleCompilation(true);
+        await ToggleCompilation(true);
         output.Clear();
 
         Visualizer.SetPlaceholder("Processing...");
@@ -83,7 +69,7 @@
             Compiler.Compile(code).ContinueWith(
                 async t =>
                 {
-                    await toggleCompilation(false);
+                    await ToggleCompilation(false);
                     var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
                     Visualizer.SetOutput(messages);
                 },
@@ -102,16 +88,16 @@
 
     #region Compilation event handlers
 
-    private async void diagnosticsHandler(object _, string val)
+    private async void DiagnosticsHandler(object _, string val)
     {
-        await toggleCompilation(false);
+        await ToggleCompilation(false);
         output.AppendLine(val);
         Visualizer.SetOutput(output.ToString());
     }
 
-    private async void outputHandler(object _, string stdout)
+    private async void OutputHandler(object _, string stdout)
     {
-        await toggleCompilation(false);
+        await ToggleCompilation(false);
 
         if (output.Length != 0)
         {
@@ -125,7 +111,7 @@
     #endregion
 
     /// <summary>Toggle the progressbar and whether the compilation button is enabled.</summary>
-    private async Task toggleCompilation(bool running)
+    private async Task ToggleCompilation(bool running)
     {
         progress.Running = running;
         await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);

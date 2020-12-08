@@ -35,11 +35,15 @@ namespace Explorer
                     webBuilder.UseStartup<Startup>()
                               .UseStaticWebAssets();
 
-                    // the PORT variable is provided on Heroku
-                    string? port = Environment.GetEnvironmentVariable("PORT");
-                    if (port != null)
+                    string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+                    if (environment == "Development")
                     {
-                        webBuilder.UseUrls($"http://*:{port}");
+                        // the PORT variable is provided on Heroku
+                        string? port = Environment.GetEnvironmentVariable("PORT");
+                        if (port != null)
+                        {
+                            webBuilder.UseUrls($"http://*:{port}");
+                        }
                     }
                 });
     }

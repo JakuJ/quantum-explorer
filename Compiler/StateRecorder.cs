@@ -33,6 +33,11 @@ namespace Compiler
 
         private void OnOperationStartHandler(ICallable operation, IApplyData input)
         {
+            if (operation.FullName == "Simulator.Custom.TagAllocation")
+            {
+                return;
+            }
+
             var opState = new OperationState(operation.Name);
 
             currentOperation.Children.Add(opState);
@@ -45,6 +50,11 @@ namespace Compiler
 
         private void OnOperationEndHandler(ICallable operation, IApplyData output)
         {
+            if (operation.FullName == "Simulator.Custom.TagAllocation")
+            {
+                return;
+            }
+
             dumper.Dump();
             currentOperation.Results = dumper.Values;
             currentOperation = parents[currentOperation];
