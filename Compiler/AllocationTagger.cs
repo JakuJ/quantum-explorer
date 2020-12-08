@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using AstTransformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
 
@@ -33,15 +32,14 @@ namespace Compiler
         /// <inheritdoc/>
         public bool Transformation(QsCompilation compilation, out QsCompilation transformed)
         {
-            transformed = TagAllocations.TagAllocationsInCompilation(compilation);
-            Console.WriteLine("Tagged allocations");
+            transformed = AllocationTagging.TagAllocations(compilation);
             return true;
         }
 
         /// <inheritdoc/>
-        public bool PreconditionVerification(QsCompilation compilation) => throw new System.NotImplementedException();
+        public bool PreconditionVerification(QsCompilation compilation) => throw new NotImplementedException();
 
         /// <inheritdoc/>
-        public bool PostconditionVerification(QsCompilation compilation) => throw new System.NotImplementedException();
+        public bool PostconditionVerification(QsCompilation compilation) => throw new NotImplementedException();
     }
 }

@@ -1,12 +1,12 @@
 namespace AstTransformations
 
+open System.Collections.Immutable
 open Microsoft.Quantum.QsCompiler.SyntaxTree
 open Microsoft.Quantum.QsCompiler.DataTypes
-open System.Collections.Immutable
 open Microsoft.Quantum.QsCompiler.SyntaxTokens
 
-module TagCallCreation =
-    let CreateTagCall: (string * bool -> QsStatement) =
+module NodeFactory =
+    let MakeTagCall: (string * bool -> QsStatement) =
         fun (qubitID, isRegister) ->
             printfn "Tagging %s (%b)" qubitID isRegister
 

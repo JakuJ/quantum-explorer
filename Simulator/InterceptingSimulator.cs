@@ -56,8 +56,6 @@ namespace Simulator
 
         private void OperationStartHandler(ICallable op, IApplyData data)
         {
-            Console.WriteLine($"Starting {op.FullName}");
-
             // Get qubits affected by this operation
             Qubit[]? qubits = data.Qubits?.ToArray();
 
@@ -84,8 +82,6 @@ namespace Simulator
 
         private void OperationEndHandler(ICallable op, IApplyData data)
         {
-            Console.WriteLine($"Exiting {op.FullName}");
-
             // Remove unnecessary qubits
             GateGrid? last = grids.GetValueOrDefault(currentOperation.Peek())?.Last();
             last?.RemoveEmptyRows();
@@ -96,8 +92,6 @@ namespace Simulator
 
         private void PushOpOnStack(string op)
         {
-            Console.WriteLine($"Pushing {op}");
-
             // Set current operation
             currentOperation.Push(op);
 

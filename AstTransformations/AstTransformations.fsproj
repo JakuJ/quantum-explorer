@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="TagCallCreation.fs" />
-        <Compile Include="TagAllocations.fs" />
+        <Compile Include="NodeFactory.fs" />
+        <Compile Include="AllocationTagging.fs" />
     </ItemGroup>
 
     <ItemGroup>
