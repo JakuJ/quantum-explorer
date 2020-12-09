@@ -12,12 +12,6 @@
         case "X":
             <GateX/>
             break;
-        case "CNOT":
-            <GateX/>
-            break;
-        case "CCNOT":
-            <GateX/>
-            break;
         default:
             <span class="gate-name">@Name</span>
             break;
@@ -30,9 +24,6 @@
     public string Name { get; set; } = null!;
 
     [Parameter]
-    public Action<Gate> OnDispose { get; set; } = null!;
-
-    [Parameter]
     public bool Border { get; set; } = true;
 
     protected override void OnParametersSet()
@@ -42,9 +33,8 @@
             case "X":
                 Border = false;
                 break;
-            case "CNOT":
-                Border = false;
-                // draw the line to the controlled CNOT gate
+                // if CNOT/CCNOT, draw the line to the controlled gate
+            default:
                 break;
         }
     }
