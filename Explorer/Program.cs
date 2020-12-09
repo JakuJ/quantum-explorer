@@ -24,6 +24,12 @@ namespace Explorer
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host
                .CreateDefaultBuilder(args)
+               .ConfigureLogging(logBuilder =>
+                {
+                    logBuilder.AddConsole();
+                    logBuilder.AddDebug();
+                    logBuilder.AddEventSourceLogger();
+                })
                .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

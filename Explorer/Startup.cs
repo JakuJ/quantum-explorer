@@ -13,13 +13,7 @@ namespace Explorer
     [ExcludeFromCodeCoverage]
     public class Startup
     {
-        private readonly IWebHostEnvironment environment;
-
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
-        {
-            Configuration = configuration;
-            this.environment = environment;
-        }
+        public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
@@ -50,7 +44,6 @@ namespace Explorer
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
-            services.AddSingleton(_ => environment);
         }
     }
 }
