@@ -68,7 +68,7 @@ namespace Explorer
 
             services.AddDbContext<CodeDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString(Env.IsDevelopment() ? "LocalDatabaseConnection" : "DatabaseConnection"),
+                    Configuration.GetConnectionString("DatabaseConnection"),
                     x => x.MigrationsAssembly("DatabaseHandler")));
             services.AddScoped<ICodeDatabaseHandler, CodeDatabaseHandler>();
         }
