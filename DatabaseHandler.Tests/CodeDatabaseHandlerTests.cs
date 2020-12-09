@@ -37,7 +37,7 @@ namespace DatabaseHandler.Tests
 
             // Assert
             Assert.AreEqual(resultCode, code, "Code in database and returned code should be equal");
-            Assert.AreEqual(resultName, name, "Code in database and returned code should be equal");
+            Assert.AreEqual(resultName, name, "Name in database and returned name should be equal");
         }
 
         [Test]

@@ -16,7 +16,7 @@ export function showSharePopOver(link) {
 
 export function initPopOverDestroyer() {
     $("html").on("mouseup", function (e) {
-        if ($(e.target).parents('.popover').length == 0) {
+        if ($(e.target).parents('.popover').length === 0) {
             $(".popover").each(function () {
                 $(this).popover("dispose");
             });

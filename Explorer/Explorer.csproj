@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <Import Project="..\msbuild\Source.props" />
 
@@ -36,10 +36,6 @@
   <ItemGroup>
     <None Include="$(JsLibRoot)\*.json" />
     <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <JsFiles Remove="JsLib\share.js" />
   </ItemGroup>
 
   <ItemGroup>

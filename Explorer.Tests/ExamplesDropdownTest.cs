@@ -44,7 +44,6 @@ namespace Explorer.Tests
 
             // Assert
             Assert.AreEqual(1, ed.FindAll(".dropdown-menu").Count, "One dropdown menu should be rendered");
-            Assert.AreEqual(1, ed.FindAll(".spinner-border").Count, "One spinner should be rendered, when no parameters");
         }
 
         [Test]

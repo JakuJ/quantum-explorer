@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace DatabaseHandler
 {
     /// <summary>
-    /// <see cref="CodeInformation"/> represents a record in database.
+    /// Represents a record in a database.
     /// </summary>
     public class CodeInformation
     {

@@ -7,15 +7,7 @@
         Examples
     </button>
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        @if (items == null)
-        {
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-            </div>
-        }
-        else
+        @if (items != null)
         {
             @foreach (var item in items)
             {

@@ -26,7 +26,7 @@
     <div class="content">
         <div id="splitPanes">
             <div id="left-pane" class="split split-horizontal split-content">
-                <Editor @ref="Editor" GetInitialCode="@GetCodeFromDatabse" />
+                <Editor @ref="Editor" GetInitialCode="@GetCodeFromDatabase" />
             </div>
             <div id="right-pane" class="split split-horizontal">
                 <div id="top-pane" class="split split-content">
@@ -135,7 +135,7 @@
         await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);
     }
 
-    private string GetCodeFromDatabse()
+    private string GetCodeFromDatabase()
     {
         if (LoadedCodeId != null && DatabaseHandler.CheckConnection())
         {

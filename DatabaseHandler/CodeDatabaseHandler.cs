@@ -6,15 +6,20 @@ using System.Text;
 namespace DatabaseHandler
 {
     /// <summary>
-    /// <see cref="CodeDatabaseHandler"/> represents a class to handle code saving and code retrieving from database.
+    /// Handles saving and retrieving code from the database.
     /// </summary>
     public class CodeDatabaseHandler : ICodeDatabaseHandler
     {
         private readonly CodeDbContext context;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CodeDatabaseHandler"/> class.
+        /// </summary>
         public CodeDatabaseHandler(CodeDbContext ctx)
         {
             context = ctx;
         }
+
         /// <inheritdoc/>
         public bool CheckConnection() => context.Database.CanConnect();
 
@@ -22,10 +27,11 @@ namespace DatabaseHandler
         public (string name, string code) GetCode(Guid key)
         {
             var codeInfo = context.CodeInformations.FirstOrDefault(c => c.Id == key);
-            if(codeInfo == null)
+            if (codeInfo == null)
             {
                 throw new KeyNotFoundException("Could not find code matching given key");
             }
+
             return (codeInfo.CodeName, codeInfo.Code);
         }
 
