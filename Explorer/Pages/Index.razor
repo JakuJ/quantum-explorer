@@ -4,9 +4,6 @@
 @using Microsoft.Extensions.Logging
 @using Compiler
 @using DatabaseHandler
-@using Microsoft.Quantum.QsCompiler.SyntaxTree
-@using Microsoft.Extensions.Logging
-@using System.Text
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -138,11 +135,11 @@
         await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);
     }
 
-    private string? GetCodeFromDatabse()
+    private string GetCodeFromDatabse()
     {
         if (LoadedCodeId != null && DatabaseHandler.CheckConnection())
         {
-            string? code = null;
+            string code = null;
             try
             {
                 (_, code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
