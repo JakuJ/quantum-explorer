@@ -15,6 +15,7 @@ namespace DatabaseHandler
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeDatabaseHandler"/> class.
         /// </summary>
+        /// <param name="ctx">Database context</param>
         public CodeDatabaseHandler(CodeDbContext ctx)
         {
             context = ctx;
@@ -24,7 +25,7 @@ namespace DatabaseHandler
         public bool CheckConnection() => context.Database.CanConnect();
 
         /// <inheritdoc/>
-        public (string name, string code) GetCode(Guid key)
+        public (string Name, string Code) GetCode(Guid key)
         {
             var codeInfo = context.CodeInformations.FirstOrDefault(c => c.Id == key);
             if (codeInfo == null)
