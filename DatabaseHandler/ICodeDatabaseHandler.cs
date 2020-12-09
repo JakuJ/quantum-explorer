@@ -18,7 +18,7 @@ namespace DatabaseHandler
         public Guid SaveCode(string name, string code);
 
         /// <summary>
-        /// Retrieves code from the database
+        /// Retrieves code from the database.
         /// </summary>
         /// <param name="key"><see cref="Guid"/> key of the code in database.</param>
         /// <returns>Name and content of the code in database.</returns>

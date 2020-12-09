@@ -15,7 +15,7 @@ namespace DatabaseHandler
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeDatabaseHandler"/> class.
         /// </summary>
-        /// <param name="ctx">Database context</param>
+        /// <param name="ctx">Database context.</param>
         public CodeDatabaseHandler(CodeDbContext ctx)
         {
             context = ctx;
@@ -45,6 +45,5 @@ namespace DatabaseHandler
 
             return codeInformation.Id;
         }
-
     }
 }

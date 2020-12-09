@@ -19,7 +19,5 @@ namespace DatabaseHandler
         /// Gets or sets <see cref="DbSet{CodeInformation}"/> representing code table in the database.
         /// </summary>
         public virtual DbSet<CodeInformation> CodeInformations { get; set; }
-
     }
-
 }
