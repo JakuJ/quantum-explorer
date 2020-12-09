@@ -102,7 +102,7 @@ export class Editor {
 
     // create the editor instance
     window.editorsDict[id] = monaco.editor.create(element, {
-        model: monaco.editor.createModel(initialCode || loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
+      model: monaco.editor.createModel(initialCode || loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
       theme: getThemeName(),
       minimap: {
         enabled: false
