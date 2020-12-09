@@ -28,11 +28,7 @@
     {
         if (firstRender)
         {
-            string? initalCode = null;
-            if(GetInitialCode != null)
-            {
-                initalCode = GetInitialCode();
-            }
+            string? initalCode = GetInitialCode != null ? GetInitialCode() : null;
             bool isDevelopment = Env.IsDevelopment();
             string lsHost = Environment.GetEnvironmentVariable("LANGUAGE_SERVER_URL") ?? "ws://localhost:8091";
             editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef, initalCode, lsHost, isDevelopment);

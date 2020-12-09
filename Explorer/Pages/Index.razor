@@ -142,7 +142,12 @@
     {
         if (LoadedCodeId != null && DatabaseHandler.CheckConnection())
         {
-            (string _, string code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
+            string? code = null;
+            try
+            {
+                (_, code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
+            }
+            catch (KeyNotFoundException) { } // todo: show message using toasts
             return code;
         }
         return null;

@@ -16,10 +16,7 @@ namespace DatabaseHandler
             context = ctx;
         }
         /// <inheritdoc/>
-        public bool CheckConnection()
-        {
-            return context.Database.CanConnect();
-        }
+        public bool CheckConnection() => context.Database.CanConnect();
 
         /// <inheritdoc/>
         public (string name, string code) GetCode(Guid key)
