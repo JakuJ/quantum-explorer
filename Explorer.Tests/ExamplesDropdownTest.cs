@@ -54,6 +54,7 @@ namespace Explorer.Tests
             using TestContext ctx = new();
             var mockJS = ctx.Services.AddMockJSRuntime();
             var ed = ctx.RenderComponent<ExamplesDropdown>(("ExamplesFolderPath", "./nonexistingFolder/"));
+
             // Act
             ed.Find("#dropdownMenuButton").Click();
 

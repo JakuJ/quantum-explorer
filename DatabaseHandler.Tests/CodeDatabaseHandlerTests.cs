@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
 
 namespace DatabaseHandler.Tests
 {
@@ -26,7 +26,7 @@ namespace DatabaseHandler.Tests
             Guid codeId = Guid.NewGuid();
             string code = "Test code";
             string name = "Test name";
-            CodeInformation codeRecord = new() { Id = codeId, Code = code, CodeName = name, ShareTime = DateTime.Now};
+            CodeInformation codeRecord = new() { Id = codeId, Code = code, CodeName = name, ShareTime = DateTime.Now };
             dbContext.CodeInformations.Add(codeRecord);
             dbContext.SaveChanges();
 
@@ -45,7 +45,7 @@ namespace DatabaseHandler.Tests
         {
             // Arrange
             CodeDbContext dbContext = GetCodeDbContext();
-            CodeInformation codeRecord = new() { Id = Guid.NewGuid(), Code = "Test code", CodeName = "Test name", ShareTime = DateTime.Now};
+            CodeInformation codeRecord = new() { Id = Guid.NewGuid(), Code = "Test code", CodeName = "Test name", ShareTime = DateTime.Now };
             dbContext.CodeInformations.Add(codeRecord);
             dbContext.SaveChanges();
 
@@ -55,7 +55,7 @@ namespace DatabaseHandler.Tests
 
             // Act
             // Assert
-            Assert.Throws<KeyNotFoundException>(() => databaseHandler.GetCode(fakeId));
+            Assert.Throws<KeyNotFoundException>(() => databaseHandler.GetCode(fakeId), "Exception should be thrown");
         }
 
         [Test]
@@ -74,9 +74,37 @@ namespace DatabaseHandler.Tests
 
             // Assert
             var savedCode = dbContext.CodeInformations.FirstOrDefault(x => x.Id == newId);
-            Assert.NotNull(savedCode);
-            Assert.AreEqual(code, savedCode?.Code);
-            Assert.AreEqual(name, savedCode?.CodeName);
+            Assert.NotNull(savedCode, "Code in db shouldn't be null");
+            Assert.AreEqual(code, savedCode?.Code, "Code in db should be equal to passed value");
+            Assert.AreEqual(name, savedCode?.CodeName, "Name of the code should be equal to passed value");
+        }
+
+        [Test]
+        public void ChecksConnectionTrue()
+        {
+            // Arrange
+            CodeDbContext dbContext = GetCodeDbContext();
+            CodeDatabaseHandler databaseHandler = new(dbContext);
+
+            // Act
+            bool canConnect = databaseHandler.CheckConnection();
+
+            // Assert
+            Assert.IsTrue(canConnect, "Db should be able to connect");
+        }
+
+        [Test]
+        public void ChecksConnectionFalse()
+        {
+            // Arrange
+            CodeDbContext dbContext = new CodeDbContext(new DbContextOptionsBuilder<CodeDbContext>().UseSqlServer("incorrectConnectionString").Options);
+            CodeDatabaseHandler databaseHandler = new(dbContext);
+
+            // Act
+            bool canConnect = databaseHandler.CheckConnection();
+
+            // Assert
+            Assert.IsFalse(canConnect, "Db should not be able to connect");
         }
     }
 }
