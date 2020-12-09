@@ -211,42 +211,6 @@ namespace Compiler
             }
         }
 
-        /// <inheritdoc/>
-        [ExcludeFromCodeCoverage] // Only used as a placeholder until the Composer is done
-        public override string ToString()
-        {
-            StringBuilder builder = new();
-
-            for (var y = 0; y < Height; y++)
-            {
-                builder.Append($"{Names[y]}:");
-                for (var x = 0; x < Width; x++)
-                {
-                    builder.Append(' ');
-
-                    QuantumGate? gate = grid[x][y];
-                    if (gate != null)
-                    {
-                        builder.Append($"[{gate.Name} arg{gate.ArgIndex}");
-                        if (gate.ArgArray)
-                        {
-                            builder.Append(" A");
-                        }
-
-                        builder.Append(']');
-                    }
-                    else
-                    {
-                        builder.Append('_');
-                    }
-                }
-
-                builder.AppendLine();
-            }
-
-            return builder.ToString();
-        }
-
         private bool BoundsCheck(int x, int y)
         {
             if (x < 0 || y < 0)

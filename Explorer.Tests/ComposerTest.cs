@@ -18,13 +18,13 @@ namespace Explorer.Tests
     [Parallelizable]
     public class ComposerTest
     {
-        [Ignore("TODO: Why doesn't BUnit render the child Gate component, even though it's initialized?")]
         [Test]
         public async Task RendersComposer()
         {
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Gate>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Cell>>().Object);
@@ -48,8 +48,8 @@ namespace Explorer.Tests
             gridComponent.Find(".gate-name").TextContent.MarkupMatches("H");
 
             // Check if the icon is displayed
-            IAttr src = gridComponent.Find("img").Attributes.GetNamedItem("src");
-            Assert.AreEqual(src.Value, "images/icons/MResetZ.svg");
+            var gateSrc = gridComponent.Find("#Measurement_Gate");
+            Assert.AreEqual(gateSrc.InnerHtml.Length, 682);
         }
     }
 }

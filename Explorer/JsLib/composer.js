@@ -1,6 +1,6 @@
 let gridRef = null;
 
-export function setReferences(ref) {
+export function setReference(ref) {
   gridRef = ref;
 }
 

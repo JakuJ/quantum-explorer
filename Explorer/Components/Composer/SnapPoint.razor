@@ -22,7 +22,7 @@
     {
         if (!Half)
         {
-            Logger.LogInformation($"Initialized snap {Id} at {X}, {Y}");
+            Logger.LogDebug($"Initialized snap {Id} at {X}, {Y}");
         }
     }
 
@@ -31,7 +31,5 @@
     private int XCoord => Half ? X * 50 + 30 : X * 50 + 10;
 
     private string XOffset => $"{XCoord}px";
-
-    public override string ToString() => $"[{X},{Y}] {Id} {Half}";
 
 }
