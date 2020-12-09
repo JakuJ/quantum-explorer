@@ -14,7 +14,7 @@ namespace Compiler
         event EventHandler<string> OnDiagnostics;
 
         /// <summary>An event raised when the GateGrid objects are ready.</summary>
-        event EventHandler<Dictionary<string, GateGrid>> OnGrids;
+        event EventHandler<Dictionary<string, List<GateGrid>>> OnGrids;
 
         /// <summary>An event raised when there's been some output printed by the simulation.</summary>
         event EventHandler<string> OnOutput;

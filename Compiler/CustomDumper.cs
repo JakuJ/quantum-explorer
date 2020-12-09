@@ -18,7 +18,7 @@ namespace Compiler
         /// <summary>
         /// Gets last dumped quantum states.
         /// </summary>
-        public List<(int Idx, Complex Value)> Values { get; private set; } = new List<(int, Complex)>();
+        public List<(int Idx, Complex Value)> Values { get; private set; } = new();
 
         /// <inheritdoc/>
         [ExcludeFromCodeCoverage] // reason: used by external APIs only
@@ -32,7 +32,7 @@ namespace Compiler
         [ExcludeFromCodeCoverage] // reason: used by external APIs only
         public override bool Dump(IQArray<Qubit>? qubits = null)
         {
-            Values = new();
+            Values = new List<(int Idx, Complex Value)>();
             return base.Dump(qubits);
         }
     }

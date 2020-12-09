@@ -25,7 +25,7 @@ namespace Compiler.Tests
                 Helpers.ConsoleLogger.LogError(s);
                 if (s != NoEntryPointMessage)
                 {
-                    Assert.Fail("No diagnostics should be present");
+                    Assert.Fail($"No diagnostics should be present! Got: {s}");
                 }
             };
 
@@ -63,34 +63,6 @@ namespace Compiler.Tests
             // Assert
             Assert.IsTrue(compiled, "Compilation should be successful");
             Assert.IsTrue(executed, "Execution must emit output.");
-        }
-
-        [TestCase("Library")]
-        [TestCase("CommentedEntryPoint")]
-        public async Task CompilesWithNoEntryPoint(string path)
-        {
-            // Arrange
-            string sourceCode = await Helpers.GetSourceFile(path);
-            QsCompiler compiler = new(Helpers.ConsoleLogger);
-            var compiled = false;
-
-            compiler.OnDiagnostics += (_, s) =>
-            {
-                Helpers.ConsoleLogger.LogError(s);
-                if (s != NoEntryPointMessage)
-                {
-                    Assert.Fail("No diagnostics should be present");
-                }
-            };
-
-            compiler.OnOutput += (_, _) => { Assert.Fail("Code should not execute"); };
-            compiler.OnGrids += (_, _) => { compiled = true; };
-
-            // Act
-            await compiler.Compile(sourceCode);
-
-            // Assert
-            Assert.IsTrue(compiled, "Q# compilation should succeed");
         }
     }
 }

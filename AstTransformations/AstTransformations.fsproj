@@ -8,13 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Helpers.fs" />
-        <Compile Include="Sectors.fs" />
-        <Compile Include="FromQSharp.fs" />
+        <Compile Include="NodeCreation.fs" />
+        <Compile Include="AllocationTagging.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Common\Common.csproj" />
+        <ProjectReference Include="..\Simulator\Simulator.csproj" />
     </ItemGroup>
 
 </Project>

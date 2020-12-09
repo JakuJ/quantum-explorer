@@ -1,12 +1,12 @@
 using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
+using Explorer.Pages;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using Index = Explorer.Pages.Index;
 using TestContext = Bunit.TestContext;
 
 namespace Explorer.Tests

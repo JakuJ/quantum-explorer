@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using AstTransformations;
 using Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
+using Simulator;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 using Diagnostic = Microsoft.VisualStudio.LanguageServer.Protocol.Diagnostic;
 using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity;
@@ -38,6 +38,7 @@ namespace Compiler
                     "Microsoft.Quantum.Standard",
                     "Microsoft.Quantum.QSharp.Core",
                     "Microsoft.Quantum.Runtime.Core",
+                    typeof(InterceptingSimulator).Assembly.FullName!,
                 }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
                  .ToArray();
 
@@ -68,7 +69,7 @@ namespace Compiler
         public event EventHandler<string>? OnDiagnostics;
 
         /// <inheritdoc/>
-        public event EventHandler<Dictionary<string, GateGrid>>? OnGrids;
+        public event EventHandler<Dictionary<string, List<GateGrid>>>? OnGrids;
 
         /// <inheritdoc/>
         public event EventHandler<string>? OnOutput;
@@ -76,25 +77,34 @@ namespace Compiler
         /// <inheritdoc/>
         public event EventHandler<List<OperationState>>? OnStatesRecorded;
 
-        private QsCompilation? Compilation { get; set; }
-
         /// <inheritdoc/>
         public async Task Compile(string qsharpCode)
         {
             // do we have an uncommented @EntryPoint?
             bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
 
+            if (!execute)
+            {
+                OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
+                return;
+            }
+
             // to load our custom rewrite step, we need to point Q# compiler config at the rewrite step
             InMemoryEmitter emitter = new();
+            AllocationTagger tagger = new();
             var config = new CompilationLoader.Configuration
             {
-                IsExecutable = execute,
+                IsExecutable = true,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
+                    (tagger, null),
                     (emitter, null),
                 },
             };
+
+            // Auto-open Simulator.Custom in all namespaces
+            qsharpCode = Regex.Replace(qsharpCode, @"namespace\s+\w+\s*{", match => match.Value + "open Simulator.Custom;");
 
             // compile Q# code
             CompilationLoader? compilationLoader;
@@ -134,21 +144,6 @@ namespace Compiler
                 {
                     return;
                 }
-            }
-
-            // communicate that the Q# compilation was successful
-            Compilation = compilationLoader.CompilationOutput;
-
-            Dictionary<string, GateGrid> grids = FromQSharp.GetGates(Compilation);
-            if (Compilation != null && grids.Count > 0)
-            {
-                OnGrids?.Invoke(this, grids);
-            }
-
-            if (Compilation == null || !execute)
-            {
-                OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
-                return;
             }
 
             CSharpCompilation? csharpCompilation;
@@ -203,7 +198,7 @@ namespace Compiler
                 return;
             }
 
-            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == entryPoint.Name);
+            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.FullName == $"{entryPoint.Namespace}.{entryPoint.Name}");
 
             if (type != null)
             {
@@ -220,6 +215,13 @@ namespace Compiler
 
                 OnOutput?.Invoke(this, sim.Messages);
                 OnStatesRecorded?.Invoke(this, recorder.Root.Children);
+
+                Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
+
+                if (grids.Count > 0)
+                {
+                    OnGrids?.Invoke(this, grids);
+                }
             }
             else
             {

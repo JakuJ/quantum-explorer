@@ -1,7 +1,7 @@
 @page "/"
-@using System.Text
-@using Microsoft.Extensions.Logging
 @using Compiler
+@using Microsoft.Extensions.Logging
+@using System.Text
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -10,7 +10,7 @@
     <div class="top-row px-4">
         <Toasts/>
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
-        <LsStatus @ref="status"/>
+        <LsStatus/>
         <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
     </div>
     <Progress @ref="progress"></Progress>
@@ -38,7 +38,6 @@
     private Compositor Compositor;
     private Visualizer Visualizer;
 
-    private LsStatus status;
     private Progress progress;
     private ElementReference compileButtonRef;
 
@@ -48,8 +47,8 @@
     {
         base.OnInitialized();
 
-        Compiler.OnDiagnostics += diagnosticsHandler;
-        Compiler.OnOutput += outputHandler;
+        Compiler.OnDiagnostics += DiagnosticsHandler;
+        Compiler.OnOutput += OutputHandler;
         Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
     }
 
@@ -58,7 +57,7 @@
     {
         if (progress.Running) return;
 
-        await toggleCompilation(true);
+        await ToggleCompilation(true);
         output.Clear();
 
         Visualizer.SetPlaceholder("Processing...");
@@ -70,7 +69,7 @@
             Compiler.Compile(code).ContinueWith(
                 async t =>
                 {
-                    await toggleCompilation(false);
+                    await ToggleCompilation(false);
                     var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
                     Visualizer.SetOutput(messages);
                 },
@@ -89,16 +88,16 @@
 
     #region Compilation event handlers
 
-    private async void diagnosticsHandler(object _, string val)
+    private async void DiagnosticsHandler(object _, string val)
     {
-        await toggleCompilation(false);
+        await ToggleCompilation(false);
         output.AppendLine(val);
         Visualizer.SetOutput(output.ToString());
     }
 
-    private async void outputHandler(object _, string stdout)
+    private async void OutputHandler(object _, string stdout)
     {
-        await toggleCompilation(false);
+        await ToggleCompilation(false);
 
         if (output.Length != 0)
         {
@@ -112,7 +111,7 @@
     #endregion
 
     /// <summary>Toggle the progressbar and whether the compilation button is enabled.</summary>
-    private async Task toggleCompilation(bool running)
+    private async Task ToggleCompilation(bool running)
     {
         progress.Running = running;
         await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);

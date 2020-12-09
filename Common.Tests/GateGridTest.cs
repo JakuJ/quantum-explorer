@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using Microsoft.Quantum.QsCompiler.SyntaxTree;
 using NUnit.Framework;
 
 namespace Common.Tests
@@ -68,24 +67,24 @@ namespace Common.Tests
             GateGrid grid = new();
 
             // Act & Assert
-            grid.AddGate(4, 4, new("SomeOperation")); // resizes to 5x5 then shrinks to 1x5
+            grid.AddGate(4, 4, new QuantumGate("SomeOperation")); // resizes to 5x5 then shrinks to 1x5
             Assert.AreEqual((1, 5), (grid.Width, grid.Height), "Grid should resize correctly");
 
-            grid.AddGate(9, new("SomeOperation")); // resizes to 2x10
+            grid.AddGate(9, new QuantumGate("SomeOperation")); // resizes to 2x10
             Assert.AreEqual((2, 10), (grid.Width, grid.Height), "Grid should resize correctly");
         }
 
         [Test]
-        public void ShrinkingTo0By0()
+        public void ShrinkingTo1By1()
         {
             // Arrange
             GateGrid grid = new(5, 5);
 
             // Act
-            grid.Shrink();
+            grid.AddGate(0, new QuantumGate("TestGate"));
 
             // Assert
-            Assert.AreEqual((0, 0), (grid.Width, grid.Height), "Empty grid should shrink to 0x0 (empty)");
+            Assert.AreEqual((1, 1), (grid.Width, grid.Height), "Empty grid should shrink to 1 by 1");
         }
 
         [Test]
@@ -129,41 +128,6 @@ namespace Common.Tests
 
             // Assert
             Assert.AreEqual((4, 8), (grid.Width, grid.Height), "Empty grid should not be bigger than necessary");
-        }
-
-        [Test]
-        public void SettingQubitIdentifiers()
-        {
-            // Arrange
-            GateGrid grid = new(3, 1);
-
-            // Act
-            grid.SetName(0, "qs[0]");
-            grid.SetName(1, "qs[1]");
-            grid.SetName(2, "SomeQ");
-
-            // maybe try to also expand the grid to see if names persist
-            grid.AddGate(2, new("H"));
-            grid.AddGate(6, new("H"));
-
-            // Assert
-            Assert.AreEqual("qs[0]", grid.Names[0], "An identifier once set should be persistent");
-            Assert.AreEqual("qs[1]", grid.Names[1], "An identifier once set should be persistent");
-            Assert.AreEqual("SomeQ", grid.Names[2], "An identifier once set should be persistent");
-
-            Assert.AreEqual(0, grid.IndexOfName("qs[0]"), "An identifier should map to its corresponding index");
-            Assert.AreEqual(1, grid.IndexOfName("qs[1]"), "An identifier should map to its corresponding index");
-            Assert.AreEqual(2, grid.IndexOfName("SomeQ"), "An identifier should map to its corresponding index");
-
-            Assert.AreEqual(-1, grid.IndexOfName("SomeNonexistentQubit"), "Trying to get the index of a qubit that does not exist returns -1.");
-
-            Assert.DoesNotThrow(
-                () => { grid.SetName(10, "SomeOtherQ"); }, "Setting names to nonexistent qubits works");
-
-            Assert.AreEqual(11, grid.Height, "Setting names to nonexistent qubits expands the grid");
-
-            Assert.Throws<ArgumentException>(
-                () => { grid.SetName(-1, "SomeOtherQ"); }, "Setting names at negative indices is an error");
         }
 
         [Test]
@@ -267,7 +231,7 @@ namespace Common.Tests
             var newGates = grid.Gates.ToArray();
 
             // Assert
-            for (int i = 0; i < gates.Length; i++)
+            for (var i = 0; i < gates.Length; i++)
             {
                 // assuming left-to-right, top-to-bottom order of grid.Gates
                 Assert.AreEqual((gates[expected[i] - '0'], i, 0), newGates[i], "Gates should be in correct order");
@@ -351,50 +315,16 @@ namespace Common.Tests
         }
 
         [Test]
-        public void InsertingRows()
-        {
-            // Arrange
-            GateGrid grid = new();
-            QuantumGate[] gates = SampleGates(3);
-
-            grid.SetName(0, "q0");
-            grid.SetName(1, "q1");
-            grid.SetName(2, "q2");
-
-            grid.AddGate(1, gates[0]);
-            grid.AddGate(2, gates[1]);
-            grid.AddGate(0, gates[2]);
-
-            var expected = new[]
-            {
-                (gates[2], 2, 0),
-                (gates[0], 0, 2),
-                (gates[1], 1, 3),
-            };
-
-            // Act
-            grid.InsertRow(1, "someQ");
-
-            // Assert
-            Assert.IsTrue(grid.Names.SequenceEqual(new[] { "q0", "someQ", "q1", "q2" }), "Qubit should be inserted at the right position");
-            Assert.AreEqual(expected, grid.Gates.ToArray(), "Gates should in the correct positions");
-            Assert.AreEqual((3, 4), (grid.Width, grid.Height), "Grid height should increase");
-        }
-
-        [Test]
         public void RemovingMultiQubitGates()
         {
             // Arrange
             GateGrid grid = new();
 
-            TypedExpression? exp = null; // ReferenceEquals(null, null) is true
-
             QuantumGate[] gates =
             {
-                new("Test", "TestNs", 0, false, exp),
-                new("Test", "TestNs", 1, true, exp),
-                new("Test", "TestNs", 1, true, exp),
-                new("Test", "TestNs", 2, false, exp),
+                new("Test", "TestNs"),
+                new("Test", "TestNs", 1),
+                new("Test", "TestNs", 2),
             };
 
             foreach ((int i, QuantumGate gate) in gates.Enumerate())
@@ -404,10 +334,33 @@ namespace Common.Tests
 
             // Act & Assert
             grid.RemoveAt(0, 1);
-            Assert.AreEqual(3, grid.Gates.Count(), "There should still be 3 arguments left");
+            Assert.AreEqual(2, grid.Gates.Count(), "There should be 2 gates left");
 
             grid.RemoveAt(0, 0);
+            grid.RemoveAt(0, 2);
             Assert.IsEmpty(grid.Gates, "There should be no more gates in the grid");
+        }
+
+        [Test]
+        public void SortingNames()
+        {
+            // Arrange
+            GateGrid grid = new();
+            foreach ((int ix, string name) in new[] { "C", "A", "B", "E", "D" }.Enumerate())
+            {
+                grid.SetName(ix, name);
+                grid.AddGate(ix, new QuantumGate(name));
+            }
+
+            // Act
+            grid.SortRowsByQubitIds();
+
+            // Assert
+            foreach ((int ix, (string name, int column)) in new[] { ("A", 1), ("B", 2), ("C", 0), ("D", 4), ("E", 3) }.Enumerate())
+            {
+                Assert.AreEqual(name, grid.Names[ix], "Qubit IDs should be in correct positions");
+                Assert.AreEqual(name, grid.At(column, ix)!.Value.Name, "Gates should be in correct positions");
+            }
         }
 
         private QuantumGate[] SampleGates(int howMany) => Enumerable.Range(0, howMany).Select(i => new QuantumGate($"Op{i}")).ToArray();

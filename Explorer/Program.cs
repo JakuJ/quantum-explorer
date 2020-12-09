@@ -38,9 +38,12 @@ namespace Explorer
                     string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
                     if (environment == "Development")
                     {
-                        // the PORT variable is provided by Heroku, 8091 is for local development
-                        string port = Environment.GetEnvironmentVariable("PORT") ?? "8091";
-                        webBuilder.UseUrls($"http://*:{port}");
+                        // the PORT variable is provided on Heroku
+                        string? port = Environment.GetEnvironmentVariable("PORT");
+                        if (port != null)
+                        {
+                            webBuilder.UseUrls($"http://*:{port}");
+                        }
                     }
                 });
     }
