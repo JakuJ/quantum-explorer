@@ -28,7 +28,7 @@ namespace Explorer.Tests
             var ed = ctx.RenderComponent<ExamplesDropdown>();
 
             // Assert
-            Assert.AreEqual("Examples", ed.Find("#dropdownMenuButton").TextContent, "Button should contain expected text");
+            Assert.IsTrue(ed.Find("#dropdownMenuButton").TextContent.Contains("Examples"), "Button should contain expected text");
         }
 
         [Test]
