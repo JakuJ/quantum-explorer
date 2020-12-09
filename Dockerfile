@@ -17,6 +17,7 @@ COPY Explorer/*.csproj Explorer/
 COPY Compiler/*.csproj Compiler/
 COPY Compiler.AzureFunction/*.csproj Compiler.AzureFunction/
 COPY Common/*.csproj Common/
+COPY DatabaseHandler/*.csproj DatabaseHandler/
 COPY Simulator/*.csproj Simulator/
 COPY AstTransformations/*.fsproj AstTransformations/
 RUN dotnet restore Explorer/Explorer.csproj
@@ -34,6 +35,7 @@ COPY Explorer/ Explorer/
 COPY Compiler/ Compiler/
 COPY Compiler.AzureFunction/ Compiler.AzureFunction/
 COPY Common/ Common/
+COPY DatabaseHandler/ DatabaseHandler/
 COPY Simulator/ Simulator/
 COPY AstTransformations/ AstTransformations/
 WORKDIR Explorer

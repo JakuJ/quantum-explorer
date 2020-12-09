@@ -65,7 +65,7 @@ let statusRef = null;
 export class Editor {
 
   // Setup the Q# editor and establish a connection to the language server if possible
-  static async InitializeEditor(element, server_url, is_development) {
+  static async InitializeEditor(element, initialCode, server_url, is_development) {
     element.innerHTML = '';
 
     window.editorsDict = window.editorsDict || {};
@@ -102,7 +102,7 @@ export class Editor {
 
     // create the editor instance
     window.editorsDict[id] = monaco.editor.create(element, {
-      model: monaco.editor.createModel(loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
+      model: monaco.editor.createModel(initialCode || loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
       theme: getThemeName(),
       minimap: {
         enabled: false
@@ -198,6 +198,11 @@ export class Editor {
   // Get the code that's currently in the editor
   static GetCode(id) {
     return window.editorsDict[id].getValue();
+  }
+
+  // Set code  in the editor
+  static SetCode(id, code) {
+    return window.editorsDict[id].setValue(code);
   }
 
   // Save the reference to the LS connection status component

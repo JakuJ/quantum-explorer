@@ -1,6 +1,7 @@
 using Bunit;
 using Bunit.TestDoubles;
 using Compiler;
+using DatabaseHandler;
 using Explorer.Pages;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,8 +19,9 @@ namespace Explorer.Tests
         private static TestContext InitializeContext()
         {
             TestContext ctx = new();
-
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.AddSingleton(_ => Mock.Of<ICodeDatabaseHandler>());
+
             ctx.Services.AddSingleton(_ => Mock.Of<ICompiler>());
             ctx.Services.AddSingleton(_ => Mock.Of<IWebHostEnvironment>());
             ctx.Services.AddLogging(builder => builder.AddConsole());

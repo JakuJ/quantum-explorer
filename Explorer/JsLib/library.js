@@ -4,6 +4,7 @@
 export {initializeSplitPanes} from './split-panes';
 export {toggleTheme} from './theme';
 export {Editor} from './editor';
+export {showSharePopOver, initPopOverDestroyer} from './share';
 
 // Helper functions for disabling and enabling DOM elements
 
@@ -13,4 +14,14 @@ export function disable(ref) {
 
 export function enable(ref) {
   ref.disabled = false;
+}
+
+export function copyToClipboard() {
+  const text = $('#link-placeholder').attr('value');
+  navigator.clipboard.writeText(text);
+  $('#copied-toast').toast('show');
+}
+
+export function changeUrl(url) {
+  history.pushState(null, '', url);
 }
