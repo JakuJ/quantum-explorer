@@ -16,11 +16,10 @@ export function enable(ref) {
     ref.disabled = false;
 }
 
-export function copyToClipboard(text) {
-    navigator.clipboard.writeText(text)
-        .catch(function (error) {
-            alert(error);
-        });
+export function copyToClipboard() {
+    var text = $('#link-placeholder').attr('value');
+    navigator.clipboard.writeText(text);
+    $('#copied-toast').toast('show');
 }
 
 export function changeUrl(url) {
