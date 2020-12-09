@@ -261,6 +261,6 @@ select:focus {
 }
 
 .dropdown-menu > a.dropdown-item:hover {
-    background-color: var(--background);
+    background-color: var(--hover);
     cursor: pointer;
 }

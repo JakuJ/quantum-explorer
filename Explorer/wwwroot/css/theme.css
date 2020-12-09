@@ -6,6 +6,7 @@
   --text-secondary: #808080;
   --error-background: lightyellow;
   --shadow: rgba(0, 0, 0, 0.2);
+  --hover: #bfbfbf;
   /* re-exported from Bootstrap */
   --link: var(--primary);
   --valid: var(--green);
@@ -19,4 +20,5 @@
   --text: #e2e2e2;
   --error-background: var(--surface);
   --shadow: rgba(255, 255, 255, 0.2);
+  --hover: #262626;
 }
