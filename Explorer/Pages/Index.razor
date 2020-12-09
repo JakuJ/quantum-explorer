@@ -1,9 +1,9 @@
 @page "/"
 @using System.Text
 @using Microsoft.Extensions.Logging
-@using Microsoft.Quantum.QsCompiler.SyntaxTree
-@using AstTransformations
 @using Compiler
+@using AstTransformations
+@using Microsoft.Quantum.QsCompiler.SyntaxTree
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -72,7 +72,7 @@
                 async t =>
                 {
                     await toggleCompilation(false);
-                    var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
+                    string messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
                     Visualizer.SetOutput(messages);
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
