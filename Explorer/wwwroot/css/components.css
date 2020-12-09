@@ -219,6 +219,10 @@ select:focus {
     border-color: transparent;
 }
 
+.bar-btn:focus {
+    outline: none;
+}
+
 .share-popover {
     display: flex;
     align-items: center;
@@ -226,10 +230,37 @@ select:focus {
 
 .share-link {
     flex: 1;
+    width: 250px;
+    color: var(--text);
 }
 
 .share-copy-btn {
     flex: 0 0;
-    margin-left: 2px;
-    height: 2em;
+    margin-left: 5px;
+    height: 20px;
+    fill: var(--text);
+    color: var(--text);
+    cursor: pointer;
+    background: transparent;
+}
+
+.popover {
+    background: var(--accent);
+}
+
+.bs-popover-bottom > .arrow::after {
+    border-bottom-color: var(--accent);
+}
+
+.dropdown-menu {
+    background-color: var(--accent);
+}
+
+.dropdown-menu > a.dropdown-item {
+    color: var(--text);
+}
+
+.dropdown-menu > a.dropdown-item:hover {
+    background-color: var(--background);
+    cursor: pointer;
 }
