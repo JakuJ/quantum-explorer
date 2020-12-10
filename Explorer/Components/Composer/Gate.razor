@@ -16,7 +16,7 @@
             <GateControl/>
             break;
         default:
-            <span class="gate-name">@Name</span>
+            <span class="gate-name">@TruncatedName</span>
             break;
     }
 </div>
@@ -48,4 +48,6 @@
     public string Id { get; } = UniqueId.CreateUniqueId();
 
     private string BorderStr => Border ? "gate-border" : "";
+
+    private string TruncatedName => Name.Substring(0, Math.Min(Name.Length, 3));
 }
