@@ -4,7 +4,7 @@
 @inject NavigationManager NavigationManager;
 
 <div>
-    <button class="bar-btn" id="popoverShareButton" @onclick="OnClicked">Share</button>
+    <button class="bar-btn" id="popoverShareButton" @onclick="OnClicked" disabled="@IsDisabled">Share</button>
     <div id="popover-content" class="d-none">
         <div class="share-popover">
             <input type="text" id="link-placeholder" readonly class="form-control-plaintext share-link" onfocus="this.select();">
@@ -17,6 +17,9 @@
 @code {
     [Parameter]
     public Func<Task<string>>? GetCode { get; set; }
+
+    [Parameter]
+    public bool IsDisabled { get; set; } = true;
 
     string sharedLink = "";
     string? sharedCode = null;

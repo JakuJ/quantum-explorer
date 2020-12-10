@@ -102,6 +102,7 @@ namespace Compiler
             {
                 IsExecutable = true,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
+                GenerateFunctorSupport = true,
                 RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
                     (new AllocationTagger(userNamespaces), null),
