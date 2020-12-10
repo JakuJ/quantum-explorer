@@ -34,7 +34,10 @@ namespace Explorer.Tests
             GateGrid grid = new();
             grid.AddGate(0, new QuantumGate("H"));
             grid.AddGate(1, new QuantumGate("MResetZ"));
-            Dictionary<string, List<GateGrid>> ast = new() { { "tab1", new List<GateGrid>() { grid } } };
+            grid.AddGate(2, new QuantumGate("X"));
+            grid.AddGate(3, CustomGateFactory.MakeCustomGate("__control__"));
+            grid.AddGate(4, new QuantumGate("ResetAll"));
+            Dictionary<string, List<GateGrid>> ast = new() { { "ExampleNamespace.Tab1", new List<GateGrid>() { grid } } };
 
             // Act
             IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
