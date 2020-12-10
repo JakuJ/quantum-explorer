@@ -162,7 +162,7 @@ input.rename-input {
 
 /* the tab bar */
 .nav-tabs {
-  display: table;
+  display: contents;
   border-color: var(--accent);
 }
 
