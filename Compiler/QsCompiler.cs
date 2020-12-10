@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
+using Simulator;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 using Diagnostic = Microsoft.VisualStudio.LanguageServer.Protocol.Diagnostic;
 using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity;
@@ -20,45 +21,45 @@ using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.Diagno
 namespace Compiler
 {
     /// <inheritdoc />
-    /// <remarks>
-    /// Inspired by <see cref="!:https://www.strathweb.com/2020/08/running-q-compiler-and-simulation-programmatically-from-a-c-application/"/>.
-    /// </remarks>
     public class QsCompiler : ICompiler
     {
         private static string[]? qsharpReferences;
         private static string[]? csharpReferences;
         private static References? cachedRefs;
 
-        private readonly ILogger<QsCompiler> logger;
+        private readonly ILogger logger;
         private readonly string filename = $"__{UniqueId.CreateUniqueId()}__.qs";
-        private readonly List<FilesEmittedArgs> eventQueue = new();
 
         private static void InitializeReferences()
         {
             // necessary references to compile our Q# program
             qsharpReferences ??= new[]
-            {
-                "Microsoft.Quantum.Standard",
-                "Microsoft.Quantum.QSharp.Core",
-                "Microsoft.Quantum.Runtime.Core",
-            }.Select(x => Assembly.Load(new AssemblyName(x))).Select(a => a.Location).ToArray();
+                {
+                    "Microsoft.Quantum.Standard",
+                    "Microsoft.Quantum.QSharp.Core",
+                    "Microsoft.Quantum.Runtime.Core",
+                    typeof(InterceptingSimulator).Assembly.FullName!,
+                }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
+                 .ToArray();
 
             // necessary references to compile C# simulation of the Q# compilation
             csharpReferences ??= new[]
-            {
-                "Microsoft.Quantum.Simulators",
-                "Microsoft.Quantum.EntryPointDriver",
-                "System.CommandLine",
-                "System.Runtime",
-                "netstandard",
-                "System.Collections.Immutable",
-                typeof(object).Assembly.FullName,
-            }.Select(x => Assembly.Load(new AssemblyName(x!))).Select(a => a.Location).Concat(qsharpReferences).ToArray();
+                {
+                    "Microsoft.Quantum.Simulators",
+                    "Microsoft.Quantum.EntryPointDriver",
+                    "System.CommandLine",
+                    "System.Runtime",
+                    "netstandard",
+                    "System.Collections.Immutable",
+                    typeof(object).Assembly.FullName!, // never null
+                }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
+                 .Concat(qsharpReferences)
+                 .ToArray();
         }
 
         /// <summary>Initializes a new instance of the <see cref="QsCompiler"/> class.</summary>
-        /// <param name="logger">A <see cref="Logger"/> instance to log compilation messages with.</param>
-        public QsCompiler(ILogger<QsCompiler> logger)
+        /// <param name="logger">An <see cref="ILogger"/> instance to log compilation messages with.</param>
+        public QsCompiler(ILogger logger)
         {
             this.logger = logger;
             InitializeReferences();
@@ -68,7 +69,7 @@ namespace Compiler
         public event EventHandler<string>? OnDiagnostics;
 
         /// <inheritdoc/>
-        public event EventHandler<QsCompilation>? OnCompilation;
+        public event EventHandler<Dictionary<string, List<GateGrid>>>? OnGrids;
 
         /// <inheritdoc/>
         public event EventHandler<string>? OnOutput;
@@ -77,32 +78,33 @@ namespace Compiler
         public event EventHandler<List<OperationState>>? OnStatesRecorded;
 
         /// <inheritdoc/>
-        public QsCompilation? Compilation { get; private set; }
-
-        /// <inheritdoc/>
         public async Task Compile(string qsharpCode)
         {
+            // do we have an uncommented @EntryPoint?
             bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
 
-            // to load our custom rewrite step, we need to point Q# compiler config at our current assembly
+            if (!execute)
+            {
+                OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
+                return;
+            }
+
+            // to load our custom rewrite step, we need to point Q# compiler config at the rewrite step
+            InMemoryEmitter emitter = new();
+            AllocationTagger tagger = new();
             var config = new CompilationLoader.Configuration
             {
-                IsExecutable = execute, // do we have an uncommented @EntryPoint?
+                IsExecutable = true,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
-                RewriteStepAssemblies = new (string, string?)[]
+                RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
-                    (Assembly.GetExecutingAssembly().Location, null),
+                    (tagger, null),
+                    (emitter, null),
                 },
             };
 
-            void Handler(object? sender, FilesEmittedArgs args)
-            {
-                eventQueue.Add(args);
-            }
-
-            eventQueue.Clear();
-
-            InMemoryEmitter.FilesGenerated += Handler;
+            // Auto-open Simulator.Custom in all namespaces
+            qsharpCode = Regex.Replace(qsharpCode, @"namespace\s+\w+\s*{", match => match.Value + "open Simulator.Custom;");
 
             // compile Q# code
             CompilationLoader? compilationLoader;
@@ -122,13 +124,12 @@ namespace Compiler
                     // Bond DLL deserialization throws this from QDK v0.13.* onwards when IsExecutable is true but the user provides no @EntryPoint
                     // We have unit tests assuring that this should never happen
                     // This try/catch block exists just to be extra safe
-                    logger.LogError($"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
+                    logger.LogError(
+                        $"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
                     OnDiagnostics?.Invoke(this, "No entry point operation specified.\nDecorate the main method with the @EntryPoint attribute.");
                     return;
                 }
             }
-
-            InMemoryEmitter.FilesGenerated -= Handler;
 
             // print any diagnostics
             ImmutableArray<Diagnostic> diags = compilationLoader.LoadDiagnostics;
@@ -145,33 +146,11 @@ namespace Compiler
                 }
             }
 
-            // communicate that the Q# compilation was successful
-            Compilation = compilationLoader.CompilationOutput;
-
-            if (Compilation == null || !execute)
-            {
-                OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
-                return;
-            }
-
-            OnCompilation?.Invoke(this, Compilation);
-
-            // find our generated files
-            Dictionary<string, string>? generatedFiles = (from args in eventQueue
-                                                          where args.CompilationHash == Compilation.GetHashCode()
-                                                          select args.FileContents).FirstOrDefault();
-
-            if (generatedFiles == null)
-            {
-                logger.LogError("Couldn't find generated files in the event queue");
-                return;
-            }
-
             CSharpCompilation? csharpCompilation;
             using (new ScopedTimer("Compiling C# driver code", logger))
             {
                 // we captured the emitted C# syntax trees into a static variable in the rewrite step
-                IEnumerable<SyntaxTree> syntaxTrees = generatedFiles.Select(x => CSharpSyntaxTree.ParseText(x.Value));
+                IEnumerable<SyntaxTree> syntaxTrees = emitter.FileContents.Select(x => CSharpSyntaxTree.ParseText(x.Value));
 
                 // compile C# code
                 // make sure to pass in the C# references as Roslyn's metadata references
@@ -182,7 +161,7 @@ namespace Compiler
             // print any diagnostics
             var csharpDiagnostics = csharpCompilation
                                    .GetDiagnostics()
-                                   .Where(d => d is { Severity: not Hidden, Id: not "CS1701" or "CS1702" })
+                                   .Where(d => d is { Severity: not Hidden, Id: not "CS1701" and not "CS1702" })
                                    .ToList();
             if (csharpDiagnostics.Any())
             {
@@ -197,6 +176,7 @@ namespace Compiler
                 }
             }
 
+            // measure execution time
             using var timer = new ScopedTimer("Executing simulation", logger);
 
             // emit C# code into an in-memory assembly
@@ -208,7 +188,7 @@ namespace Compiler
             QSharpLoadContext qsharpLoadContext = new();
             Assembly qsharpAssembly = qsharpLoadContext.LoadFromStream(peStream);
 
-            // get the @Entrypoint() operation
+            // get the @EntryPoint() operation
             QsQualifiedName? entryPoint = compilationLoader.CompilationOutput?.EntryPoints.FirstOrDefault();
 
             if (entryPoint == null)
@@ -218,12 +198,11 @@ namespace Compiler
                 return;
             }
 
-            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == entryPoint.Name);
+            Type? type = qsharpAssembly.GetExportedTypes().FirstOrDefault(x => x.FullName == $"{entryPoint.Namespace}.{entryPoint.Name}");
 
             if (type != null)
             {
                 using InterceptingSimulator sim = new();
-
                 var recorder = new StateRecorder(sim);
 
                 // simulate the entry point operation using reflection
@@ -236,6 +215,13 @@ namespace Compiler
 
                 OnOutput?.Invoke(this, sim.Messages);
                 OnStatesRecorded?.Invoke(this, recorder.Root.Children);
+
+                Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
+
+                if (grids.Count > 0)
+                {
+                    OnGrids?.Invoke(this, grids);
+                }
             }
             else
             {

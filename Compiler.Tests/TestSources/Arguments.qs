@@ -9,7 +9,7 @@ namespace Arguments {
 
     operation Ignored(num: Int, nums: Int[]): Unit {}
 
-    // test operation
+    @EntryPoint()
     operation TestOp(): Unit {
         using (qs = Qubit[5]) {
             X(qs[0]);

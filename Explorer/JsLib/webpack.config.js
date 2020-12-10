@@ -1,9 +1,9 @@
 const path = require('path');
-const webpack = require('webpack');
+
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging';
 
 module.exports = {
   mode: isDev ? 'development' : 'production',
@@ -55,11 +55,6 @@ module.exports = {
         '!toggleHighContrast',
         '!toggleTabFocusMode',
       ],
-    }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      // TODO: Use os.tempdir() for local development when qsharp-compiler#737 gets resolved
-      'process.env.TEMP_DIR': JSON.stringify('/tmp'),
     })
   ]
 };

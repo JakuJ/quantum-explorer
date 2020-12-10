@@ -4,10 +4,14 @@
 
   <PropertyGroup>
     <RootNamespace>Common</RootNamespace>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.14.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.14.2011120240" />
   </ItemGroup>
 
 </Project>

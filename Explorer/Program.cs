@@ -26,19 +26,24 @@ namespace Explorer
                .CreateDefaultBuilder(args)
                .ConfigureLogging(logBuilder =>
                 {
-                    logBuilder.AddConsole();
-                    logBuilder.AddDebug();
-                    logBuilder.AddEventSourceLogger();
+                    logBuilder.AddConsole()
+                              .AddDebug()
+                              .AddEventSourceLogger();
                 })
                .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                              .UseStaticWebAssets();
 
-                    // This environment variable is set when running on Heroku
-                    string? port = Environment.GetEnvironmentVariable("PORT");
-                    if (port != null)
+                    string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+                    if (environment == "Development")
                     {
-                        webBuilder.UseUrls($"http://*:{port}");
+                        // the PORT variable is provided on Heroku
+                        string? port = Environment.GetEnvironmentVariable("PORT");
+                        if (port != null)
+                        {
+                            webBuilder.UseUrls($"http://*:{port}");
+                        }
                     }
                 });
     }

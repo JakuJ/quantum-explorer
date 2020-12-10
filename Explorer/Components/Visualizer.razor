@@ -1,7 +1,5 @@
-@using Compiler;
-@using System.Diagnostics.CodeAnalysis;
-@using System.Numerics;
-
+@using Compiler
+@using System.Numerics
 <div class="visualizer vis-container">
     <div class="nav-tabs-container">
         <ul class="nav nav-tabs">
@@ -114,13 +112,13 @@
                 return "100%";
             }
 
-            int binLength = (int)Math.Ceiling(Math.Log2(chartData.Count()));
+            var binLength = (int)Math.Ceiling(Math.Log2(chartData.Count()));
             return 136 + (15 * (binLength + 2) + 20) * chartData.Count() + "px";
         }
     }
 
     /// <summary>
-    /// Sets text in placeholder.
+    /// Displays text in the placeholder.
     /// </summary>
     /// <param name="text">Text to be set in placeholder.</param>
     public async void SetPlaceholder(string text) => await SetText(text, true);
@@ -152,15 +150,15 @@
     }
 
     /// <summary>
-    /// Transforms chosen operation state to displayable list binded to chart
+    /// Transforms chosen operation state to a displayable list binded to the chart.
     /// </summary>
     private void CreateDisplayList()
     {
-        List<(int idx, Complex v)>? list = (dataType == "Arguments") ? selectedOperation?.Arguments : selectedOperation?.Results;
+        List<(int idx, Complex v)>? list = dataType == "Arguments" ? selectedOperation?.Arguments : selectedOperation?.Results;
 
         if (list == null) return;
 
-        int binLength = (int)Math.Ceiling(Math.Log2(list.Count)); //calculate number of qubits to include in labels
+        var binLength = (int)Math.Ceiling(Math.Log2(list.Count)); //calculate number of qubits to include in labels
 
         if (!showZeros)
         {
@@ -169,13 +167,14 @@
 
         chartData = list.Select(pair => new DataItem
         {
-            Idx = '|' + new String(Convert.ToString(pair.idx, 2).PadLeft(binLength, '0').Reverse().ToArray()) + '>',
+            Idx = '|' + new string(Convert.ToString(pair.idx, 2).PadLeft(binLength, '0').Reverse().ToArray()) + '>',
             Real = pair.v.Real,
-            Imaginary = pair.v.Imaginary
+            Imaginary = pair.v.Imaginary,
         });
     }
+
     /// <summary>
-    /// Displays chart on operation choosing
+    /// Displays the chart whenever an operation is chosen.
     /// </summary>
     private void ShowOperationState(TreeEventArgs args)
     {
@@ -187,7 +186,7 @@
     }
 
     /// <summary>
-    /// Filter zero states and update chart
+    /// Filter out zero states and update the chart.
     /// </summary>
     private void ZerosSwitch(ChangeEventArgs checkedValue)
     {
@@ -199,11 +198,11 @@
     }
 
     /// <summary>
-    /// Switch between operation's arguments and results, then update the chart
+    /// Switch between an operation's arguments and results, then update the chart.
     /// </summary>
     private void DataTypeChanged(ChangeEventArgs e)
     {
-        string? selected = e.Value?.ToString();
+        var selected = e.Value?.ToString();
         if (selected == null || selected == dataType) return;
 
         dataType = selected;

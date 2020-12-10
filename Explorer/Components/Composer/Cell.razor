@@ -1,12 +1,12 @@
-@using Compiler
+@using Common
 @using Microsoft.Extensions.Logging
 @inject ILogger<Cell> Logger;
 
-<SnapPoint X="@X" Y="@Y" Half="@false" @ref="snapPoint" Locked="@(QuantumGate != null)"/>
+<SnapPoint X="@X" Y="@Y" Half="@false" @ref="snapPoint" Locked="@(QuantumGate.HasValue && QuantumGate?.Name != null)"/>
 <div class="grid-cell">
-    @if (QuantumGate != null)
+    @if (QuantumGate.HasValue && QuantumGate?.Name != null)
     {
-        <Gate Name="@(QuantumGate.Name)" @ref="gate"/>
+        <Gate Name="@(QuantumGate?.Name)" @ref="gate"/>
     }
 </div>
 

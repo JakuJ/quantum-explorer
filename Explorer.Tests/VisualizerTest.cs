@@ -100,7 +100,7 @@ namespace Explorer.Tests
         {
             List<(int Idx, Complex Value)> states = new();
 
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 states.Add((i, i < zerosCount ? Complex.Zero : new Complex(Random.NextDouble() * 2 - 1, Random.NextDouble() * 2 - 1)));
             }
@@ -111,9 +111,9 @@ namespace Explorer.Tests
         private static IEnumerable<OperationState> GenerateSampleStates(IEnumerable<int> sizes)
         {
             List<OperationState> states = new();
-            bool addAsChild = false;
+            var addAsChild = false;
 
-            foreach (var size in sizes)
+            foreach (int size in sizes)
             {
                 var operation = new OperationState(new string('A', size))
                 {
@@ -123,7 +123,7 @@ namespace Explorer.Tests
 
                 if (addAsChild)
                 {
-                    states[^1].AddOperation(operation);
+                    states[^1].Children.Add(operation);
                 }
                 else
                 {

@@ -1,7 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 using Compiler;
+using Compiler.AzureFunction;
+using Compiler.AzureFunction.Connection;
+using DatabaseHandler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,21 +17,25 @@ namespace Explorer
     [ExcludeFromCodeCoverage]
     public class Startup
     {
-        public Startup(IConfiguration configuration) => Configuration = configuration;
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        {
+            Configuration = configuration;
+            Env = env;
+        }
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public IWebHostEnvironment Env { get; }
+
+        public void Configure(IApplicationBuilder app)
         {
-            if (env.IsProduction())
+            if (Env.IsDevelopment())
             {
-                app.UseExceptionHandler("/Error")
-                   .UseHttpsRedirection();
+                app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseDeveloperExceptionPage();
+                app.UseExceptionHandler("/Error");
             }
 
             app.UseRouting()
@@ -43,7 +51,26 @@ namespace Explorer
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
+            services.AddSingleton(_ => Env);
+
+            if (Env.IsProduction())
+            {
+                services.AddScoped<ICompiler>(container =>
+                {
+                    var client = new AzureFunctionClient(container.GetRequiredService<ILogger<AzureFunctionClient>>());
+                    return new AzureFunctionCompiler(client, container.GetRequiredService<ILogger<AzureFunctionCompiler>>());
+                });
+            }
+            else
+            {
+                services.AddScoped<ICompiler>(container => new QsCompiler(container.GetRequiredService<ILogger<QsCompiler>>()));
+            }
+
+            services.AddDbContext<CodeDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DatabaseConnection"),
+                    x => x.MigrationsAssembly("DatabaseHandler")));
+            services.AddScoped<ICodeDatabaseHandler, CodeDatabaseHandler>();
         }
     }
 }

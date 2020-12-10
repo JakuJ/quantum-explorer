@@ -1,4 +1,6 @@
+@inject IJSRuntime JsRuntime
 @using System.Text.Json.Serialization
+@implements IDisposable
 
 <div id="ls-status" class="alert alert-light" role="alert">
     @switch (state)
@@ -41,20 +43,37 @@
         Disconnected,
         Connecting,
         Connected,
-        SyntaxOnly
+        SyntaxOnly,
     }
+
+    private DotNetObjectReference<LsStatus>? reference;
 
     private ConnectionState state = ConnectionState.Disconnected;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // Save the reference to be used by the JS Editor class
+        reference = DotNetObjectReference.Create(this);
+        await JsRuntime.InvokeVoidAsync("Library.Editor.SetStatusReference", reference);
+    }
+
     /// <summary>
-    /// Sets state displayed in component.
+    /// Sets state displayed in the component.
     /// </summary>
-    /// <param name="_state"><see cref="ConnectionState"/> representing LS status.</param>
+    /// <param name="_state"><see cref="ConnectionState"/> representing LS connection status.</param>
     [JSInvokable]
     public void SetState(ConnectionState _state)
     {
         state = _state;
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        reference?.Dispose();
     }
 
 }

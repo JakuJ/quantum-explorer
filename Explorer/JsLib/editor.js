@@ -11,11 +11,6 @@ import {v4 as uuidv4} from 'uuid';
 
 //#region Constants
 
-// Websocket connection
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const PRODUCTION_HOST = 'qexplorer-ls.herokuapp.com';
-const WEBSOCKET_ENDPOINT = 'monaco-editor';
-
 // Custom editor theme identifiers
 const LIGHT_THEME_NAME = 'vs-code-custom-light-theme';
 const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
@@ -23,8 +18,9 @@ const DARK_THEME_NAME = 'vs-code-custom-dark-theme';
 // URIs for the language server
 const UUID = uuidv4();
 const WORKSPACE_NAME = `${UUID}-workspace`;
-const WORKSPACE_URI = monaco.Uri.parse(`file://${process.env.TEMP_DIR}/qsharp/${WORKSPACE_NAME}`);
-const FILE_URI = monaco.Uri.parse(`file://${process.env.TEMP_DIR}/qsharp/${WORKSPACE_NAME}/_content_.qs`);
+const TEMP_DIR = '/tmp';
+const WORKSPACE_URI = monaco.Uri.parse(`file://${TEMP_DIR}/qsharp/${WORKSPACE_NAME}`);
+const FILE_URI = monaco.Uri.parse(`file://${TEMP_DIR}/qsharp/${WORKSPACE_NAME}/_content_.qs`);
 const LANGUAGE_ID = 'qsharp';
 
 // Paths to files in the syntax directory
@@ -68,9 +64,8 @@ let statusRef = null;
 
 export class Editor {
 
-  static async InitializeEditor(element) {
-    await loadWASM(ONIGASM_FILE);
-
+  // Setup the Q# editor and establish a connection to the language server if possible
+  static async InitializeEditor(element, initialCode, server_url, is_development) {
     element.innerHTML = '';
 
     window.editorsDict = window.editorsDict || {};
@@ -78,13 +73,17 @@ export class Editor {
 
     const id = 'id' + (window.editorsCounter++);
 
-    //register qsharp language in monaco
+    // preload onigasm
+    await loadWASM(ONIGASM_FILE);
+
+    // register the Q# language
     monaco.languages.register({
       id: LANGUAGE_ID,
       extensions: ['qs'],
       aliases: ['Q#', 'qsharp']
     });
 
+    // set up the registry with our custom grammar
     const registry = new Registry({
       getGrammarDefinition: async () => ({
         format: 'json',
@@ -92,7 +91,7 @@ export class Editor {
       })
     });
 
-    //define themes in editor
+    // define light and dark themes
     monaco.editor.defineTheme(LIGHT_THEME_NAME,
       await fetch(LIGHT_THEME_JSON).then(x => x.json())
     );
@@ -101,9 +100,9 @@ export class Editor {
       await fetch(DARK_THEME_JSON).then(x => x.json())
     );
 
-    //create monaco editor
+    // create the editor instance
     window.editorsDict[id] = monaco.editor.create(element, {
-      model: monaco.editor.createModel(loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
+      model: monaco.editor.createModel(initialCode || loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
       theme: getThemeName(),
       minimap: {
         enabled: false
@@ -121,24 +120,24 @@ export class Editor {
       foldingStrategy: 'indentation',
     });
 
-    //install services required to communicate with LS
+    // install Monaco services required to communicate with the LS
     MonacoServices.install(window.editorsDict[id]);
 
+    // wire TM grammars
     const grammars = new Map([[LANGUAGE_ID, 'source.qsharp']]);
     await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
 
+    // enable dynamic layout changes
     new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
 
-    //add command to save code
+    // bind the save command to Ctrl+S
     window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
       saveCode(window.editorsDict[id].getValue());
     });
 
     // create the web socket
-    const url = IS_PRODUCTION
-      ? `wss://${PRODUCTION_HOST}/${WEBSOCKET_ENDPOINT}`
-      : `ws://localhost:8091/${WEBSOCKET_ENDPOINT}`;
-    const webSocket = createWebSocket(url);
+    const url = `${server_url}/monaco-editor`;
+    const webSocket = createWebSocket(url, is_development);
 
     // listen when the web socket is opened
     listen({
@@ -147,20 +146,22 @@ export class Editor {
         // create and start the language client
         const languageClient = createLanguageClient(connection);
         const disposable = languageClient.start();
-
         const con = await languageClient.connectionProvider.get();
 
+        // gracefully stop the client on page closed
         window.addEventListener('beforeunload', () => {
           languageClient.stop();
         });
 
         con.onLogMessage(async ({message}) => {
-          if (!IS_PRODUCTION) {
+          // log detailed LS connection messages outside production
+          if (is_development) {
             console.log(message);
           }
 
           let status = null;
 
+          // change LS status based on received notifications
           switch (true) {
           case message.startsWith('Discovered Q# project'):
             status = 'Connecting';
@@ -183,9 +184,10 @@ export class Editor {
           await statusRef.invokeMethodAsync('SetState', status);
         });
 
-        // Invoked when the connection is closed by the server
+        // Dispose when the connection is closed by the server
         connection.onClose(async () => {
           disposable.dispose();
+          await statusRef.invokeMethodAsync('SetState', 'Disconnected');
         });
       },
     });
@@ -193,14 +195,17 @@ export class Editor {
     return id;
   }
 
+  // Get the code that's currently in the editor
   static GetCode(id) {
     return window.editorsDict[id].getValue();
   }
 
+  // Set code  in the editor
   static SetCode(id, code) {
-    window.editorsDict[id].setValue(code);
+    return window.editorsDict[id].setValue(code);
   }
 
+  // Save the reference to the LS connection status component
   static SetStatusReference(ref) {
     statusRef = ref;
   }
@@ -214,14 +219,14 @@ function getThemeName() {
   return localStorage.getItem('theme') === 'dark' ? DARK_THEME_NAME : LIGHT_THEME_NAME;
 }
 
-function createWebSocket(url) {
+function createWebSocket(url, is_development) {
   const socketOptions = {
     maxReconnectionDelay: 10000,
     minReconnectionDelay: 1000,
     reconnectionDelayGrowFactor: 1.3,
     connectionTimeout: 10000,
     maxRetries: Infinity,
-    debug: !IS_PRODUCTION,
+    debug: is_development,
   };
   return new ReconnectingWebSocket(url, [], socketOptions);
 }

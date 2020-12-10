@@ -4,15 +4,16 @@
 
   <PropertyGroup>
     <RootNamespace>Compiler</RootNamespace>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup Label="Projects">
-    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
+    <ProjectReference Include="..\Simulator\Simulator.csproj" />
   </ItemGroup>
 
   <ItemGroup Label="Packages">
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
-    <PackageReference Include="Microsoft.Quantum.Compiler" Version="0.14.2011120240" />
     <PackageReference Include="Microsoft.Quantum.Simulators" Version="0.14.2011120240" />
     <PackageReference Include="Microsoft.Quantum.CsharpGeneration" Version="0.14.2011120240" />
     <PackageReference Include="Microsoft.Quantum.EntryPointDriver" Version="0.14.2011120240" />

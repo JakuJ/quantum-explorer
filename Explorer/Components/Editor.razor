@@ -1,11 +1,17 @@
+@using Microsoft.Extensions.Hosting
+@using Microsoft.AspNetCore.Hosting
 @inject IJSRuntime JSRuntime
+@inject IWebHostEnvironment Env
 
 <div id="editor" @ref="editorRootRef"></div>
 
 @code {
     private ElementReference editorRootRef;
 
-    private string? editorId;
+    private string editorId = "";
+
+    [Parameter]
+    public Func<string?>? GetInitialCode { get; set; }
 
     /// <summary>Asynchronously gets code stored in Editor component.</summary>
     /// <returns>An awaitable <see cref="Task"/> returning <see cref="string"/>.</returns>
@@ -13,32 +19,20 @@
     => await JSRuntime.InvokeAsync<string>("Library.Editor.GetCode", editorId).AsTask();
 
     /// <summary>Asynchronously sets code in Editor component.</summary>
-    /// <param name="code">Q# code as a plain string.</param>
+    /// <param name="code">Code to be set</param>
     /// <returns>An awaitable <see cref="Task"/>.</returns>
     public async Task SetCode(string code)
-    {
-        if (editorId != null)
-        {
-            await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code);
-        }
-    }
+    => await JSRuntime.InvokeVoidAsync("Library.Editor.SetCode", editorId, code).AsTask();
 
-    /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef);
+            string? initialCode = GetInitialCode?.Invoke();
+            bool isDevelopment = Env.IsDevelopment();
+            string lsHost = Environment.GetEnvironmentVariable("LANGUAGE_SERVER_URL") ?? "ws://localhost:8091";
+            editorId = await JSRuntime.InvokeAsync<string>("Library.Editor.InitializeEditor", editorRootRef, initialCode, lsHost, isDevelopment);
         }
-    }
-
-    /// <summary>Saves the reference to an instance of <see cref="LsStatus"/> to be used by the JS Editor class.</summary>
-    /// <param name="target"><see cref="LsStatus"/> component instance to pass to the Editor class on the JS side.</param>
-    /// <returns>An awaitable <see cref="Task"/>.</returns>
-    public async Task SetStatusReference(LsStatus target)
-    {
-        var objRef = DotNetObjectReference.Create(target);
-        await JSRuntime.InvokeVoidAsync("Library.Editor.SetStatusReference", objRef);
     }
 
 }

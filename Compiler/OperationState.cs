@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace Compiler
@@ -7,7 +6,6 @@ namespace Compiler
     /// <summary>
     /// A class for keeping information about quantum operation.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     public class OperationState
     {
         /// <summary>
@@ -20,11 +18,6 @@ namespace Compiler
         /// Gets a name of the operation.
         /// </summary>
         public string Name { get; }
-
-        /// <summary>
-        /// Gets the parent operation.
-        /// </summary>
-        public OperationState? Parent { get; private set; }
 
         /// <summary>
         /// Gets a list of operations that are run inside this operation.
@@ -40,15 +33,5 @@ namespace Compiler
         /// Gets or sets a list of complex numbers that represent quantum states of results represented by index.
         /// </summary>
         public List<(int Idx, Complex Value)>? Results { get; set; }
-
-        /// <summary>
-        /// Adds child operation.
-        /// </summary>
-        /// <param name="child">Child operation run in this operation.</param>
-        public void AddOperation(OperationState child)
-        {
-            child.Parent = this;
-            Children.Add(child);
-        }
     }
 }

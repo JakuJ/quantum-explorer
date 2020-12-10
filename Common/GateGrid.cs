@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using Common;
 
-namespace Compiler
+namespace Common
 {
     /// <summary>Represents a grid of quantum gates.</summary>
     public class GateGrid
@@ -21,7 +20,7 @@ namespace Compiler
         public GateGrid(int height, int width) => Expand(width, height);
 
         /// <summary>Gets the array of identifiers associated with the qubits.</summary>
-        public List<string?> Names { get; } = new();
+        public List<string?> Names { get; private set; } = new();
 
         /// <summary>Gets the length of the longest lane in this grid.</summary>
         public int Width => grid.Count;
@@ -46,19 +45,22 @@ namespace Compiler
                     for (var x = 0; x < Width; x++)
                     {
                         QuantumGate? gate = grid[x][y];
-                        if (gate != null)
+                        if (gate.HasValue)
                         {
-                            yield return (gate, x, y);
+                            yield return (gate.Value, x, y);
                         }
                     }
                 }
             }
         }
 
-        /// <summary>Return which row on the grid corresponds to a given qubit identifier.</summary>
-        /// <param name="name">The identifier to look for.</param>
-        /// <returns>Index of the qubit corresponding to this name (-1 if not found).</returns>
-        public int IndexOfName(string name) => Names.FindIndex(x => x == name);
+        /// <summary>
+        /// Gets the gate at a given position.
+        /// </summary>
+        /// <param name="x">Row.</param>
+        /// <param name="y">Column.</param>
+        /// <returns>A gate if present at the position, null otherwise.</returns>
+        public QuantumGate? At(int x, int y) => grid.ElementAtOrDefault(x)?.ElementAtOrDefault(y);
 
         /// <summary>Set an identifier of a qubit.</summary>
         /// <param name="qubit">The index of the qubit.</param>
@@ -129,7 +131,7 @@ namespace Compiler
 
             QuantumGate? gate = grid[x][y];
 
-            if (gate == null)
+            if (!gate.HasValue)
             {
                 throw new ArgumentException($"There is no gate at location ({x}, {y})");
             }
@@ -138,27 +140,11 @@ namespace Compiler
 
             if (moving)
             {
-                return gate;
-            }
-
-            // Remove all other gates of the same operation if this one was not part of an array
-            if (!gate.ArgArray)
-            {
-                for (x = 0; x < Width; x++)
-                {
-                    for (y = 0; y < Height; y++)
-                    {
-                        if (gate.SameOperation(grid[x][y]))
-                        {
-                            grid[x][y] = null;
-                        }
-                    }
-                }
+                return gate.Value;
             }
 
             Shrink();
-
-            return gate;
+            return gate.Value;
         }
 
         /// <summary>
@@ -175,8 +161,56 @@ namespace Compiler
             AddGate(xTo, yTo, gate);
         }
 
-        /// <summary>Shrinks the grid to occupy the least number of squares in each direction.</summary>
-        public void Shrink()
+        /// <summary>Remove empty rows (qubits) from the grid.</summary>
+        public void RemoveEmptyRows()
+        {
+            int[] indices = Names
+                           .Enumerate()
+                           .Where(x => x.Item == null)
+                           .Select(x => x.Index)
+                           .Reverse()
+                           .ToArray();
+
+            Names.RemoveAll(x => x == null);
+
+            foreach (var column in grid)
+            {
+                foreach (int index in indices)
+                {
+                    column.RemoveAt(index);
+                }
+            }
+        }
+
+        /// <summary>Sort rows in the grid by their corresponding qubit IDs, alphabetically.</summary>
+        public void SortRowsByQubitIds()
+        {
+            (int Index, string? Item)[] sorted = Names.Enumerate().OrderBy(x => x.Item).ToArray();
+            Names = sorted.Select(x => x.Item).ToList();
+
+            int[] indices = sorted.Select(x => x.Index).ToArray();
+
+            foreach (var column in grid)
+            {
+                QuantumGate?[] copy = column.ToArray();
+                foreach ((int index, int newIndex) in indices.Enumerate())
+                {
+                    column[index] = copy[newIndex];
+                }
+            }
+        }
+
+        private bool BoundsCheck(int x, int y)
+        {
+            if (x < 0 || y < 0)
+            {
+                throw new ArgumentException($"Position ({x}, {y}) is out of bounds of the grid");
+            }
+
+            return x < Width && y < Height;
+        }
+
+        private void Shrink()
         {
             // Collapse empty columns
             grid.RemoveAll(col => col.TrueForAll(x => x == null));
@@ -209,16 +243,6 @@ namespace Compiler
                 Names.Truncate(max);
                 grid.ForEach(col => col.Truncate(max));
             }
-        }
-
-        private bool BoundsCheck(int x, int y)
-        {
-            if (x < 0 || y < 0)
-            {
-                throw new ArgumentException($"Position ({x}, {y}) is out of bounds of the grid");
-            }
-
-            return x < Width && y < Height;
         }
 
         private void Expand(int plusWidth, int plusHeight)

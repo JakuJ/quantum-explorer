@@ -1,6 +1,6 @@
 @using System.Linq
 @using Microsoft.Extensions.Logging
-@using Compiler
+@using Common
 @inject IJSRuntime JsRuntime
 @inject ILogger<Composer> Logger
 
@@ -18,13 +18,13 @@
     <div class="vis-content">
         @if (keysNames.ContainsKey(selectedKey) && _ast.ContainsKey(keysNames[selectedKey]))
         {
-            <Grid GateGrid="@(_ast[keysNames[selectedKey]])"/>
+            <Grid GateGrid="@(_ast[keysNames[selectedKey]].First())"/>
         }
     </div>
 </div>
 
 @code {
-    private Dictionary<string, GateGrid> _ast = new();
+    private Dictionary<string, List<GateGrid>> _ast = new();
 
     private Dictionary<string, string> keysNames = new();
 
@@ -47,15 +47,19 @@
         return _ast.Keys.ToDictionary(k => k);
     }
 
-    public async Task UpdateGridsAsync(Dictionary<string, GateGrid> ast)
+    public async Task UpdateGridsAsync(Dictionary<string, List<GateGrid>> grids)
     {
         // force the underlying Grid component to render from scratch
+        foreach(var grid in _ast)
+        {
+            grid.Value.Clear();
+        }
         _ast.Clear();
         keysNames.Clear();
         selectedKey = "";
         await InvokeAsync(StateHasChanged);
 
-        _ast = ast;
+        _ast = grids;
         keysNames = KeysNames();
         selectedKey = keysNames.First().Key ?? "";
         await InvokeAsync(StateHasChanged);

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Bunit;
 using Bunit.TestDoubles;
-using Compiler;
+using Common;
 using Explorer.Components.Composer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -34,7 +34,7 @@ namespace Explorer.Tests
             GateGrid grid = new();
             grid.AddGate(0, new QuantumGate("H"));
             grid.AddGate(1, new QuantumGate("MResetZ"));
-            Dictionary<string, GateGrid> ast = new() { { "tab1", grid } };
+            Dictionary<string, List<GateGrid>> ast = new() { { "tab1", new List<GateGrid>() { grid } } };
 
             // Act
             IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();

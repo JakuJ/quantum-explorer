@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Quantum.QsCompiler.Diagnostics;
+using Microsoft.VisualStudio.LanguageServer.Protocol;
 using static Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity;
-using Diagnostic = Microsoft.VisualStudio.LanguageServer.Protocol.Diagnostic;
-using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity;
 
 namespace Compiler
 {
