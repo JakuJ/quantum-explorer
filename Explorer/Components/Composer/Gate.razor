@@ -12,6 +12,9 @@
         case "X":
             <GateX/>
             break;
+        case "__control__":
+            <GateControl/>
+            break;
         default:
             <span class="gate-name">@Name</span>
             break;
@@ -31,6 +34,9 @@
         switch (Name)
         {
             case "X":
+                Border = false;
+                break;
+            case "__control__":
                 Border = false;
                 break;
                 // if CNOT/CCNOT, draw the line to the controlled gate
