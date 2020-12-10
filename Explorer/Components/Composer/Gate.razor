@@ -22,19 +22,17 @@
 
 @code {
 
-    private bool Border => Name switch
-    {
-        "X"           => false,
-        "__control__" => false,
-        var _         => true,
-    };
-
     [Parameter]
     public string Name { get; set; } = null!;
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
-    private string BorderStr => Border ? "gate-border" : "";
+    private string BorderStr => Name switch
+    {
+        "X"           => "",
+        "__control__" => "",
+        var _         => "gate-border",
+    };
 
     private string TruncatedName => Name.Substring(0, Math.Min(Name.Length, 3));
 

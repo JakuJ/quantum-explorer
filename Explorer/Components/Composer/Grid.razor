@@ -1,5 +1,6 @@
 @using Common
 @using Microsoft.Extensions.Logging
+@using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime
 @inject ILogger<Grid> Logger;
 @implements IDisposable
@@ -95,6 +96,7 @@
         reference?.Dispose();
     }
 
+    [ExcludeFromCodeCoverage] // Reason: called by JS functions, awaiting E2E tests
     [JSInvokable]
     public void Expand(string gateId, string snapId)
     {
@@ -109,6 +111,7 @@
         ForceRerender();
     }
 
+    [ExcludeFromCodeCoverage] // Reason: called by JS functions, awaiting E2E tests
     [JSInvokable]
     public void Move(string gateId, string snapId)
     {
