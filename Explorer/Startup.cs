@@ -27,7 +27,7 @@ namespace Explorer
 
         public IWebHostEnvironment Env { get; }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, ILogger<Startup> logger)
         {
             if (Env.IsDevelopment())
             {
@@ -45,6 +45,11 @@ namespace Explorer
                     endpoints.MapBlazorHub();
                     endpoints.MapFallbackToPage("/_Host");
                 });
+
+            foreach (var cs in Configuration.GetSection("ConnectionStrings").GetChildren())
+            {
+                logger.LogInformation(cs.Key + " : " + cs.Value);
+            }
         }
 
         public void ConfigureServices(IServiceCollection services)

@@ -28,7 +28,8 @@ namespace Explorer
                 {
                     logBuilder.AddConsole()
                               .AddDebug()
-                              .AddEventSourceLogger();
+                              .AddEventSourceLogger()
+                              .AddAzureWebAppDiagnostics();
                 })
                .ConfigureWebHostDefaults(webBuilder =>
                 {
