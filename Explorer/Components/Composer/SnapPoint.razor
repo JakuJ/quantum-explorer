@@ -1,5 +1,5 @@
-@using Common
 @using Microsoft.Extensions.Logging
+@using Common
 @inject ILogger<SnapPoint> Logger
 
 <div id="@Id" class="grid-snap @(Half ? "half" : "") @(Locked ? "locked" : "")" style="left: @XOffset"></div>
@@ -17,14 +17,6 @@
 
     [Parameter]
     public bool Locked { get; set; }
-
-    protected override void OnInitialized()
-    {
-        if (!Half)
-        {
-            Logger.LogDebug($"Initialized snap {Id} at {X}, {Y}");
-        }
-    }
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 

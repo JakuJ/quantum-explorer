@@ -5,20 +5,20 @@
 @implements IDisposable
 
 <div class="grid-outer-container">
-    @for(var x = 0; x < gates.GetLength(0); x++)
+    @for (var x = 0; x < gates.GetLength(0); x++)
     {
-        @for(var y1 = 0; y1 < gates.GetLength(1); y1++)
+        @for (var y1 = 0; y1 < gates.GetLength(1); y1++)
         {
             QuantumGate? g1 = gates[x, y1];
-            @if(g1.HasValue && g1.Value.Namespace == "__custom__" && g1.Value.Name == "__control__")
+            @if (g1.HasValue && g1.Value.Namespace == "__custom__" && g1.Value.Name == "__control__")
             {
-                @for(var y2 = 0; y2 < gates.GetLength(1); y2++)
+                @for (var y2 = 0; y2 < gates.GetLength(1); y2++)
                 {
                     QuantumGate? g2 = gates[x, y2];
-                    @if(g2.HasValue && g2.Value.Name != "__control__")
+                    @if (g2.HasValue && g2.Value.Name != "__control__")
                     {
                         int tempy1 = y1, tempy2 = y2;
-                        if(y2 < y1)
+                        if (y2 < y1)
                         {
                             tempy1 = y2;
                             tempy2 = y1;

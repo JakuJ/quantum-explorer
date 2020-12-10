@@ -1,5 +1,5 @@
-@using Common
 @using Microsoft.Extensions.Logging
+@using Common
 @inject ILogger<Cell> Logger;
 
 <SnapPoint X="@X" Y="@Y" Half="@false" @ref="snapPoint" Locked="@(QuantumGate.HasValue)"/>

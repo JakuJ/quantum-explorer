@@ -44,6 +44,7 @@
   float: left;
   text-align: center;
   z-index: 99;
+  cursor: pointer;
 }
 
 .gate.gate-border {

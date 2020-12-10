@@ -1,12 +1,11 @@
 @using Common
 
 <div id="@Id" class="gate @BorderStr">
-    @switch (@Name)
+    @switch (Name)
     {
         case "MResetZ":
-            <GateMeasurement/>
-            break;
         case "ResetAll":
+        case "M":
             <GateMeasurement/>
             break;
         case "X":
@@ -23,31 +22,20 @@
 
 @code {
 
+    private bool Border => Name switch
+    {
+        "X"           => false,
+        "__control__" => false,
+        var _         => true,
+    };
+
     [Parameter]
     public string Name { get; set; } = null!;
-
-    [Parameter]
-    public bool Border { get; set; } = true;
-
-    protected override void OnParametersSet()
-    {
-        switch (Name)
-        {
-            case "X":
-                Border = false;
-                break;
-            case "__control__":
-                Border = false;
-                break;
-                // if CNOT/CCNOT, draw the line to the controlled gate
-            default:
-                break;
-        }
-    }
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
     private string BorderStr => Border ? "gate-border" : "";
 
     private string TruncatedName => Name.Substring(0, Math.Min(Name.Length, 3));
+
 }
