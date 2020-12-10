@@ -4,25 +4,57 @@
 @inject ILogger<Grid> Logger;
 @implements IDisposable
 
-<div class="grid-container">
-    @for (var y = 0; y < gates.GetLength(1); y++)
+<div class="grid-outer-container">
+    @for(var x = 0; x < gates.GetLength(0); x++)
     {
-        <div class="grid-outer-row">
-            <RowID Name="@(GateGrid.Names[y])"/>
-            <div class="grid-row">
-                <Line X1="0" X2="@(50 * GateGrid.Width + 10)"/>
-                @for (var x = 0; x < gates.GetLength(0); x++)
+        @for(var y1 = 0; y1 < gates.GetLength(1); y1++)
+        {
+            QuantumGate g1 = gates[x, y1];
+            @if(g1.Namespace == "__custom__" && g1.Name == "__control__")
+            {
+                @for(var y2 = 0; y2 < gates.GetLength(1); y2++)
                 {
-                    // Snap point between the cells
-                    <SnapPoint X="@x" Y="@y" Half="@true" @ref="SnapRef"/>
-
-                    QuantumGate localQGate = gates[x, y];
-
-                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>
+                    QuantumGate g2 = gates[x, y2];
+                    @if(g2.Name == "X")
+                    {
+                        int tempy1 = y1, tempy2 = y2;
+                        if(y2 < y1)
+                        {
+                            tempy1 = y2;
+                            tempy2 = y1;
+                        }
+                        int xPix = 90 + 50 * x + 2;
+                        int y1Pix = 50 * tempy1 + 20;
+                        int y2Pix = 50 * (tempy2 - tempy1) + 5;
+                        <div class="line-container" style="position: absolute;">
+                            <Line Y1="0" Y2="@y2Pix" Left="@xPix" Top="y1Pix"/>
+                        </div>
+                        Logger.LogDebug("Controlled gate: {0} {1} {2}", x, tempy1, tempy2);
+                    }
                 }
-            </div>
-        </div>
+            }
+        }
     }
+    <div class="grid-container">
+        @for (var y = 0; y < gates.GetLength(1); y++)
+        {
+            <div class="grid-outer-row">
+                <RowID Name="@(GateGrid.Names[y])"/>
+                <div class="grid-row">
+                    <Line X1="0" X2="@(50 * GateGrid.Width + 10)"/>
+                    @for (var x = 0; x < gates.GetLength(0); x++)
+                    {
+                        // Snap point between the cells
+                        <SnapPoint X="@x" Y="@y" Half="@true" @ref="SnapRef"/>
+
+                        QuantumGate localQGate = gates[x, y];
+
+                        <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>
+                    }
+                </div>
+            </div>
+        }
+    </div>
 </div>
 
 @code {
