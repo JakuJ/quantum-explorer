@@ -91,14 +91,14 @@ namespace Compiler
 
             // to load our custom rewrite step, we need to point Q# compiler config at the rewrite step
             InMemoryEmitter emitter = new();
-            AllocationTagger tagger = new();
             var config = new CompilationLoader.Configuration
             {
                 IsExecutable = true,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
+                GenerateFunctorSupport = true,
                 RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
-                    (tagger, null),
+                    (new AllocationTagger(), null),
                     (emitter, null),
                 },
             };
