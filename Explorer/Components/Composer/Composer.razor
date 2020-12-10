@@ -34,7 +34,7 @@
     {
         if(_ast.Count > 0)
         {
-            int id = _ast.Keys.First().IndexOf('.');
+            int id = _ast.Keys.First().LastIndexOf('.');
             if(id > -1)
             {
                 bool sameNamespaces = _ast.Keys.All(k => k.Substring(0, id) == _ast.Keys.First().Substring(0, id));
