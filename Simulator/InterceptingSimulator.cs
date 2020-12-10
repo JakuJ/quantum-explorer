@@ -123,10 +123,23 @@ namespace Simulator
 
         private void OperationEndHandler(ICallable op, IApplyData data)
         {
-            // Remove unnecessary qubits
-            GateGrid? last = gateGrids.GetValueOrDefault(currentOperation.Peek())?.Last();
-            last?.RemoveEmptyRows();
-            last?.SortRowsByQubitIds();
+            List<GateGrid>? grids = gateGrids.GetValueOrDefault(currentOperation.Peek());
+            GateGrid? last = grids?.Last();
+
+            if (last != null)
+            {
+                if (last.Height > 0)
+                {
+                    // Remove unnecessary qubits
+                    last.RemoveEmptyRows();
+                    last.SortRowsByQubitIds();
+                }
+                else
+                {
+                    // Remove empty grids
+                    grids!.RemoveAt(grids.Count - 1);
+                }
+            }
 
             currentOperation.Pop();
         }

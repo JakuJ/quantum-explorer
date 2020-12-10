@@ -161,12 +161,19 @@ namespace Compiler.Tests
             operation = $"AllocatedQubitOps.{operation}";
 
             // Assert
-            foreach ((QuantumGate gate, int x, int y) in grids[operation].Single().Gates)
+            if (grids[operation].Count > 0)
             {
-                Assert.Contains((gate.Name, x, y), gates, "Gate should be present at a given position");
+                foreach ((QuantumGate gate, int x, int y) in grids[operation].Single().Gates)
+                {
+                    Assert.Contains((gate.Name, x, y), gates, "Gate should be present at a given position");
+                }
+                Assert.AreEqual(names, grids[operation].Single().Names, "Assigned qubit identifiers should be correct");
             }
-
-            Assert.AreEqual(names, grids[operation].Single().Names, "Assigned qubit identifiers should be correct");
+            else
+            {
+                Assert.IsEmpty(gates, "Operations that do not call quantum operations on qubits should not produce GateGrids.");
+                Assert.IsEmpty(names, "Operations that do not call quantum operations on qubits should not produce GateGrids.");
+            }
         }
 
         [Test]
