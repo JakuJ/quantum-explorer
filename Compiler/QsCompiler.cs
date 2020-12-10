@@ -80,31 +80,34 @@ namespace Compiler
         /// <inheritdoc/>
         public async Task Compile(string qsharpCode)
         {
-            // do we have an uncommented @EntryPoint?
-            bool execute = Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint");
-
-            if (!execute)
+            // Do we have an uncommented @EntryPoint?
+            if (!Regex.IsMatch(qsharpCode, @"(?<!//.*)@EntryPoint"))
             {
                 OnDiagnostics?.Invoke(this, "Nothing to execute, no entry point specified.");
                 return;
             }
 
+            // Auto-open Simulator.Custom in all namespaces
+            List<string> userNamespaces = new();
+
+            qsharpCode = Regex.Replace(qsharpCode, @"namespace\s+([\w\.]+)\s*{", match =>
+            {
+                userNamespaces.Add(match.Groups.Values.ElementAt(1).Captures.Single().Value);
+                return match.Value + "open Simulator.Custom;";
+            });
+
             // to load our custom rewrite step, we need to point Q# compiler config at the rewrite step
             InMemoryEmitter emitter = new();
-            AllocationTagger tagger = new();
             var config = new CompilationLoader.Configuration
             {
                 IsExecutable = true,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
-                    (tagger, null),
+                    (new AllocationTagger(userNamespaces), null),
                     (emitter, null),
                 },
             };
-
-            // Auto-open Simulator.Custom in all namespaces
-            qsharpCode = Regex.Replace(qsharpCode, @"namespace\s+\w+\s*{", match => match.Value + "open Simulator.Custom;");
 
             // compile Q# code
             CompilationLoader? compilationLoader;
@@ -202,7 +205,7 @@ namespace Compiler
 
             if (type != null)
             {
-                using InterceptingSimulator sim = new();
+                using InterceptingSimulator sim = new(userNamespaces);
                 var recorder = new StateRecorder(sim);
 
                 // simulate the entry point operation using reflection
