@@ -2,10 +2,7 @@ using System;
 using System.Linq;
 using Bunit;
 using Bunit.TestDoubles;
-using DatabaseHandler;
 using Explorer.Components;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using NUnit.Framework;
 using TestContext = Bunit.TestContext;
 
@@ -15,14 +12,14 @@ namespace Explorer.Tests
     [TestFixture]
     public class ExamplesDropdownTest
     {
-        private string filesDirectory = "./TestExampleCodes";
+        private const string FilesDirectory = "./TestExampleCodes";
 
         [Test]
         public void Renders()
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
+            ctx.Services.AddMockJSRuntime();
 
             // Act
             var ed = ctx.RenderComponent<ExamplesDropdown>();
@@ -36,7 +33,7 @@ namespace Explorer.Tests
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
+            ctx.Services.AddMockJSRuntime();
             var ed = ctx.RenderComponent<ExamplesDropdown>();
 
             // Act
@@ -51,8 +48,8 @@ namespace Explorer.Tests
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
-            var ed = ctx.RenderComponent<ExamplesDropdown>(("ExamplesFolderPath", "./nonexistingFolder/"));
+            ctx.Services.AddMockJSRuntime();
+            var ed = ctx.RenderComponent<ExamplesDropdown>(("ExamplesFolderPath", "./nonexistentFolder/"));
 
             // Act
             ed.Find("#dropdownMenuButton").Click();
@@ -66,9 +63,9 @@ namespace Explorer.Tests
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
+            ctx.Services.AddMockJSRuntime();
 
-            var ed = ctx.RenderComponent<ExamplesDropdown>(("ExamplesFolderPath", filesDirectory));
+            var ed = ctx.RenderComponent<ExamplesDropdown>(("ExamplesFolderPath", FilesDirectory));
 
             // Act
             ed.Find("#dropdownMenuButton").Click();
@@ -87,15 +84,16 @@ namespace Explorer.Tests
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
+            ctx.Services.AddMockJSRuntime();
 
             string selectedString = "";
-            Action<string> onSelect = s => selectedString = s;
-            var ed = ctx.RenderComponent<ExamplesDropdown>(("ExamplesFolderPath", filesDirectory), ("OnSelected", onSelect));
+            var ed = ctx.RenderComponent<ExamplesDropdown>(
+                ("ExamplesFolderPath", FilesDirectory),
+                ("OnSelected", (Action<string>)(s => selectedString = s)));
 
             // Act
             ed.Find("#dropdownMenuButton").Click();
-            ed.FindAll(".dropdown-menu>a").Where(a => a.TextContent == "testFile1").First().Click();
+            ed.FindAll(".dropdown-menu>a").First(a => a.TextContent == "testFile1").Click();
 
             // Assert
             Assert.IsTrue(selectedString.StartsWith("testCode1"), "Name test1 should be displayed");
