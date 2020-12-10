@@ -219,6 +219,10 @@ select:focus {
   border-color: transparent;
 }
 
+.bar-btn:disabled{
+    color: var(--shadow);
+}
+
 .bar-btn:focus {
   outline: none;
 }
