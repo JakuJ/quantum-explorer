@@ -19,7 +19,7 @@ namespace Explorer.Tests
     public class ExamplesCompilationTest
     {
         [TestCase("./CodeExamples/")]
-        public async Task ExamplesCompiles(string directoryPath)
+        public async Task ExamplesCompile(string directoryPath)
         {
             // Arrange
             var codes = GetExampleCodes(directoryPath);
