@@ -9,13 +9,13 @@
     {
         @for(var y1 = 0; y1 < gates.GetLength(1); y1++)
         {
-            QuantumGate g1 = gates[x, y1];
-            @if(g1.Namespace == "__custom__" && g1.Name == "__control__")
+            QuantumGate? g1 = gates[x, y1];
+            @if(g1.HasValue && g1.Value.Namespace == "__custom__" && g1.Value.Name == "__control__")
             {
                 @for(var y2 = 0; y2 < gates.GetLength(1); y2++)
                 {
-                    QuantumGate g2 = gates[x, y2];
-                    @if(g2.Name == "X")
+                    QuantumGate? g2 = gates[x, y2];
+                    @if(g2.HasValue && g2.Value.Name != "__control__")
                     {
                         int tempy1 = y1, tempy2 = y2;
                         if(y2 < y1)
@@ -24,8 +24,8 @@
                             tempy2 = y1;
                         }
                         int xPix = 90 + 50 * x + 2;
-                        int y1Pix = 50 * tempy1 + 20;
-                        int y2Pix = 50 * (tempy2 - tempy1) + 5;
+                        int y1Pix = 50 * tempy1 + 27;
+                        int y2Pix = 50 * (tempy2 - tempy1);
                         <div class="line-container" style="position: absolute;">
                             <Line Y1="0" Y2="@y2Pix" Left="@xPix" Top="y1Pix"/>
                         </div>
@@ -47,7 +47,7 @@
                         // Snap point between the cells
                         <SnapPoint X="@x" Y="@y" Half="@true" @ref="SnapRef"/>
 
-                        QuantumGate localQGate = gates[x, y];
+                        QuantumGate? localQGate = gates[x, y];
 
                         <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>
                     }
@@ -69,7 +69,7 @@
         set => snapPoints.Add(value.Id, value);
     }
 
-    private QuantumGate[,] gates = null!;
+    private QuantumGate?[,] gates = null!;
 
     private DotNetObjectReference<Grid>? reference;
 
@@ -122,9 +122,9 @@
         ForceRerender();
     }
 
-    private QuantumGate[,] RefreshGateArray()
+    private QuantumGate?[,] RefreshGateArray()
     {
-        var arr = new QuantumGate[GateGrid.Width, GateGrid.Height];
+        var arr = new QuantumGate?[GateGrid.Width, GateGrid.Height];
         foreach ((QuantumGate gate, int x, int y) in GateGrid.Gates)
         {
             arr[x, y] = gate;
@@ -134,7 +134,7 @@
 
     private void ForceRerender()
     {
-        gates = new QuantumGate[gates.GetLength(0), gates.GetLength(1)];
+        gates = new QuantumGate?[gates.GetLength(0), gates.GetLength(1)];
         StateHasChanged();
 
         gates = RefreshGateArray();
