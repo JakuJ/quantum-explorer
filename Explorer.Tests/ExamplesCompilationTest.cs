@@ -37,7 +37,6 @@ namespace Explorer.Tests
                 // Assert
                 Assert.IsTrue(runs, $"Code from {codeInfo.Name} should compile.");
             }
-
         }
 
         private List<(string Name, string Code)> GetExampleCodes(string folderPath)
