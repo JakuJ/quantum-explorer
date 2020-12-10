@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Bunit;
 using Bunit.TestDoubles;
@@ -21,7 +20,7 @@ namespace Explorer.Tests
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
+            ctx.Services.AddMockJSRuntime();
             var dbhMock = new Mock<ICodeDatabaseHandler>();
             ctx.Services.AddSingleton(dbhMock.Object);
 
@@ -37,7 +36,7 @@ namespace Explorer.Tests
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
+            var mockJs = ctx.Services.AddMockJSRuntime();
             var dbhMock = new Mock<ICodeDatabaseHandler>();
             ctx.Services.AddSingleton(dbhMock.Object);
             var sb = ctx.RenderComponent<ShareButton>();
@@ -46,7 +45,7 @@ namespace Explorer.Tests
             sb.Find("button").Click();
 
             // Assert
-            Assert.IsEmpty(mockJS.Invocations, "No popup initialize calls should be made");
+            Assert.IsEmpty(mockJs.Invocations, "No popup initialize calls should be made");
         }
 
         [Test]
@@ -54,17 +53,16 @@ namespace Explorer.Tests
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
+            var mockJs = ctx.Services.AddMockJSRuntime();
             var dbhMock = new Mock<ICodeDatabaseHandler>();
             ctx.Services.AddSingleton(dbhMock.Object);
-            Func<Task<string>> getCode = () => Task.FromResult("codeExample");
-            var sb = ctx.RenderComponent<ShareButton>(("GetCode", getCode));
+            var sb = ctx.RenderComponent<ShareButton>(("GetCode", (Func<Task<string>>)(() => Task.FromResult("codeExample"))));
 
             // Act
             sb.Find("button").Click();
 
             // Assert
-            Assert.IsTrue(mockJS.Invocations.ContainsKey("Library.showSharePopOver"), "Call to create popup should be made");
+            Assert.IsTrue(mockJs.Invocations.ContainsKey("Library.showSharePopOver"), "Call to create popup should be made");
             dbhMock.Verify(m => m.SaveCode("", "codeExample"), Times.Once());
         }
 
@@ -73,12 +71,11 @@ namespace Explorer.Tests
         {
             // Arrange
             using TestContext ctx = new();
-            var mockJS = ctx.Services.AddMockJSRuntime();
+            ctx.Services.AddMockJSRuntime();
             var dbhMock = new Mock<ICodeDatabaseHandler>();
             dbhMock.Setup(m => m.SaveCode("", "codeExample")).Returns(Guid.NewGuid());
             ctx.Services.AddSingleton(dbhMock.Object);
-            Func<Task<string>> getCode = () => Task.FromResult("codeExample");
-            var sb = ctx.RenderComponent<ShareButton>(("GetCode", getCode));
+            var sb = ctx.RenderComponent<ShareButton>(("GetCode", (Func<Task<string>>)(() => Task.FromResult("codeExample"))));
 
             // Act
             sb.Find("button").Click();

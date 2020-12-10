@@ -75,17 +75,15 @@ module AllocationTagging =
             base.OnAllocateQubits newScope
 
     /// Process a QsCompilation and return operation names and corresponding GateGrids
-    let TagAllocations (compilation: QsCompilation): QsCompilation =
+    let TagAllocations (compilation: QsCompilation, userNamespaces: string array): QsCompilation =
         let transform = Transform()
-
-        let notSkipped ns =
-            not (ns.Name.StartsWith("Microsoft.Quantum"))
-            && ns.Name <> "Simulator.Utils"
+        let userNamespaceSet = Set.ofArray userNamespaces
 
         let namespaces =
             compilation.Namespaces.ToArray()
             |> List.ofArray
-            |> List.map (fun ns -> if notSkipped ns then transform.Namespaces.OnNamespace ns else ns)
+            |> List.map (fun ns ->
+                if Set.contains ns.Name userNamespaceSet then transform.Namespaces.OnNamespace ns else ns)
 
         { compilation with
               Namespaces = namespaces.ToImmutableArray() }

@@ -13,8 +13,7 @@ namespace Simulator
     /// <inheritdoc />
     public class InterceptingSimulator : QuantumSimulator
     {
-        private static readonly ImmutableHashSet<string> ExcludedNamespaces
-            = ImmutableHashSet.Create("Simulator.Custom", "__custom__");
+        private readonly ImmutableHashSet<string> userNamespaces;
 
         private readonly StringBuilder funnel = new();
 
@@ -30,8 +29,9 @@ namespace Simulator
         /// <summary>
         /// Initializes a new instance of the <see cref="InterceptingSimulator" /> class.
         /// </summary>
-        public InterceptingSimulator() : base(false)
+        public InterceptingSimulator(List<string> userNamespaces) : base(false)
         {
+            this.userNamespaces = userNamespaces.ToImmutableHashSet();
             OnOperationStart += OperationStartHandler;
             OnOperationEnd += OperationEndHandler;
             AfterAllocateQubits += AllocateQubitsHandler;
@@ -136,7 +136,7 @@ namespace Simulator
             // Set current operation
             currentOperation.Push(fullName);
 
-            if (fullName.StartsWith("Microsoft.Quantum") || ExcludedNamespaces.Contains(@namespace))
+            if (!userNamespaces.Contains(@namespace))
             {
                 return;
             }

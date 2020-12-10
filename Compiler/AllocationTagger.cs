@@ -11,6 +11,14 @@ namespace Compiler
     /// </summary>
     public class AllocationTagger : IRewriteStep
     {
+        private readonly List<string> userNamespaces;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AllocationTagger"/> class.
+        /// </summary>
+        /// <param name="userNamespaces">A list of user-defined namespaces.</param>
+        public AllocationTagger(List<string> userNamespaces) => this.userNamespaces = userNamespaces;
+
         /// <inheritdoc/>
         public string Name => "AllocationTagging";
 
@@ -35,7 +43,7 @@ namespace Compiler
         /// <inheritdoc/>
         public bool Transformation(QsCompilation compilation, out QsCompilation transformed)
         {
-            transformed = AllocationTagging.TagAllocations(compilation);
+            transformed = AllocationTagging.TagAllocations(compilation, userNamespaces.ToArray());
             return true;
         }
 

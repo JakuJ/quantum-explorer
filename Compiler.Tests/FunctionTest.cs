@@ -6,6 +6,7 @@ using NUnit.Framework;
 
 namespace Compiler.Tests
 {
+    [Parallelizable]
     [TestFixture]
     public class FunctionTest
     {

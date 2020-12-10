@@ -8,8 +8,8 @@ using NUnit.Framework;
 
 namespace Compiler.Tests
 {
-    [TestFixture]
     [Parallelizable]
+    [TestFixture]
     public class GateExtractionTest
     {
         private static class DeclarationSources
@@ -295,6 +295,29 @@ namespace Compiler.Tests
             {
                 Assert.AreEqual(names, grids![op].Single().Names.ToArray(), "Name list should be correct");
             }
+        }
+
+        [Test]
+        public async Task WorksWhenNamespaceStartsWithMicrosoftQuantum()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("Microsoft.Quantum.TestSample");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            Dictionary<string, List<GateGrid>>? grids = null;
+
+            compiler.OnGrids += (_, dictionary) => grids = dictionary;
+            compiler.OnDiagnostics += (_, diags) => Assert.Fail($"There should be no diagnostics, but got: {diags}");
+
+            // Act
+            await compiler.Compile(code);
+
+            // Assert
+            Assert.NotNull(grids);
+            GateGrid grid = grids!["Microsoft.Quantum.TestSample.RandomBit"].Single();
+
+            Assert.AreEqual("q", grid.Names[0], "Qubit identifier should be correct");
+            Assert.AreEqual("H", grid.At(0, 0)!.Value.Name, "Gate should be at a correct position");
+            Assert.AreEqual("MResetZ", grid.At(1, 0)!.Value.Name, "Gate should be at a correct position");
         }
     }
 }
