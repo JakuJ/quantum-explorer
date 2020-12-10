@@ -93,12 +93,28 @@ namespace Common
 
             if (grid[x][y] != null)
             {
-                grid.Insert(x, EmptyColumn());
+                InsertColumn(x);
             }
 
             grid[x][y] = gate;
 
             Shrink();
+        }
+
+        /// <summary>Insert an empty row above the one with the provided index.</summary>
+        /// <param name="rowBelow">Index of the row directly below the inserted one.</param>
+        /// <param name="qubitId">Identifier for the inserted row.</param>
+        public void InsertRow(int rowBelow, string qubitId)
+        {
+            Names.Insert(rowBelow, qubitId);
+            grid.ForEach(col => col.Insert(rowBelow, null));
+        }
+
+        /// <summary>Insert an empty column before the one with the provided index.</summary>
+        /// <param name="columnRight">Index of the column right to the inserted one.</param>
+        public void InsertColumn(int columnRight)
+        {
+            grid.Insert(columnRight, EmptyColumn());
         }
 
         /// <summary>Removes the gate at a given position.</summary>
@@ -181,65 +197,6 @@ namespace Common
                 {
                     column[index] = copy[newIndex];
                 }
-            }
-        }
-
-        /// <inheritdoc/>
-        [ExcludeFromCodeCoverage] // Reason: used as a placeholder until the Compositor is done
-        public override string ToString()
-        {
-            StringBuilder builder = new();
-
-            for (var y = 0; y < Height; y++)
-            {
-                builder.Append($"{Names[y]}:");
-                for (var x = 0; x < Width; x++)
-                {
-                    builder.Append(' ');
-
-                    QuantumGate? gate = grid[x][y];
-                    if (gate.HasValue)
-                    {
-                        builder.Append($"[{gate.Value.Name} arg{gate.Value.ArgIndex}]");
-                    }
-                    else
-                    {
-                        builder.Append('_');
-                    }
-                }
-
-                builder.AppendLine();
-            }
-
-            return builder.ToString();
-        }
-
-        /// <inheritdoc/>
-        public override bool Equals(object? obj)
-        {
-            if (obj is GateGrid other)
-            {
-                return Names.SequenceEqual(other.Names) && Gates.SequenceEqual(other.Gates);
-            }
-
-            return false;
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = Names.Aggregate(19, (current, foo) => current * 31 + foo?.GetHashCode() ?? 0);
-
-                foreach ((QuantumGate a, int b, int c) in Gates)
-                {
-                    hash = hash * 31 + a.GetHashCode();
-                    hash = hash * 31 + b.GetHashCode();
-                    hash = hash * 31 + c.GetHashCode();
-                }
-
-                return hash;
             }
         }
 

@@ -1,0 +1,79 @@
+@using Microsoft.Extensions.Logging
+@using Common
+@inject IJSRuntime JsRuntime
+@inject ILogger<Composer> Logger
+
+<div class="overflow-hidden" style="height: 100%">
+    <div class="nav-tabs-container">
+        <ul class="nav nav-tabs">
+            @foreach (string key in keysNames.Keys)
+            {
+                    <li class="nav-item">
+                        <a class="nav-link noselect @(selectedKey == key ? "active" : "")" @onclick="@(() => OnTabChange(key))">@key</a>
+                    </li>
+            }
+        </ul>
+    </div>
+    <div class="vis-content">
+        @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
+        {
+            <Grid GateGrid="@(ast[keysNames[selectedKey]].First())"/>        }
+    </div>
+</div>
+
+@code {
+    private Dictionary<string, List<GateGrid>> ast = new();
+
+    private Dictionary<string, string> keysNames = new();
+
+    private string selectedKey = "";
+
+    private Dictionary<string, string> KeysNames()
+    {
+        if (ast.Count > 0)
+        {
+            int id = ast.Keys.First().LastIndexOf('.');
+            if (id > -1)
+            {
+                bool sameNamespaces = ast.Keys.All(k => k.Substring(0, id) == ast.Keys.First().Substring(0, id));
+                if (sameNamespaces)
+                {
+                    return ast.Keys.ToDictionary(k => k.Substring(id + 1, k.Length - id - 1));
+                }
+            }
+        }
+        return ast.Keys.ToDictionary(k => k);
+    }
+
+    public async Task UpdateGridsAsync(Dictionary<string, List<GateGrid>> grids)
+    {
+        // force the underlying Grid component to render from scratch
+        foreach ((string _, List<GateGrid> grid) in ast)
+        {
+            grid.Clear();
+        }
+
+        ast.Clear();
+        keysNames.Clear();
+        await InvokeAsync(StateHasChanged);
+
+        // Remove tabs which contain no displayable grids
+        IEnumerable<string> emptyKeys = grids.Where(x => x.Value.Count == 0).Select(x => x.Key);
+        foreach (string emptyKey in emptyKeys)
+        {
+            grids.Remove(emptyKey);
+        }
+
+        ast = grids;
+        keysNames = KeysNames();
+        selectedKey = keysNames.First().Key ?? "";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    void OnTabChange(string key)
+    {
+        selectedKey = key;
+        Logger.LogDebug($"Tab with key {key} was selected.");
+    }
+
+}

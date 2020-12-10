@@ -1,0 +1,73 @@
+.grid-container {
+  height: 100%;
+  width: 100%;
+  padding: 2px;
+  display: inline-block;
+  overflow: auto;
+}
+
+.grid-outer-row {
+  display: flex;
+}
+
+.grid-row {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  margin: 5px 0;
+  display: -ms-flexbox;
+  display: inline-flex;
+  overflow: visible; /* hidden fixes the overflow but hides the gates while dragging! */
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.grid-snap {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+}
+
+.grid-cell {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+  overflow: visible;
+}
+
+.gate {
+  width: 40px;
+  height: 40px;
+  float: left;
+  text-align: center;
+  z-index: 99;
+  cursor: pointer;
+}
+
+.gate.gate-border {
+  border: var(--text);
+  border-width: 2px;
+  border-style: solid;
+  background: var(--background);
+}
+
+.gate-name {
+  vertical-align: baseline;
+  font-size: x-large;
+}
+
+.row-id {
+  width: 80px;
+  min-width: 80px;
+  height: 40px;
+  line-height: 40px;
+  margin: 5px 0;
+  padding-left: 5px;
+  float: left;
+  text-align: left;
+  background: var(--accent);
+  z-index: 98;
+}

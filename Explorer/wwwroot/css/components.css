@@ -162,7 +162,18 @@ input.rename-input {
 
 /* the tab bar */
 .nav-tabs {
+  display: contents;
   border-color: var(--accent);
+}
+
+/* the tab table cell */
+.nav-tabs .nav-item {
+  display: table-cell;
+}
+
+/* the tab bar container */
+.nav-tabs-container {
+  overflow-x: auto;
 }
 
 /* Grid lines and scrollbars on the plot*/

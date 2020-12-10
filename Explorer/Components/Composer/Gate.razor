@@ -1,0 +1,39 @@
+@using Common
+
+<div id="@Id" class="gate @BorderStr">
+    @switch (Name)
+    {
+        case "MResetZ":
+        case "ResetAll":
+        case "M":
+            <GateMeasurement/>
+            break;
+        case "X":
+            <GateX/>
+            break;
+        case "__control__":
+            <GateControl/>
+            break;
+        default:
+            <span class="gate-name">@TruncatedName</span>
+            break;
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public string Name { get; set; } = null!;
+
+    public string Id { get; } = UniqueId.CreateUniqueId();
+
+    private string BorderStr => Name switch
+    {
+        "X"           => "",
+        "__control__" => "",
+        var _         => "gate-border",
+    };
+
+    private string TruncatedName => Name.Substring(0, Math.Min(Name.Length, 3));
+
+}

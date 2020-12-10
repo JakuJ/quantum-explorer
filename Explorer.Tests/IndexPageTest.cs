@@ -5,6 +5,7 @@ using DatabaseHandler;
 using Explorer.Pages;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -21,7 +22,6 @@ namespace Explorer.Tests
             TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
             ctx.Services.AddSingleton(_ => Mock.Of<ICodeDatabaseHandler>());
-
             ctx.Services.AddSingleton(_ => Mock.Of<ICompiler>());
             ctx.Services.AddSingleton(_ => Mock.Of<IWebHostEnvironment>());
             ctx.Services.AddLogging(builder => builder.AddConsole());

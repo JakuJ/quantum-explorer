@@ -1,0 +1,44 @@
+@using Microsoft.Extensions.Logging
+@using Common
+@inject ILogger<Cell> Logger;
+
+<SnapPoint X="@X" Y="@Y" Half="@false" @ref="snapPoint" Locked="@(QuantumGate.HasValue)"/>
+<div class="grid-cell">
+    @if (QuantumGate.HasValue)
+    {
+        <Gate Name="@(QuantumGate.Value.Name)" @ref="gate"/>
+    }
+</div>
+
+@code {
+
+    private Gate? gate;
+
+    private SnapPoint snapPoint = null!;
+
+    [Parameter]
+    public QuantumGate? QuantumGate { get; set; }
+
+    [Parameter]
+    public int X { get; set; }
+
+    [Parameter]
+    public int Y { get; set; }
+
+    [Parameter]
+    public Dictionary<string, SnapPoint> SnapPoints { get; set; } = null!;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            SnapPoints.Add(snapPoint.Id, snapPoint);
+        }
+
+        if (gate != null)
+        {
+            SnapPoints[gate.Id] = snapPoint;
+        }
+    }
+
+}
