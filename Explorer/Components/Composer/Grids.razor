@@ -1,0 +1,37 @@
+@using Microsoft.Extensions.Logging
+@using Common
+@inject ILogger<Composer> Logger
+
+<div class="grids">
+    <Grid GateGrid="@(GridList.First())"/>
+
+    <div class="grid-selector">
+        @selectedGridKey
+        @foreach (string key in keysNames.Keys)
+        {
+            <a class="grid-selector-item @(selectedGridKey == key ? "active" : "")" @onclick="@(() => OnGridChange(key))">@(key)</a>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<GateGrid> GridList { get; set; } = null!;
+
+    private Dictionary<string, int> keysNames = new();
+
+    private string selectedGridKey { get; set; } = "";
+
+    protected override void OnParametersSet()
+    {
+        keysNames = Enumerable
+            .Range(0, GridList.Count)
+            .ToDictionary(x => (x + 1).ToString(), x => x);
+    }
+
+    void OnGridChange(string key)
+    {
+        selectedGridKey = key;
+        Logger.LogDebug($"Grid with key {key} was selected.");
+    }
+}

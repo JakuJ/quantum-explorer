@@ -1,3 +1,18 @@
+.grids {
+  display: flex;
+}
+
+.grid-selector {
+  height: 100%;
+  width: 30px;
+  display: grid;
+}
+
+.grid-outer-container {
+  height: 100%;
+  width: 100%;
+}
+
 .grid-container {
   height: 100%;
   width: 100%;
@@ -45,6 +60,7 @@
   text-align: center;
   z-index: 99;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .gate.gate-border {

@@ -22,7 +22,7 @@
     <div class="vis-content">
         @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
         {
-            <Grid GateGrid="@(ast[keysNames[selectedKey]].First())"/>
+            <Grids GridList="@(ast[keysNames[selectedKey]])"/>
         }
     </div>
 </div>
@@ -56,26 +56,26 @@
         return ast.Keys.ToDictionary(k => k);
     }
 
-    public async Task UpdateGridsAsync(Dictionary<string, List<GateGrid>> grids)
+    public async Task UpdateGridsAsync(Dictionary<string, List<GateGrid>> gridsDict)
     {
-    // force the underlying Grid component to render from scratch
-        foreach ((string _, List<GateGrid> grid) in ast)
+        // force the underlying Grid component to render from scratch
+        foreach ((string _, List<GateGrid> grids) in ast)
         {
-            grid.Clear();
+            grids.Clear();
         }
 
         ast.Clear();
         keysNames.Clear();
         await InvokeAsync(StateHasChanged);
 
-    // Remove tabs which contain no displayable grids
-        IEnumerable<string> emptyKeys = grids.Where(x => x.Value.Count == 0).Select(x => x.Key);
+        // Remove tabs which contain no displayable grids
+        IEnumerable<string> emptyKeys = gridsDict.Where(x => x.Value.Count == 0).Select(x => x.Key);
         foreach (string emptyKey in emptyKeys)
         {
-            grids.Remove(emptyKey);
+            gridsDict.Remove(emptyKey);
         }
 
-        ast = grids;
+        ast = gridsDict;
         keysNames = GetKeyNames();
         selectedKey = keysNames.First().Key ?? "";
         await InvokeAsync(StateHasChanged);
