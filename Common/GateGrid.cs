@@ -200,6 +200,65 @@ namespace Common
             }
         }
 
+        /// <inheritdoc/>
+        [ExcludeFromCodeCoverage] // Reason: used as a placeholder until the Compositor is done
+        public override string ToString()
+        {
+            StringBuilder builder = new();
+
+            for (var y = 0; y < Height; y++)
+            {
+                builder.Append($"{Names[y]}:");
+                for (var x = 0; x < Width; x++)
+                {
+                    builder.Append(' ');
+
+                    QuantumGate? gate = grid[x][y];
+                    if (gate.HasValue)
+                    {
+                        builder.Append($"[{gate.Value.Name} arg{gate.Value.ArgIndex}]");
+                    }
+                    else
+                    {
+                        builder.Append('_');
+                    }
+                }
+
+                builder.AppendLine();
+            }
+
+            return builder.ToString();
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
+        {
+            if (obj is GateGrid other)
+            {
+                return Names.SequenceEqual(other.Names) && Gates.SequenceEqual(other.Gates);
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = Names.Aggregate(19, (current, foo) => current * 31 + foo?.GetHashCode() ?? 0);
+
+                foreach ((QuantumGate a, int b, int c) in Gates)
+                {
+                    hash = hash * 31 + a.GetHashCode();
+                    hash = hash * 31 + b.GetHashCode();
+                    hash = hash * 31 + c.GetHashCode();
+                }
+
+                return hash;
+            }
+        }
+
         private bool BoundsCheck(int x, int y)
         {
             if (x < 0 || y < 0)

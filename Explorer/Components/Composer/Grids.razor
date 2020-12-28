@@ -7,6 +7,7 @@
 
     <div class="grid-selector">
         @selectedGridKey
+        @(GridList.Count)
         @foreach (string key in keysNames.Keys)
         {
             <a class="grid-selector-item @(selectedGridKey == key ? "active" : "")" @onclick="@(() => OnGridChange(key))">@(key)</a>
