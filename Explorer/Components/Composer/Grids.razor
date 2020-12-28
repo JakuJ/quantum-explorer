@@ -3,7 +3,7 @@
 @inject ILogger<Composer> Logger
 
 <div class="grids">
-    <Grid GateGrid="@(GridList.First())"/>
+    <Grid GateGrid="@(GridList[keysNames[selectedGridKey]])"/>
 
     <div class="grid-selector">
         @selectedGridKey
@@ -20,13 +20,14 @@
 
     private Dictionary<string, int> keysNames = new();
 
-    private string selectedGridKey { get; set; } = "";
+    private string selectedGridKey { get; set; } = null!;
 
     protected override void OnParametersSet()
     {
         keysNames = Enumerable
             .Range(0, GridList.Count)
             .ToDictionary(x => (x + 1).ToString(), x => x);
+        selectedGridKey = "1";
     }
 
     void OnGridChange(string key)
