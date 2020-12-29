@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Common;
 using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
@@ -13,11 +14,16 @@ namespace Simulator
     /// <inheritdoc />
     public class InterceptingSimulator : QuantumSimulator
     {
+        private static readonly Regex[] ExpandedOps = new[]
+        {
+            @"Microsoft\.Quantum\.Canon\.Apply\w+",
+        }.Select(x => new Regex(x)).ToArray();
+
         private readonly ImmutableHashSet<string> userNamespaces;
 
         private readonly StringBuilder funnel = new();
 
-        private readonly Stack<string> currentOperation = new();
+        private readonly List<(string, bool)> operationStack = new();
 
         private readonly Dictionary<string, List<GateGrid>> gateGrids = new();
 
@@ -29,7 +35,7 @@ namespace Simulator
         /// <summary>
         /// Initializes a new instance of the <see cref="InterceptingSimulator" /> class.
         /// </summary>
-        public InterceptingSimulator(List<string> userNamespaces) : base(false)
+        public InterceptingSimulator(IEnumerable<string> userNamespaces) : base(false)
         {
             this.userNamespaces = userNamespaces.ToImmutableHashSet();
             OnOperationStart += OperationStartHandler;
@@ -79,51 +85,89 @@ namespace Simulator
                 }
             }
 
-            // Add corresponding column(s)
-            if (qubits.Length > 0 && gateGrids.TryGetValue(currentOperation.Peek(), out var grids))
+            // Check if this operation is phantom
+            bool isPhantom = ExpandedOps.Any(x => x.Match(op.FullName).Success);
+
+            if (operationStack.Count > 0) // If it's not the entry-point operation
             {
-                GateGrid grid = grids.Last();
-                int x = grid.Width;
-
-                foreach ((int argIndex, int qubit) in qubits.Enumerate())
+                // Find first non-phantom parent
+                int i = operationStack.Count - 1;
+                (string parentOperation, bool isParentPhantom) = operationStack[i];
+                while (isParentPhantom)
                 {
-                    // If a qubit occurs more than one time, move subsequent gates to the right
-                    int k = x;
-                    while (grid.At(k, qubit) != null)
-                    {
-                        k++;
-                    }
+                    (parentOperation, isParentPhantom) = operationStack[--i];
+                }
 
-                    // Create custom gates for control qubits
-                    if (controls != null && Array.IndexOf(controls, qubit) >= 0)
+                // If we had a phantom parent, we would like to place this call in the last column
+                // and not add another one.
+                bool hasPhantomParent = i != operationStack.Count - 1;
+
+                // Add corresponding column(s)
+                if (qubits.Length > 0 && gateGrids.TryGetValue(parentOperation, out var grids))
+                {
+                    GateGrid grid = grids.Last();
+                    if (isPhantom)
                     {
-                        grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
+                        grid.InsertColumn(grid.Width);
                     }
                     else
                     {
-                        switch (op.FullName)
+                        int x = grid.Width - (hasPhantomParent ? 1 : 0);
+
+                        foreach ((int argIndex, int qubit) in qubits.Enumerate())
                         {
-                            case "Microsoft.Quantum.Intrinsic.CNOT":
-                            case "Microsoft.Quantum.Intrinsic.CCNOT":
-                                grid.AddGate(k, qubit, new QuantumGate("X", @namespace));
-                                break;
-                            default:
-                                grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
-                                break;
+                            // If a qubit occurs more than one time, move subsequent gates to the right
+                            int k = x;
+                            while (grid.At(k, qubit) != null)
+                            {
+                                k++;
+                            }
+
+                            // Create custom gates for control qubits
+                            if (controls != null && Array.IndexOf(controls, qubit) >= 0)
+                            {
+                                grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
+                            }
+                            else
+                            {
+                                switch (op.FullName)
+                                {
+                                    case "Microsoft.Quantum.Intrinsic.CNOT":
+                                    case "Microsoft.Quantum.Intrinsic.CCNOT":
+                                        grid.AddGate(k, qubit, new QuantumGate("X", @namespace));
+                                        break;
+                                    default:
+                                        grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
+                                        break;
+                                }
+                            }
+
+                            // Set qubit identifier
+                            grid.SetName(qubit, qubitIds[qubit]);
                         }
                     }
-
-                    // Set qubit identifier
-                    grid.SetName(qubit, qubitIds[qubit]);
                 }
             }
 
-            PushOperation(op.FullName, @namespace);
+            // Set current operation
+            operationStack.Add((op.FullName, isPhantom));
+
+            if (!userNamespaces.Contains(@namespace))
+            {
+                return;
+            }
+
+            if (!gateGrids.ContainsKey(op.FullName))
+            {
+                gateGrids.Add(op.FullName, new List<GateGrid>());
+            }
+
+            gateGrids[op.FullName].Add(new GateGrid());
         }
 
         private void OperationEndHandler(ICallable op, IApplyData data)
         {
-            List<GateGrid>? grids = gateGrids.GetValueOrDefault(currentOperation.Peek());
+            List<GateGrid>? grids = gateGrids.GetValueOrDefault(operationStack.Last().Item1);
             GateGrid? last = grids?.Last();
 
             if (last != null)
@@ -141,25 +185,7 @@ namespace Simulator
                 }
             }
 
-            currentOperation.Pop();
-        }
-
-        private void PushOperation(string fullName, string @namespace)
-        {
-            // Set current operation
-            currentOperation.Push(fullName);
-
-            if (!userNamespaces.Contains(@namespace))
-            {
-                return;
-            }
-
-            if (!gateGrids.ContainsKey(fullName))
-            {
-                gateGrids.Add(fullName, new List<GateGrid>());
-            }
-
-            gateGrids[fullName].Add(new GateGrid());
+            operationStack.RemoveAt(operationStack.Count - 1);
         }
 
         /// <summary>A custom intrinsic operation for runtime allocation tagging.</summary>
