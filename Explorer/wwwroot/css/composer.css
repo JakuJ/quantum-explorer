@@ -91,6 +91,19 @@ li.nav-item.grid-selector-item {
   z-index: 98;
 }
 
+.line-container {
+  position: absolute;
+}
+
+.composer-svg {
+  position: absolute;
+}
+
+.composer-line {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
 /* Operation expansion toggle */
 
 #composer-top-bar {
