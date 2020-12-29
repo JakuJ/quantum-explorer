@@ -4,15 +4,19 @@
 
 <div class="grids">
     <Grid GateGrid="@(GridList[keysNames[selectedGridKey]])"/>
-
-    <div class="grid-selector">
-        @selectedGridKey
-        @(GridList.Count)
-        @foreach (string key in keysNames.Keys)
-        {
-            <a class="grid-selector-item @(selectedGridKey == key ? "active" : "")" @onclick="@(() => OnGridChange(key))">@(key)</a>
-        }
-    </div>
+    @if(GridList.Count > 1)
+    {
+        <nav aria-label="Grid selector" class="grid-selector-container">
+            <ul class="nav nav-tabs nav-left grid-pagination">
+                @foreach (string key in keysNames.Keys)
+                {
+                    <li class="nav-item grid-selector-item">
+                        <a class="nav-link @(selectedGridKey == key ? "active" : "")" @onclick="@(() => OnGridChange(key))">@(key)</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
 </div>
 
 @code {

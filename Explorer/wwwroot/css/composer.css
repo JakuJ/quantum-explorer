@@ -5,7 +5,10 @@
 .grid-selector {
   height: 100%;
   width: 30px;
-  display: grid;
+}
+
+li.nav-item.grid-selector-item {
+  display: flex;
 }
 
 .grid-outer-container {
