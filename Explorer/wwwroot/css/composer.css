@@ -51,7 +51,7 @@
   border: var(--text);
   border-width: 2px;
   border-style: solid;
-  background: var(--background);
+  background: var(--surface);
 }
 
 .gate-name {
