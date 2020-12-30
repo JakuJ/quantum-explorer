@@ -167,6 +167,7 @@ namespace Compiler.Tests
                 {
                     Assert.Contains((gate.Name, x, y), gates, "Gate should be present at a given position");
                 }
+
                 Assert.AreEqual(names, grids[operation].Single().Names, "Assigned qubit identifiers should be correct");
             }
             else
@@ -325,6 +326,79 @@ namespace Compiler.Tests
             Assert.AreEqual("q", grid.Names[0], "Qubit identifier should be correct");
             Assert.AreEqual("H", grid.At(0, 0)!.Value.Name, "Gate should be at a correct position");
             Assert.AreEqual("MResetZ", grid.At(1, 0)!.Value.Name, "Gate should be at a correct position");
+        }
+
+        [Test]
+        public async Task ExpandsComplexOperationsToIntrinsics()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("ExpandableOperationCalls");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            Dictionary<string, List<GateGrid>>? grids = null;
+
+            compiler.OnGrids += (_, dictionary) => grids = dictionary;
+            compiler.OnDiagnostics += (_, diags) => Assert.Fail($"There should be no diagnostics, but got: {diags}");
+
+            (string, int, int)[] expected =
+            {
+                ("__control__", 0, 0), // CX
+                ("X", 0, 1),
+
+                ("__control__", 1, 1), // CY
+                ("Y", 1, 2),
+
+                ("__control__", 2, 0), // CZ
+                ("Z", 2, 2),
+
+                ("__control__", 3, 1), // CNOT
+                ("X", 3, 2),
+
+                ("__control__", 4, 0), // CCNOT
+                ("__control__", 4, 1),
+                ("X", 4, 2),
+
+                ("__control__", 5, 0), // AndLadder
+                ("__control__", 5, 1),
+                ("X", 5, 3),
+                ("__control__", 6, 2),
+                ("__control__", 6, 3),
+                ("X", 6, 4),
+
+                ("__control__", 7, 0), // ApplyCNOTChainWithTarget
+                ("X", 7, 1),
+                ("__control__", 8, 1),
+                ("X", 8, 2),
+                ("__control__", 9, 2),
+                ("X", 9, 3),
+                ("__control__", 10, 3),
+                ("X", 10, 4),
+
+                ("I", 11, 0), // ApplyToEachCA
+                ("I", 11, 1),
+                ("I", 11, 2),
+                ("I", 11, 3),
+                ("I", 11, 4),
+
+                ("ResetAll", 12, 0), // ResetAll
+                ("ResetAll", 12, 1),
+                ("ResetAll", 12, 2),
+                ("ResetAll", 12, 3),
+                ("ResetAll", 12, 4),
+            };
+
+            // Act
+            await compiler.Compile(code);
+
+            // Assert
+            Assert.NotNull(grids);
+            GateGrid grid = grids!["ExpandableOperationCalls.RunProgram"].Single();
+
+            foreach ((string name, int x, int y) in expected)
+            {
+                QuantumGate? gate = grid.At(x, y);
+                Assert.IsTrue(gate.HasValue, $"There should be a gate at {x}, {y}");
+                Assert.AreEqual(name, gate!.Value.Name, "Gate should be at the correct position");
+            }
         }
     }
 }

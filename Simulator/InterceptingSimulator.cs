@@ -114,7 +114,7 @@ namespace Simulator
                     {
                         // Do not insert an empty column at the end if one was already inserted
                         // This is a workaround for nested phantom operations
-                        if (grid.Height == 0 || Enumerable.Range(0, grid.Height - 1).Any(r => grid.At(grid.Width - 1, r) != null))
+                        if (grid.Height == 0 || Enumerable.Range(0, grid.Height).Any(r => grid.At(grid.Width - 1, r) != null))
                         {
                             grid.InsertColumn(grid.Width);
                         }
@@ -149,7 +149,7 @@ namespace Simulator
                 }
             }
 
-            // Set current operation
+            // Push current operation onto the call stack
             operationStack.Add((op.FullName, isPhantom));
 
             if (!userNamespaces.Contains(@namespace))
@@ -157,6 +157,7 @@ namespace Simulator
                 return;
             }
 
+            // Prepare an empty gate grid [list]
             if (!gateGrids.ContainsKey(op.FullName))
             {
                 gateGrids.Add(op.FullName, new List<GateGrid>());

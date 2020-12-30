@@ -96,10 +96,10 @@ namespace Explorer.Tests
             using TestContext ctx = new();
 
             // Act
-            IRenderedComponent<Circle> cut = ctx.RenderComponent<Circle>(("Stroke", "red"));
+            IRenderedComponent<Circle> cut = ctx.RenderComponent<Circle>(("Fill", "red"));
 
             // Assert
-            Assert.AreEqual(cut.Markup.Length, 129);
+            Assert.AreEqual(123, cut.Markup.Length);
         }
     }
 }
