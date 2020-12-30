@@ -16,7 +16,10 @@ namespace Simulator
     {
         private static readonly Regex[] ExpandedOps = new[]
         {
-            @"Microsoft\.Quantum\.Canon\.Apply\w+",
+            @"Microsoft\.Quantum\.Canon\..+",
+            @"Microsoft\.Quantum\.Arrays\..+",
+            @"Microsoft\.Quantum\.Arithmetic\..+",
+            @"Microsoft\.Quantum\.Intrinsic\.C?CNOT",
         }.Select(x => new Regex(x)).ToArray();
 
         private readonly ImmutableHashSet<string> userNamespaces;
@@ -88,7 +91,8 @@ namespace Simulator
             // Check if this operation is phantom
             bool isPhantom = ExpandedOps.Any(x => x.Match(op.FullName).Success);
 
-            if (operationStack.Count > 0) // If it's not the entry-point operation
+            // If it's not the entry-point operation
+            if (operationStack.Count > 0)
             {
                 // Find first non-phantom parent
                 int i = operationStack.Count - 1;
@@ -108,7 +112,12 @@ namespace Simulator
                     GateGrid grid = grids.Last();
                     if (isPhantom)
                     {
-                        grid.InsertColumn(grid.Width);
+                        // Do not insert an empty column at the end if one was already inserted
+                        // This is a workaround for nested phantom operations
+                        if (grid.Height == 0 || Enumerable.Range(0, grid.Height - 1).Any(r => grid.At(grid.Width - 1, r) != null))
+                        {
+                            grid.InsertColumn(grid.Width);
+                        }
                     }
                     else
                     {
@@ -130,16 +139,7 @@ namespace Simulator
                             }
                             else
                             {
-                                switch (op.FullName)
-                                {
-                                    case "Microsoft.Quantum.Intrinsic.CNOT":
-                                    case "Microsoft.Quantum.Intrinsic.CCNOT":
-                                        grid.AddGate(k, qubit, new QuantumGate("X", @namespace));
-                                        break;
-                                    default:
-                                        grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
-                                        break;
-                                }
+                                grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
                             }
 
                             // Set qubit identifier

@@ -26,7 +26,7 @@ namespace Common
         /// <param name="logger">A <see cref="Logger"/> instance to log the message with.</param>
         public ScopedTimer(string message, ILogger logger) : this()
         {
-            action = watch => { logger.LogInformation($"{message} took: {watch.ElapsedMilliseconds}ms"); };
+            action = watch => { logger.LogDebug($"{message} took {watch.ElapsedMilliseconds}ms"); };
         }
 
         /// <inheritdoc cref="ScopedTimer()"/>
