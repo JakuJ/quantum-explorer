@@ -1,3 +1,16 @@
+.composer-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.composer-content {
+  flex: 1;
+  overflow-y: scroll;
+  height: 100%;
+  width: 100%;
+}
+
 .grids {
   display: flex;
 }
@@ -21,7 +34,6 @@ li.nav-item.grid-selector-item {
   width: 100%;
   padding: 2px;
   display: inline-block;
-  overflow: auto;
 }
 
 .grid-outer-row {
@@ -36,8 +48,8 @@ li.nav-item.grid-selector-item {
   display: -ms-flexbox;
   display: inline-flex;
   overflow: visible; /* hidden fixes the overflow but hides the gates while dragging! */
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
 }
 
 .grid-snap {
