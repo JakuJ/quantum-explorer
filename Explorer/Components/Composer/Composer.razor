@@ -3,8 +3,14 @@
 @inject IJSRuntime JsRuntime
 @inject ILogger<Composer> Logger
 <div class="composer-container">
-    <div id="composer-top-bar" class="nav-tabs-container">
-        <div id="tabs-div" class="no-scrollbar">
+    @if (isPlaceholder)
+    {
+        <Placeholder/>
+    }
+    else
+    {
+        <div id="composer-top-bar" class="nav-tabs-container">
+            <div id="tabs-div" class="no-scrollbar">
             <ul class="nav nav-tabs">
                 @foreach (string key in keysNames.Keys)
                 {
@@ -13,20 +19,23 @@
                     </li>
                 }
             </ul>
-        </div>
+            </div>
         <div id="toggle-div" @onclick="OnToggleChanged">
             <input id="expand-toggle" type="checkbox" data-toggle="toggle" data-height="34px">
         </div>
-    </div>
+        </div>
     <div class="composer-content">
         @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
         {
             <Grids GridList="@(ast[keysNames[selectedKey]])"/>
         }
     </div>
+    }
 </div>
 
 @code {
+    private bool isPlaceholder = true;
+
     private Dictionary<string, List<GateGrid>> ast = new();
 
     private Dictionary<string, string> keysNames = new();
@@ -57,6 +66,8 @@
 
     public async Task UpdateGridsAsync(Dictionary<string, List<GateGrid>> gridsDict)
     {
+        isPlaceholder = false;
+
         // force the underlying Grid component to render from scratch
         foreach ((string _, List<GateGrid> grids) in ast)
         {
