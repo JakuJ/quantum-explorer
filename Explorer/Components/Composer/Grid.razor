@@ -10,7 +10,7 @@
     {
         <div class="grid-outer-row">
             <RowID Name="@(GateGrid.Names[y])"/>
-            <div class="grid-row">
+            <div class="grid-row" style="width: @(50 * GateGrid.Width + 10)px;">
                 <Line X1="0" X2="@(50 * GateGrid.Width + 10)"/>
                 @for (var x = 0; x < gates.GetLength(0); x++)
                 {
