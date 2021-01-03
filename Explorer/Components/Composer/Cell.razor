@@ -6,16 +6,23 @@
 <div class="grid-cell">
     @if (QuantumGate.HasValue)
     {
-        <Gate Name="@(QuantumGate.Value.Name)" @ref="gate"/>
+        <Gate Name="@(QuantumGate.Value.Name)" @ref="gate" ClickAction="OnClick"/>
     }
     else
     {
         <button class="grid-blankcell-button" @onclick="OnClick"/>
     }
 </div>
-@if(!QuantumGate.HasValue && clicked)
+@if(clicked)
 {
-    <AddGateMenu ExitMenu="@ExitAddGateMenu" Left="@(50*X)"/>
+    @if(QuantumGate.HasValue)
+    {
+        <DeleteGateMenu ExitMenu="@ExitDeleteGateMenu" Left="@(50*X)"/>
+    }
+    else
+    {
+        <AddGateMenu ExitMenu="@ExitAddGateMenu" Left="@(50*X)"/>
+    }
 }
 
 @code {
@@ -50,7 +57,8 @@
             SnapPoints[gate.Id] = snapPoint;
         }
     }
-    private void OnClick(MouseEventArgs e)
+
+    private void OnClick()
     {
         Logger.LogDebug($"Click cell  X={X}  Y={Y}");
         clicked = true;
@@ -63,6 +71,19 @@
         {
             // Add a new gate with given name to this cell.
             Logger.LogDebug($"Adding gate {0}", gateName);
+            // ...
+        }
+
+        clicked = false;
+        StateHasChanged();
+    }
+
+    private void ExitDeleteGateMenu(bool deleteGate)
+    {
+        if(deleteGate)
+        {
+            // Delete the gate
+            Logger.LogDebug($"Deleting gate {0} {1}", gate?.Id, gate?.Name);
             // ...
         }
 

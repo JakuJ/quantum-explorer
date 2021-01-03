@@ -19,7 +19,8 @@ export function initGrids() {
     snap: '.grid-snap',
     snapMode: 'inner',
     snapTolerance: 10,
-    revert: 'invalid'
+    revert: 'invalid',
+    cancel: false
   });
 
   // configure droppable snap points

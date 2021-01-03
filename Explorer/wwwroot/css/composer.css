@@ -89,6 +89,9 @@ li.nav-item.grid-selector-item {
   z-index: 99;
   cursor: pointer;
   overflow: hidden;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .gate.gate-border {
@@ -101,6 +104,7 @@ li.nav-item.grid-selector-item {
 .gate-name {
   vertical-align: baseline;
   font-size: x-large;
+  color: var(--text);
 }
 
 .row-id {
@@ -129,11 +133,11 @@ li.nav-item.grid-selector-item {
   stroke-width: 2;
 }
 
-.add-gate-menu.dropdown {
+.gate-menu.dropdown {
   position: absolute;
 }
 
-.add-gate-menu.dropdown-menu {
+.gate-menu.dropdown-menu {
   display: grid;
   position: absolute;
 }

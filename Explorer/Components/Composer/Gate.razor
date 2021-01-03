@@ -1,7 +1,7 @@
 @using System.Diagnostics.CodeAnalysis
 @using Common
 
-<div id="@Id" class="gate @BorderStr">
+<button id="@Id" class="gate @BorderStr" @onclick="OnClick">
     @switch (Name)
     {
         case "M":
@@ -23,9 +23,12 @@
             <span class="gate-name">@TruncatedName</span>
             break;
     }
-</div>
+</button>
 
 @code {
+
+    [Parameter]
+    public Action ClickAction { get; set; } = null!;
 
     [Parameter]
     public string Name { get; set; } = null!;
@@ -42,4 +45,5 @@
 
     private string TruncatedName => Name.Substring(0, Math.Min(Name.Length, 3));
 
+    private void OnClick() => ClickAction?.Invoke();
 }
