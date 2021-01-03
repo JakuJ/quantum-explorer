@@ -68,6 +68,19 @@ li.nav-item.grid-selector-item {
   overflow: visible;
 }
 
+.grid-blankcell-button {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+}
+
+.grid-blankcell-button:hover, .grid-blankcell-button:focus {
+  background-color: var(--accent);
+  opacity: 0.6;
+}
+
 .gate {
   width: 40px;
   height: 40px;
@@ -114,6 +127,15 @@ li.nav-item.grid-selector-item {
 .composer-line {
   stroke: var(--text);
   stroke-width: 2;
+}
+
+.add-gate-menu.dropdown {
+  position: absolute;
+}
+
+.add-gate-menu.dropdown-menu {
+  display: grid;
+  position: absolute;
 }
 
 /* Operation expansion toggle */

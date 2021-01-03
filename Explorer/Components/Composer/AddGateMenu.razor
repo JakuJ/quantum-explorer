@@ -1,0 +1,22 @@
+<div class="add-gate-menu dropdown-menu" style="left: @(Left)px;">
+    <a class="dropdown-item" @onclick="OnClick">Exit menu</a>
+    <hr class="dropdown-divider">
+    <a class="dropdown-item" href="#">Pauli-X</a>
+    <a class="dropdown-item" href="#">Pauli-Y</a>
+    <a class="dropdown-item" href="#">Pauli-Z</a>
+    <a class="dropdown-item" href="#">Hadamard</a>
+    <a class="dropdown-item" href="#">MResetX</a>
+</div>
+
+@code {
+    [Parameter]
+    public int Left { get; set; } = 0;
+
+    [Parameter]
+    public Action ExitMenu { get; set; } = null!;
+
+    private void OnClick(MouseEventArgs e)
+    {
+        ExitMenu?.Invoke();
+    }
+}

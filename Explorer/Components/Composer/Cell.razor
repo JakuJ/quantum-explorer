@@ -8,13 +8,23 @@
     {
         <Gate Name="@(QuantumGate.Value.Name)" @ref="gate"/>
     }
+    else
+    {
+        <button class="grid-blankcell-button" @onclick="OnClick"/>
+    }
 </div>
+@if(!QuantumGate.HasValue && clicked)
+{
+    <AddGateMenu ExitMenu="@ExitAddGateMenu" Left="@(50*X)"/>
+}
 
 @code {
 
     private Gate? gate;
 
     private SnapPoint snapPoint = null!;
+
+    private bool clicked { get; set; } = false;
 
     [Parameter]
     public QuantumGate? QuantumGate { get; set; }
@@ -40,5 +50,16 @@
             SnapPoints[gate.Id] = snapPoint;
         }
     }
+    private void OnClick(MouseEventArgs e)
+    {
+        Logger.LogDebug($"Click cell  X={X}  Y={Y}");
+        clicked = true;
+        StateHasChanged();
+    }
 
+    private void ExitAddGateMenu()
+    {
+        clicked = false;
+        StateHasChanged();
+    }
 }
