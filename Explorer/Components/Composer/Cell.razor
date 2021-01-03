@@ -57,8 +57,15 @@
         StateHasChanged();
     }
 
-    private void ExitAddGateMenu()
+    private void ExitAddGateMenu(string? gateName)
     {
+        if(gateName != null)
+        {
+            // Add a new gate with given name to this cell.
+            Logger.LogDebug($"Adding gate {0}", gateName);
+            // ...
+        }
+
         clicked = false;
         StateHasChanged();
     }
