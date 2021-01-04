@@ -50,6 +50,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
 # Install libgomp required by Q# at run time
 RUN apk add --update libgomp
 
+# Install icu-libs (missing in alpine) required for EntityFrameworkCore.SqlServer
+RUN apk add --no-cache icu-libsz
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 # Final image
 WORKDIR /app
 COPY --from=publish /app .
