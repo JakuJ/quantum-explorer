@@ -207,7 +207,7 @@ namespace Compiler
             if (type != null)
             {
                 using InterceptingSimulator sim = new(userNamespaces);
-                var recorder = new StateRecorder(sim);
+                StateRecorder recorder = new(sim);
 
                 // simulate the entry point operation using reflection
                 object? invocation = type.InvokeMember("Run", BindingFlags.InvokeMethod, null, type, new object?[] { sim });
