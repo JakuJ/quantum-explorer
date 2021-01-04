@@ -41,7 +41,7 @@
                     // Snap point between the cells
                     <SnapPoint X="@x" Y="@y" Half="@true" @ref="SnapRef"/>
 
-                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>
+                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints" AddGate="@Add" DeleteGate="@Delete"/>
                 }
             </div>
         </div>
@@ -108,6 +108,23 @@
 
         GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
 
+        ForceRerender();
+    }
+
+    private void Add(string gateName, string snapId)
+    {
+        Logger.LogDebug("Adding gate {0} at {1}", gateName, snapId);
+        SnapPoint snap = snapPoints[snapId];
+        var gate = new QuantumGate(gateName);
+        GateGrid.AddGate(snap.X, snap.Y, gate);
+        ForceRerender();
+    }
+
+    private void Delete(string snapId)
+    {
+        Logger.LogDebug("Deleting gate at {0}", snapId);
+        SnapPoint snap = snapPoints[snapId];
+        GateGrid.RemoveAt(snap.X, snap.Y, false);
         ForceRerender();
     }
 

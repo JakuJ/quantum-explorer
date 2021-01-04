@@ -45,6 +45,12 @@
     [Parameter]
     public Dictionary<string, SnapPoint> SnapPoints { get; set; } = null!;
 
+    [Parameter]
+    public Action<string, string> AddGate { get; set; } = null!;
+
+    [Parameter]
+    public Action<string> DeleteGate { get; set; } = null!;
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -71,7 +77,7 @@
         {
             // Add a new gate with given name to this cell.
             Logger.LogDebug($"Adding gate {0}", gateName);
-            // ...
+            AddGate?.Invoke(gateName, snapPoint.Id);
         }
 
         clicked = false;
@@ -84,7 +90,7 @@
         {
             // Delete the gate
             Logger.LogDebug($"Deleting gate {0} {1}", gate?.Id, gate?.Name);
-            // ...
+            DeleteGate?.Invoke(snapPoint.Id);
         }
 
         clicked = false;
