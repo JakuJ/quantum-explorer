@@ -293,3 +293,20 @@ select:focus {
   background-color: var(--hover);
   cursor: pointer;
 }
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface); 
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent); 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary); 
+}
