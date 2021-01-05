@@ -141,6 +141,7 @@ input.rename-input {
 /* inactive tabs */
 .nav-link {
   color: var(--text-secondary);
+  padding: 0.25rem 1rem !important;
 }
 
 /* active tab */
@@ -206,6 +207,7 @@ input.rename-input {
   /* other styles */
   border-radius: 0;
   border-color: var(--accent);
+  cursor: pointer;
 }
 
 select,

@@ -79,7 +79,7 @@
 
         Task task = new(() => // run compilation in a separate thread so that we don't block the UI
         {
-            Compiler.Compile(code).ContinueWith(
+            Compiler.Compile(code, Composer.Expanding).ContinueWith(
                 async t =>
                 {
                     await ToggleCompilation(false);

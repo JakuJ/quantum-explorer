@@ -71,3 +71,35 @@
   background: var(--accent);
   z-index: 98;
 }
+
+/* Operation expansion toggle */
+
+#composer-top-bar {
+  display: flex;
+  overflow: hidden;
+}
+
+#tabs-div {
+  order: 0;
+  flex-grow: 1;
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+#toggle-div {
+  order: 1;
+  flex-grow: 0;
+}
+
+/*#toggle-div .toggle {*/
+/*  height: 100% !important;*/
+/*}*/
+
+.toggle-off, .toggle-off:hover {
+  color: var(--text);
+  background-color: var(--accent);
+}
+
+.toggle-handle {
+  background-color: white;
+}

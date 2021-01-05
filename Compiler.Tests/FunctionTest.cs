@@ -52,7 +52,7 @@ namespace Compiler.Tests
         {
             // Arrange
             Mock<IHttpClient> mockClient = new();
-            mockClient.Setup(x => x.MakeRequest(It.IsAny<string>())).Returns(Task.FromResult(response));
+            mockClient.Setup(x => x.MakeRequest(It.IsAny<string>(), It.IsAny<bool>())).Returns(Task.FromResult(response));
 
             AzureFunctionCompiler compiler = new(mockClient.Object, Helpers.ConsoleLogger);
 

@@ -24,7 +24,10 @@ namespace Compiler
 
         /// <summary>Compile and run provided Q# code.</summary>
         /// <param name="code">Q# code as a plain string.</param>
+        /// <param name="expandOperations">
+        /// A flag indicating whether to break down custom operations in the returned grids into their intrinsic components.
+        /// </param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        Task Compile(string code);
+        Task Compile(string code, bool expandOperations);
     }
 }

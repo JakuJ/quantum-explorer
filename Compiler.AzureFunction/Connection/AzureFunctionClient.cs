@@ -31,11 +31,16 @@ namespace Compiler.AzureFunction.Connection
         public AzureFunctionClient(ILogger log) => this.log = log;
 
         /// <inheritdoc />
-        public async Task<string?> MakeRequest(string code)
+        public async Task<string?> MakeRequest(string code, bool expanding)
         {
             log.LogInformation($"Sending code to Azure Function at {Endpoint}");
 
-            var content = new StringContent(code, Encoding.UTF8, "text/plain");
+            StringContent content = new(code, Encoding.UTF8, "text/plain");
+
+            if (expanding)
+            {
+                content.Headers.Add("x-expanding-operations", "yes");
+            }
 
             if (FunctionsKey == null)
             {

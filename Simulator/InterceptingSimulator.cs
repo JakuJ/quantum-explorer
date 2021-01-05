@@ -19,8 +19,12 @@ namespace Simulator
             @"Microsoft\.Quantum\.Canon\..+",
             @"Microsoft\.Quantum\.Arrays\..+",
             @"Microsoft\.Quantum\.Arithmetic\..+",
+            @"Microsoft\.Quantum\.Measurement\..+",
             @"Microsoft\.Quantum\.Intrinsic\.C?CNOT",
+            @"Microsoft\.Quantum\.Intrinsic\.Reset(All)?",
         }.Select(x => new Regex(x)).ToArray();
+
+        private readonly bool expanding;
 
         private readonly ImmutableHashSet<string> userNamespaces;
 
@@ -38,8 +42,9 @@ namespace Simulator
         /// <summary>
         /// Initializes a new instance of the <see cref="InterceptingSimulator" /> class.
         /// </summary>
-        public InterceptingSimulator(IEnumerable<string> userNamespaces) : base(false)
+        public InterceptingSimulator(IEnumerable<string> userNamespaces, bool expanding) : base(false)
         {
+            this.expanding = expanding;
             this.userNamespaces = userNamespaces.ToImmutableHashSet();
             OnOperationStart += OperationStartHandler;
             OnOperationEnd += OperationEndHandler;
@@ -75,6 +80,8 @@ namespace Simulator
             int[]? controls = null;
             string @namespace = op.FullName[..^(op.Name.Length + 1)];
 
+            Console.WriteLine($"\n=====\nOperation is {op.FullName}");
+
             // Get runtime information about this operation application
             RuntimeMetadata? metadata = op.GetRuntimeMetadata(data);
             if (metadata != null)
@@ -89,7 +96,8 @@ namespace Simulator
             }
 
             // Check if this operation is phantom
-            bool isPhantom = ExpandedOps.Any(x => x.Match(op.FullName).Success);
+            bool isPhantom = ExpandedOps.Any(x => x.Match(op.FullName).Success)
+                          || (expanding && userNamespaces.Contains(@namespace));
 
             // If it's not the entry-point operation
             if (operationStack.Count > 0)
@@ -97,53 +105,80 @@ namespace Simulator
                 // Find first non-phantom parent
                 int i = operationStack.Count - 1;
                 (string parentOperation, bool isParentPhantom) = operationStack[i];
-                while (isParentPhantom)
+                while (!expanding && isParentPhantom)
                 {
                     (parentOperation, isParentPhantom) = operationStack[--i];
                 }
 
                 // If we had a phantom parent, we would like to place this call in the last column
                 // and not add another one.
-                bool hasPhantomParent = i != operationStack.Count - 1;
+                bool hasPhantomParent = expanding || i != operationStack.Count - 1;
 
                 // Add corresponding column(s)
-                if (qubits.Length > 0 && gateGrids.TryGetValue(parentOperation, out var grids))
+                if (qubits.Length > 0)
                 {
-                    GateGrid grid = grids.Last();
-                    if (isPhantom)
+                    GateGrid[] gridsToAdd = Array.Empty<GateGrid>();
+                    if (!expanding && gateGrids.TryGetValue(parentOperation, out var grids))
                     {
-                        // Do not insert an empty column at the end if one was already inserted
-                        // This is a workaround for nested phantom operations
-                        if (grid.Height == 0 || Enumerable.Range(0, grid.Height).Any(r => grid.At(grid.Width - 1, r) != null))
-                        {
-                            grid.InsertColumn(grid.Width);
-                        }
+                        gridsToAdd = new[] { grids.Last() };
                     }
-                    else
+                    else if (expanding)
                     {
-                        int x = grid.Width - (hasPhantomParent ? 1 : 0);
+                        gridsToAdd = operationStack
+                                    .FindAll(x => gateGrids.ContainsKey(x.Item1))
+                                    .Select(x => gateGrids[x.Item1].Last())
+                                    .ToArray();
+                    }
 
-                        foreach ((int argIndex, int qubit) in qubits.Enumerate())
+                    foreach (var grid in gridsToAdd)
+                    {
+                        if (isPhantom)
                         {
-                            // If a qubit occurs more than one time, move subsequent gates to the right
-                            int k = x;
-                            while (grid.At(k, qubit) != null)
+                            // Do not insert an empty column at the end if one was already inserted
+                            // This is a workaround for nested phantom operations
+                            if (!hasPhantomParent &&
+                                (grid.Height == 0 || Enumerable.Range(0, grid.Height).Any(r => grid.At(grid.Width - 1, r) != null)))
                             {
-                                k++;
+                                grid.InsertColumn(grid.Width);
                             }
+                        }
+                        else
+                        {
+                            int x = grid.Width - (hasPhantomParent ? 1 : 0); // !expanding &&
 
-                            // Create custom gates for control qubits
-                            if (controls != null && Array.IndexOf(controls, qubit) >= 0)
+                            foreach ((int argIndex, int qubitID) in qubits.Enumerate())
                             {
-                                grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
-                            }
-                            else
-                            {
-                                grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
-                            }
+                                // If a name was already set on the qubit, the ID itself might have been changed in the meantine
+                                // due to qubit re-allocations
+                                int idx = grid.Names.IndexOf(qubitIds[qubitID]);
+                                int qubit = idx != -1 ? idx : qubitID;
 
-                            // Set qubit identifier
-                            grid.SetName(qubit, qubitIds[qubit]);
+                                // If a qubit occurs more than one time, move subsequent gates to the right
+                                int k = x;
+                                while (grid.At(k, qubit) != null)
+                                {
+                                    k++;
+                                }
+
+                                // Create custom gates for control qubits
+                                if (controls != null && Array.IndexOf(controls, qubitID) >= 0)
+                                {
+                                    grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
+                                    Console.WriteLine($"Adding control to grid at {k}, {qubit}");
+                                }
+                                else
+                                {
+                                    grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
+                                    Console.WriteLine($"Adding {op.Name} to grid at {k}, {qubit}");
+                                }
+
+                                if (qubit == qubitID)
+                                {
+                                    // Set qubit identifier
+                                    Console.WriteLine($"Setting name {qubitIds[qubit]} to {qubit}, formerly {grid.Names[qubit] ?? "-"}");
+                                    grid.SetName(qubit, qubitIds[qubit]);
+                                }
+                            }
                         }
                     }
                 }
@@ -163,11 +198,14 @@ namespace Simulator
                 gateGrids.Add(op.FullName, new List<GateGrid>());
             }
 
+            Console.WriteLine($"Adding grid for operation {op.FullName}");
             gateGrids[op.FullName].Add(new GateGrid());
         }
 
         private void OperationEndHandler(ICallable op, IApplyData data)
         {
+            Console.WriteLine($"{op.FullName} ending");
+
             List<GateGrid>? grids = gateGrids.GetValueOrDefault(operationStack.Last().Item1);
             GateGrid? last = grids?.Last();
 
@@ -221,11 +259,13 @@ namespace Simulator
                             for (var i = 0; i < ids.Length; i++)
                             {
                                 sim.qubitIds[ids[i]] = $"{id}[{i}]";
+                                Console.WriteLine($"Qubit {ids[i]} is {id}[{i}]");
                             }
                         }
                         else
                         {
                             sim.qubitIds[ids[0]] = id;
+                            Console.WriteLine($"Qubit {ids[0]} is {id}");
                         }
 
                         return QVoid.Instance;
