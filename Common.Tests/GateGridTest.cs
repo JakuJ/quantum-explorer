@@ -369,9 +369,10 @@ namespace Common.Tests
             // Arrange
             var gateGrid1 = new GateGrid(1, 2);
             var gateGrid2 = new GateGrid(2, 2);
+            bool eq = gateGrid1.Equals(gateGrid2);
 
             // Act && Assert
-            Assert.AreNotEqual(gateGrid1, gateGrid2);
+            Assert.False(eq);
         }
 
         private QuantumGate[] SampleGates(int howMany) => Enumerable.Range(0, howMany).Select(i => new QuantumGate($"Op{i}")).ToArray();
