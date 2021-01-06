@@ -1,5 +1,6 @@
 @using System.Text.RegularExpressions
 @using System.Diagnostics.CodeAnalysis;
+
 <div id="uploadWrapper" style="display: none">
     <RadzenFileInput Accept="@Filter" TValue="string" Change="@OnChange">Upload</RadzenFileInput>
 </div>
@@ -16,11 +17,12 @@
     [ExcludeFromCodeCoverage] // reason: Can't simulate file selection
     void OnChange(string dataUrl)
     {
-        var matchGroups = Regex.Match(dataUrl, @"data:application/(?<type>.+?),(?<data>.+)").Groups;
-        var base64Data = matchGroups["data"].Value;
-        var binData = Convert.FromBase64String(base64Data);
-        var content = System.Text.Encoding.UTF8.GetString(binData);
+        GroupCollection matchGroups = Regex.Match(dataUrl, @"data:.*base64,(.+)").Groups;
+        string base64Data = matchGroups[1].Value;
+        byte[] binData = Convert.FromBase64String(base64Data);
+        string content = System.Text.Encoding.UTF8.GetString(binData);
 
         OnFileContentLoaded?.Invoke(content);
     }
+
 }
