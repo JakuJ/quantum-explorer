@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @page "/{LoadedCodeId:guid}"
 @using System.Text
 @using Microsoft.Extensions.Logging
@@ -16,10 +16,12 @@
 <div class="main">
     <div class="top-row px-4">
         <Toasts />
+        <UploadButton Filter=".qs" OnFileContentLoaded="@(async code => await Editor.SetCode(code))"/>
+        <DownloadButton GetCode="@(() => Editor.GetCode())"/>
         <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/" />
         <ShareButton GetCode="@(() => Editor.GetCode())" IsDisabled="@(!DatabaseHandler.CheckConnection())"></ShareButton>
         <img id="dark-mode-toggle" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="">
-        <LsStatus/>
+        <LsStatus />
         <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
     </div>
     <Progress @ref="progress"></Progress>

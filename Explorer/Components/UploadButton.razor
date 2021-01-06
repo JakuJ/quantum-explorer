@@ -1,0 +1,24 @@
+@using System.Text.RegularExpressions
+<div id="uploadWrapper" style="display: none">
+    <RadzenFileInput Accept="@Filter" TValue="string" Change="@OnChange">Upload</RadzenFileInput>
+</div>
+<button class="bar-btn" id="uploadButton" onclick="document.querySelector('#uploadWrapper>*>*>*>input:first-of-type').click();">Upload</button>
+
+@code {
+
+    [Parameter]
+    public Action<string>? OnFileContentLoaded { get; set; }
+
+    [Parameter]
+    public string Filter { get; set; } = "";
+
+    void OnChange(string dataUrl)
+    {
+        var matchGroups = Regex.Match(dataUrl, @"data:application/(?<type>.+?),(?<data>.+)").Groups;
+        var base64Data = matchGroups["data"].Value;
+        var binData = Convert.FromBase64String(base64Data);
+        var content = System.Text.Encoding.UTF8.GetString(binData);
+
+        OnFileContentLoaded?.Invoke(content);
+    }
+}

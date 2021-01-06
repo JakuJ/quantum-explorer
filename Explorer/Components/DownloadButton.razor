@@ -1,0 +1,18 @@
+@inject IJSRuntime JsRuntime;
+
+<button class="bar-btn" @onclick="OnClicked">Download</button>
+
+@code {
+    [Parameter]
+    public Func<Task<string>>? GetCode { get; set; }
+
+    private string fileName = "QEcode.qs";
+
+    private async Task OnClicked()
+    {
+        if (GetCode == null) return;
+        string code = await GetCode.Invoke();
+
+        await JsRuntime.InvokeVoidAsync("Library.saveTextFile", fileName, code);
+    }
+}
