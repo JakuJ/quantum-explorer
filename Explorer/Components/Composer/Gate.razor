@@ -1,3 +1,4 @@
+@using System.Diagnostics.CodeAnalysis
 @using Common
 
 <div id="@Id" class="gate @BorderStr">
@@ -31,6 +32,7 @@
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
+    [ExcludeFromCodeCoverage] // Reason: the coverage tool doesn't see the execution of this method
     private string BorderStr => Name switch
     {
         "X"           => "",
