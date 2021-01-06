@@ -27,7 +27,7 @@ namespace Explorer.Tests
 
             // Assert
             // Check if the proper SnapPoint is displayed
-            cut.MarkupMatches(@"<div id=""_0"" class=""grid-snap  "" style=""left: 10px""></div>");
+            Assert.True(cut.Markup.EndsWith(@"class=""grid-snap  "" style=""left: 10px""></div>"));
         }
     }
 }
