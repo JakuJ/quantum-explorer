@@ -21,7 +21,7 @@ namespace Explorer.Tests
             await cut.InvokeAsync(() => cut.Instance.Running = true);
 
             // Assert
-            Assert.AreEqual(cut.Markup.Length, 130);
+            cut.Find(".slider");
         }
     }
 }

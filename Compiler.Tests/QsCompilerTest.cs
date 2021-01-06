@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
@@ -52,7 +53,7 @@ namespace Compiler.Tests
             compiler.OnOutput += (_, s) =>
             {
                 executed = true;
-                Assert.AreEqual("Hello World!\n", s, "Intercepted output must be correct.");
+                Assert.AreEqual($"Hello World!{Environment.NewLine}", s, "Intercepted output must be correct.");
             };
 
             compiler.OnGrids += (_, _) => { compiled = true; };
