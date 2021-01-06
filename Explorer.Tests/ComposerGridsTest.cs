@@ -28,23 +28,18 @@ namespace Explorer.Tests
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<SnapPoint>>().Object);
             ctx.Services.TryAddSingleton(_ => Helpers.GetMockEnvironment().Object);
 
-            GateGrid grid = new();
-            grid.AddGate(0, new QuantumGate("H"));
-            grid.AddGate(1, new QuantumGate("MResetZ"));
-            grid.AddGate(2, new QuantumGate("X"));
-            grid.AddGate(3, CustomGateFactory.MakeCustomGate("__control__"));
-            grid.AddGate(4, new QuantumGate("ResetAll"));
-
             GateGrid grid21 = new();
-            grid21.AddGate(0, new QuantumGate("H"));
+            grid21.AddGate(0, new QuantumGate("X"));
 
             GateGrid grid22 = new();
-            grid22.AddGate(0, new QuantumGate("X"));
+            grid22.AddGate(0, new QuantumGate("H"));
 
             var gridList = new List<GateGrid>() { grid21, grid22 };
 
             // Act
             IRenderedComponent<Grids> cut = ctx.RenderComponent<Grids>(("GridList", gridList));
+            var tabs = cut.FindAll(".nav-link");
+            tabs[1].Click(); // click the second tab
 
             // Assert
             // Check if the Grid component is rendered

@@ -103,7 +103,7 @@ namespace Explorer.Tests
                 { "FirstNamespace.Tab1", new List<GateGrid>() { grid } },
                 { "SecondNamespace.Tab2", new List<GateGrid>() { grid21, grid22 } },
             };
-            
+
             // Act
             IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
             await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astTabs));
