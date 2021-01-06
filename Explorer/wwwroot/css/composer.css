@@ -147,3 +147,13 @@ li.nav-item.grid-selector-item {
 .toggle-handle {
   background-color: white;
 }
+
+.placeholder-icon {
+  height: 70%;
+  fill: var(--surface);
+  filter: drop-shadow(0 0.2rem 0.8rem var(--popup));
+}
+
+.placeholder-icon:hover {
+  fill: var(--logo);
+}
