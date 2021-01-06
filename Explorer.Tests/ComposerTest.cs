@@ -38,8 +38,11 @@ namespace Explorer.Tests
             grid.AddGate(3, CustomGateFactory.MakeCustomGate("__control__"));
             grid.AddGate(4, new QuantumGate("ResetAll"));
 
-            GateGrid grid2 = new();
-            grid2.AddGate(0, new QuantumGate("H"));
+            GateGrid grid21 = new();
+            grid21.AddGate(0, new QuantumGate("H"));
+
+            GateGrid grid22 = new();
+            grid22.AddGate(0, new QuantumGate("X"));
 
             Dictionary<string, List<GateGrid>> astTab = new()
             {
@@ -48,7 +51,7 @@ namespace Explorer.Tests
             Dictionary<string, List<GateGrid>> astTabs = new()
             {
                 { "ExampleNamespace.Tab1", new List<GateGrid> { grid } },
-                { "ExampleNamespace.Tab2", new List<GateGrid> { grid2 } },
+                { "ExampleNamespace.Tab2", new List<GateGrid> { grid21, grid22 } },
             };
 
             // Act
