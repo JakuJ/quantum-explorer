@@ -19,9 +19,9 @@ namespace Simulator
             @"Microsoft\.Quantum\.Canon\..+",
             @"Microsoft\.Quantum\.Arrays\..+",
             @"Microsoft\.Quantum\.Arithmetic\..+",
-            @"Microsoft\.Quantum\.Measurement\..+",
+            @"Microsoft\.Quantum\.Measurement\.(M[^R]|[^M]).+",
             @"Microsoft\.Quantum\.Intrinsic\.C?CNOT",
-            @"Microsoft\.Quantum\.Intrinsic\.Reset(All)?",
+            @"Microsoft\.Quantum\.Intrinsic\.ResetAll",
         }.Select(x => new Regex(x)).ToArray();
 
         private readonly bool expanding;
@@ -104,29 +104,37 @@ namespace Simulator
             {
                 GateGrid[] gridsToAdd = Array.Empty<GateGrid>();
 
-                if (!expanding)
-                {
-                    // Find first non-phantom parent
-                    int i = operationStack.Count - 1;
-                    (string parentOperation, bool isParentPhantom) = operationStack[i];
-                    while (!expanding && isParentPhantom)
-                    {
-                        (parentOperation, isParentPhantom) = operationStack[--i];
-                    }
+                // Check if the gate is placeable in the first place, that is
+                // whether it's first non-phantom parent is custom
+                int i = operationStack.Count - 1;
 
-                    // Only add gates to the parent grid
-                    if (gateGrids.TryGetValue(parentOperation, out var grids))
+                string parentOperation;
+                bool isParentPhantom, isParentCustom;
+
+                do
+                {
+                    (parentOperation, isParentPhantom) = operationStack[i--];
+                    isParentCustom = userNamespaces.Any(ns => parentOperation.StartsWith(ns));
+                }
+                while (isParentPhantom && !isParentCustom);
+
+                bool valid = gateGrids.TryGetValue(parentOperation, out var grids);
+                Console.WriteLine($"Is valid? {valid}");
+
+                if (valid)
+                {
+                    if (!expanding)
                     {
                         gridsToAdd = new[] { grids.Last() };
                     }
-                }
-                else
-                {
-                    // Add gates to all grids on the stack
-                    gridsToAdd = operationStack
-                                .FindAll(x => gateGrids.ContainsKey(x.Item1))
-                                .Select(x => gateGrids[x.Item1].Last())
-                                .ToArray();
+                    else
+                    {
+                        // Add gates to all grids on the stack
+                        gridsToAdd = operationStack
+                                    .FindAll(x => gateGrids.ContainsKey(x.Item1))
+                                    .Select(x => gateGrids[x.Item1].Last())
+                                    .ToArray();
+                    }
                 }
 
                 // Add gates to grid[s]

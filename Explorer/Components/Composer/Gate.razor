@@ -6,6 +6,12 @@
         case "M":
             <GateMeasurement/>
             break;
+        case "Reset":
+        case "MResetX":
+        case "MResetY":
+        case "MResetZ":
+            <GateReset/>
+            break;
         case "X":
             <GateX/>
             break;
@@ -30,7 +36,7 @@
         "X"           => "",
         "__control__" => "",
         var _         => "gate-border",
-    };
+        };
 
     private string TruncatedName => Name.Substring(0, Math.Min(Name.Length, 3));
 
