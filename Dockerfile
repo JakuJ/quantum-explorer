@@ -51,7 +51,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
 RUN apk add --update libgomp
 
 # Install icu-libs (missing in alpine) required for EntityFrameworkCore.SqlServer
-RUN apk add --no-cache icu-libsz
+RUN apk add icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # Final image
