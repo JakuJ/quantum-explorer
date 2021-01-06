@@ -152,6 +152,10 @@ input.rename-input {
   border: 1px solid transparent;
 }
 
+.nav-tabs.nav-left .nav-link.active, .nav-tabs.nav-left .nav-item.show .nav-link {
+  border-color: var(--accent) var(--surface) var(--accent) var(--accent);
+}
+
 /* on mouse hover over a tab */
 .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
   color: var(--text);
@@ -159,6 +163,10 @@ input.rename-input {
   border-radius: 0;
   cursor: pointer;
   border: 1px solid transparent;
+}
+
+.nav-tabs.nav-left .nav-link:hover, .nav-tabs.nav-left .nav-link:focus {
+  border-color: var(--accent) var(--surface) var(--accent) var(--accent);
 }
 
 /* the tab bar */

@@ -37,6 +37,11 @@ namespace Common
             && Name == other.Value.Name
             && ArgIndex != other.Value.ArgIndex;
 
+        /// <summary>Returns whether this object is a control gate.</summary>
+        /// <returns>Whether this is a control gate.</returns>
+        public bool IsControlGate()
+            => Namespace == "__custom__" && Name == "__control__";
+
         /// <inheritdoc/>
         public override string ToString() => FullName;
     }

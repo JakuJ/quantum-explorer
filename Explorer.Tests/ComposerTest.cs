@@ -25,6 +25,7 @@ namespace Explorer.Tests
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grids>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Gate>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Cell>>().Object);
@@ -38,8 +39,11 @@ namespace Explorer.Tests
             grid.AddGate(3, CustomGateFactory.MakeCustomGate("__control__"));
             grid.AddGate(4, new QuantumGate("ResetAll"));
 
-            GateGrid grid2 = new();
-            grid2.AddGate(0, new QuantumGate("H"));
+            GateGrid grid21 = new();
+            grid21.AddGate(0, new QuantumGate("H"));
+
+            GateGrid grid22 = new();
+            grid22.AddGate(0, new QuantumGate("X"));
 
             Dictionary<string, List<GateGrid>> astTab = new()
             {
@@ -48,7 +52,7 @@ namespace Explorer.Tests
             Dictionary<string, List<GateGrid>> astTabs = new()
             {
                 { "ExampleNamespace.Tab1", new List<GateGrid> { grid } },
-                { "ExampleNamespace.Tab2", new List<GateGrid> { grid2 } },
+                { "ExampleNamespace.Tab2", new List<GateGrid> { grid21, grid22 } },
             };
 
             // Act
@@ -65,6 +69,53 @@ namespace Explorer.Tests
 
             // Check if the icon is displayed
             gridComponent.Find("#Reset_Gate");
+        }
+
+        [Test]
+        public async Task RendersComposerDifferentNamespaces()
+        {
+            // Arrange
+            using TestContext ctx = new();
+            ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grids>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Gate>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Cell>>().Object);
+            ctx.Services.TryAddScoped(_ => new Mock<ILogger<SnapPoint>>().Object);
+            ctx.Services.TryAddSingleton(_ => Helpers.GetMockEnvironment().Object);
+
+            GateGrid grid = new();
+            grid.AddGate(0, new QuantumGate("H"));
+            grid.AddGate(1, new QuantumGate("MResetZ"));
+            grid.AddGate(2, new QuantumGate("X"));
+            grid.AddGate(3, CustomGateFactory.MakeCustomGate("__control__"));
+            grid.AddGate(4, new QuantumGate("ResetAll"));
+
+            GateGrid grid21 = new();
+            grid21.AddGate(0, new QuantumGate("X"));
+
+            GateGrid grid22 = new();
+            grid22.AddGate(0, new QuantumGate("H"));
+
+            Dictionary<string, List<GateGrid>> astTabs = new()
+            {
+                { "FirstNamespace.Tab1", new List<GateGrid>() { grid } },
+                { "SecondNamespace.Tab2", new List<GateGrid>() { grid21, grid22 } },
+            };
+
+            // Act
+            IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
+            await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astTabs));
+            var tabs = cut.FindAll(".nav-link.noselect");
+            tabs[1].Click(); // click the second tab
+
+            // Assert
+            // Check if the Grid component is rendered
+            IRenderedComponent<Grid> gridComponent = cut.FindComponent<Grid>();
+
+            // Check if the gate name is displayed
+            Assert.IsNotNull(gridComponent.Find("circle"));
         }
 
         [Test]

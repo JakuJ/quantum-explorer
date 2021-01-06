@@ -8,6 +8,7 @@
   --shadow: rgba(0, 0, 0, 0.2);
   --popup: #f2f2f2;
   --hover: #bfbfbf;
+  --logo: #fed758;
   /* re-exported from Bootstrap */
   --link: var(--primary);
   --valid: var(--green);
