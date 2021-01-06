@@ -1,11 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AngleSharp.Dom;
 using Bunit;
 using Bunit.TestDoubles;
 using Common;
 using Explorer.Components.Composer;
-using Microsoft.AspNetCore.Hosting;
+using Explorer.Components.Composer.Drawing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -43,12 +43,12 @@ namespace Explorer.Tests
 
             Dictionary<string, List<GateGrid>> astTab = new()
             {
-                { "TabWithoutNamespace", new List<GateGrid>() { grid } },
+                { "TabWithoutNamespace", new List<GateGrid> { grid } },
             };
             Dictionary<string, List<GateGrid>> astTabs = new()
             {
-                { "ExampleNamespace.Tab1", new List<GateGrid>() { grid } },
-                { "ExampleNamespace.Tab2", new List<GateGrid>() { grid2 } },
+                { "ExampleNamespace.Tab1", new List<GateGrid> { grid } },
+                { "ExampleNamespace.Tab2", new List<GateGrid> { grid2 } },
             };
 
             // Act
@@ -64,8 +64,7 @@ namespace Explorer.Tests
             gridComponent.Find(".gate-name").TextContent.MarkupMatches("H");
 
             // Check if the icon is displayed
-            var gateSrc = gridComponent.Find("#Measurement_Gate");
-            Assert.AreEqual(gateSrc.InnerHtml.Length, 682);
+            gridComponent.Find("#Reset_Gate");
         }
 
         [Test]
@@ -85,7 +84,7 @@ namespace Explorer.Tests
             Dictionary<string, List<GateGrid>> astEmpty = new();
 
             // Act & Assert - check if setting the empty AST throws an exception
-            Assert.ThrowsAsync<System.InvalidOperationException>(
+            Assert.ThrowsAsync<InvalidOperationException>(
                 async () => await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astEmpty)));
         }
 

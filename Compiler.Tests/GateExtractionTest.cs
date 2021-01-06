@@ -203,24 +203,24 @@ namespace Compiler.Tests
             // Arrange
             string code = await Helpers.GetSourceFile("Arguments");
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
-            (string, int, int, int)[]? expected = new[]
+            (string, int, int, int)[] expected =
             {
                 ("X", 0, 0, 0),
 
                 ("TwoArgs", 1, 0, 0),
                 ("TwoArgs", 1, 1, 1),
 
-                ("TwoArgs", 2, 4, 0),
-                ("TwoArgs", 3, 4, 1),
+                ("TwoArgs", 1, 4, 0),
+                ("TwoArgs", 2, 4, 1),
 
-                ("RegArg", 4, 1, 0),
-                ("RegArg", 4, 0, 1),
-                ("RegArg", 4, 3, 2),
+                ("RegArg", 3, 1, 0),
+                ("RegArg", 3, 0, 1),
+                ("RegArg", 3, 3, 2),
 
-                ("SingleAndRegArgs", 5, 4, 0),
-                ("SingleAndRegArgs", 5, 2, 1),
-                ("SingleAndRegArgs", 5, 3, 2),
-                ("SingleAndRegArgs", 5, 1, 3),
+                ("SingleAndRegArgs", 4, 4, 0),
+                ("SingleAndRegArgs", 4, 2, 1),
+                ("SingleAndRegArgs", 4, 3, 2),
+                ("SingleAndRegArgs", 4, 1, 3),
             };
 
             GateGrid grid = null!;
@@ -379,11 +379,11 @@ namespace Compiler.Tests
                 ("I", 11, 3),
                 ("I", 11, 4),
 
-                ("ResetAll", 12, 0), // ResetAll
-                ("ResetAll", 12, 1),
-                ("ResetAll", 12, 2),
-                ("ResetAll", 12, 3),
-                ("ResetAll", 12, 4),
+                ("Reset", 12, 0), // ResetAll
+                ("Reset", 12, 1),
+                ("Reset", 12, 2),
+                ("Reset", 12, 3),
+                ("Reset", 12, 4),
             };
 
             // Act
