@@ -191,10 +191,6 @@ input.rename-input {
   border-radius: 0;
 }
 
-body:not(.rz-default-scrollbars) ::-webkit-scrollbar {
-  background: transparent;
-}
-
 .visualizer select {
   /* disable default select */
   -webkit-appearance: none;
