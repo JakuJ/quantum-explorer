@@ -91,9 +91,9 @@
   flex-grow: 0;
 }
 
-/*#toggle-div .toggle {*/
-/*  height: 100% !important;*/
-/*}*/
+.toggle-group > label {
+  font-size: 14px;
+}
 
 .toggle-off, .toggle-off:hover {
   color: var(--text);

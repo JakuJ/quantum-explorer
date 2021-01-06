@@ -6,8 +6,8 @@ export function setReference(ref) {
 
 export function initializeToggles() {
   $('#expand-toggle').bootstrapToggle({
-    on: 'Expand',
-    off: 'Expand',
+    on: 'Intrinsics only',
+    off: 'Show custom',
   });
 }
 
