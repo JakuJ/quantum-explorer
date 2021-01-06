@@ -100,11 +100,9 @@ namespace Simulator
             bool isPhantom = ExpandedOps.Any(x => x.Match(op.FullName).Success) || (expanding && isCustom);
 
             // If it's not the entry-point operation and it takes qubit arguments
-            if (operationStack.Count > 0 && qubits.Length > 0)
+            if (!isPhantom && operationStack.Count > 0 && qubits.Length > 0)
             {
-                bool hasPhantomParent;
                 GateGrid[] gridsToAdd = Array.Empty<GateGrid>();
-                bool isParentCustom = userNamespaces.Any(x => operationStack.Last().Item1.StartsWith(x));
 
                 if (!expanding)
                 {
@@ -116,8 +114,6 @@ namespace Simulator
                         (parentOperation, isParentPhantom) = operationStack[--i];
                     }
 
-                    hasPhantomParent = i != operationStack.Count - 1;
-
                     // Only add gates to the parent grid
                     if (gateGrids.TryGetValue(parentOperation, out var grids))
                     {
@@ -126,8 +122,6 @@ namespace Simulator
                 }
                 else
                 {
-                    hasPhantomParent = true;
-
                     // Add gates to all grids on the stack
                     gridsToAdd = operationStack
                                 .FindAll(x => gateGrids.ContainsKey(x.Item1))
@@ -138,57 +132,67 @@ namespace Simulator
                 // Add gates to grid[s]
                 foreach (var grid in gridsToAdd)
                 {
-                    if (isPhantom)
+                    // Check if we can place this gate set in the last column
+                    var lastColumn = Enumerable
+                                    .Range(0, grid.Height)
+                                    .Where(r => grid.At(grid.Width - 1, r) != null)
+                                    .ToHashSet();
+                    bool sharesQubits = qubits.ToHashSet().Overlaps(lastColumn);
+
+                    bool lastColumnHasCtl = Enumerable
+                                           .Range(0, grid.Height)
+                                           .Any(r => grid.At(grid.Width - 1, r)?.Name == "__control__");
+
+                    bool lastColumnHasOther = Enumerable
+                                             .Range(0, grid.Height)
+                                             .Select(r => grid.At(grid.Width - 1, r))
+                                             .Where(x => x.HasValue)
+                                             .Any(x => x.Value.FullName != op.FullName);
+
+                    if (sharesQubits
+                     || lastColumnHasCtl
+                     || (metadata?.IsControlled ?? false)
+                     || lastColumnHasOther)
                     {
-                        // Insert an empty column at the end unless one was already inserted
-                        // This however has an exception: we do not insert a column if the operation is custom
-                        if (!isCustom
-                         && grid.Height != 0 && Enumerable.Range(0, grid.Height).Any(r => grid.At(grid.Width - 1, r) != null))
-                        {
-                            Console.WriteLine($"Inserting column at {grid.Width} because Phantom");
-                            grid.InsertColumn(grid.Width);
-                        }
+                        Console.WriteLine($"Shares qubits, adding column at {grid.Width}");
+                        grid.InsertColumn(grid.Width);
                     }
-                    else
+
+                    // Index of last column
+                    int x = Math.Max(0, grid.Width - 1);
+
+                    foreach ((int argIndex, int qubitID) in qubits.Enumerate())
                     {
-                        // We place multiple gates in the same column if the parent is phantom and not custom
-                        bool shouldPlaceInTheSameColumn = hasPhantomParent && !isParentCustom;
-                        int x = grid.Width - (shouldPlaceInTheSameColumn ? 1 : 0);
-                        x = Math.Max(0, x); // do not go to negative indices
+                        // If a name was already set on the qubit, the ID itself might have been
+                        // changed in the meantime due to qubit re-allocations
+                        int idx = grid.Names.IndexOf(qubitIds[qubitID]);
+                        int qubit = idx != -1 ? idx : qubitID;
+                        int k = x;
 
-                        foreach ((int argIndex, int qubitID) in qubits.Enumerate())
+                        // If a qubit occurs more than one time, move subsequent gates to the right
+                        while (grid.At(k, qubit) != null)
                         {
-                            // If a name was already set on the qubit, the ID itself might have been
-                            // changed in the meantime due to qubit re-allocations
-                            int idx = grid.Names.IndexOf(qubitIds[qubitID]);
-                            int qubit = idx != -1 ? idx : qubitID;
-                            int k = x;
+                            k++;
+                        }
 
-                            // If a qubit occurs more than one time, move subsequent gates to the right
-                            while (grid.At(k, qubit) != null)
-                            {
-                                k++;
-                            }
+                        if (controls != null && Array.IndexOf(controls, qubitID) >= 0)
+                        {
+                            // Create custom gates for control qubits
+                            grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
+                            Console.WriteLine($"Adding control to grid at {k}, {qubit}");
+                        }
+                        else
+                        {
+                            // And normal gates for intrinsics / custom operations
+                            grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
+                            Console.WriteLine($"Adding {op.Name} to grid at {k}, {qubit}");
+                        }
 
-                            if (controls != null && Array.IndexOf(controls, qubitID) >= 0)
-                            {
-                                // Create custom gates for control qubits
-                                grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
-                                Console.WriteLine($"Adding control to grid at {k}, {qubit}");
-                            }
-                            else
-                            {
-                                // And normal gates for intrinsics / custom operations
-                                grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
-                                Console.WriteLine($"Adding {op.Name} to grid at {k}, {qubit}");
-                            }
-
-                            // Set qubit identifier if not present
-                            if (grid.Names[qubit] == null)
-                            {
-                                Console.WriteLine($"Setting name {qubitIds[qubit]} to {qubit}");
-                                grid.SetName(qubit, qubitIds[qubit]);
-                            }
+                        // Set qubit identifier if not present
+                        if (grid.Names[qubit] == null)
+                        {
+                            Console.WriteLine($"Setting name {qubitIds[qubit]} to {qubit}");
+                            grid.SetName(qubit, qubitIds[qubit]);
                         }
                     }
                 }
