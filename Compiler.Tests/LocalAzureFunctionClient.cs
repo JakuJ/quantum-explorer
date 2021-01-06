@@ -12,7 +12,7 @@ namespace Compiler.Tests
     public class LocalAzureFunctionClient : IHttpClient
     {
         /// <inheritdoc/>
-        public async Task<string?> MakeRequest(string code)
+        public async Task<string?> MakeRequest(string code, bool expanding)
         {
             // Prepare the request body as a Stream (Disposable!)
             await using Stream body = GenerateStreamFromString(code);
@@ -21,6 +21,7 @@ namespace Compiler.Tests
             DefaultHttpContext context = new();
             HttpRequest request = context.Request;
             request.Body = body;
+            request.Headers.Add("x-expanding-operations", "yes");
 
             var result = await Function.Run(request, Helpers.ConsoleLogger) as OkObjectResult;
             return result?.Value as string;

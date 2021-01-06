@@ -141,29 +141,29 @@ input.rename-input {
 /* inactive tabs */
 .nav-link {
   color: var(--text-secondary);
+  padding: 0.25rem 1rem !important;
 }
 
 /* active tab */
 .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
-  background-color: var(--surface);
-  border-color: var(--accent) var(--accent) var(--surface);
+  background-color: var(--accent);
   border-radius: 0;
   color: var(--text);
+  border: 1px solid transparent;
 }
 
 /* on mouse hover over a tab */
 .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
-  border-color: var(--accent) var(--accent) var(--surface);
   color: var(--text);
   background-color: var(--accent);
   border-radius: 0;
   cursor: pointer;
+  border: 1px solid transparent;
 }
 
 /* the tab bar */
 .nav-tabs {
   display: contents;
-  border-color: var(--accent);
 }
 
 /* the tab table cell */
@@ -174,6 +174,7 @@ input.rename-input {
 /* the tab bar container */
 .nav-tabs-container {
   overflow-x: auto;
+  border-bottom: 1px solid var(--accent);
 }
 
 /* Grid lines and scrollbars on the plot*/
@@ -206,6 +207,7 @@ input.rename-input {
   /* other styles */
   border-radius: 0;
   border-color: var(--accent);
+  cursor: pointer;
 }
 
 select,

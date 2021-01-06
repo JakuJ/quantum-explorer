@@ -24,9 +24,11 @@ namespace Explorer
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host
                .CreateDefaultBuilder(args)
-               .ConfigureLogging(logBuilder =>
+               .ConfigureLogging((hostingContext, logBuilder) =>
                 {
-                    logBuilder.AddConsole()
+                    logBuilder.ClearProviders()
+                              .AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
+                              .AddConsole()
                               .AddDebug()
                               .AddEventSourceLogger()
                               .AddAzureWebAppDiagnostics();

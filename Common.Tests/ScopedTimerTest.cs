@@ -30,7 +30,7 @@ namespace Common.Tests
             using (new ScopedTimer("Test message", logger.Object)) { }
 
             // Assert
-            logger.VerifyLevelWasCalled(LogLevel.Information).VerifyNoOtherCalls();
+            logger.VerifyLevelWasCalled(LogLevel.Debug).VerifyNoOtherCalls();
         }
     }
 }

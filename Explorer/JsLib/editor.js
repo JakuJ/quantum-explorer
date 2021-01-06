@@ -137,7 +137,7 @@ export class Editor {
 
     // create the web socket
     const url = `${server_url}/monaco-editor`;
-    const webSocket = createWebSocket(url, is_development);
+    const webSocket = createWebSocket(url);
 
     // listen when the web socket is opened
     listen({
@@ -219,14 +219,13 @@ function getThemeName() {
   return localStorage.getItem('theme') === 'dark' ? DARK_THEME_NAME : LIGHT_THEME_NAME;
 }
 
-function createWebSocket(url, is_development) {
+function createWebSocket(url) {
   const socketOptions = {
     maxReconnectionDelay: 10000,
     minReconnectionDelay: 1000,
     reconnectionDelayGrowFactor: 1.3,
     connectionTimeout: 10000,
     maxRetries: Infinity,
-    debug: is_development,
   };
   return new ReconnectingWebSocket(url, [], socketOptions);
 }

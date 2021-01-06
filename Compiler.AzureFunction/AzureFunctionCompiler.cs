@@ -38,9 +38,9 @@ namespace Compiler.AzureFunction
         public event EventHandler<List<OperationState>>? OnStatesRecorded;
 
         /// <inheritdoc/>
-        public async Task Compile(string code)
+        public async Task Compile(string code, bool expanding = false)
         {
-            string? responseString = await client.MakeRequest(code);
+            string? responseString = await client.MakeRequest(code, expanding);
 
             if (responseString == null)
             {

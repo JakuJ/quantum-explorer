@@ -4,6 +4,13 @@ export function setReference(ref) {
   gridRef = ref;
 }
 
+export function initializeToggles() {
+  $('#expand-toggle').bootstrapToggle({
+    on: 'Intrinsics only',
+    off: 'Show custom',
+  });
+}
+
 export function initGrids() {
   // make gates draggable
   $('.gate').draggable({

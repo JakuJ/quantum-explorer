@@ -167,6 +167,7 @@ namespace Compiler.Tests
                 {
                     Assert.Contains((gate.Name, x, y), gates, "Gate should be present at a given position");
                 }
+
                 Assert.AreEqual(names, grids[operation].Single().Names, "Assigned qubit identifiers should be correct");
             }
             else
@@ -202,24 +203,24 @@ namespace Compiler.Tests
             // Arrange
             string code = await Helpers.GetSourceFile("Arguments");
             var compiler = new QsCompiler(Helpers.ConsoleLogger);
-            (string, int, int, int)[]? expected = new[]
+            (string, int, int, int)[] expected =
             {
                 ("X", 0, 0, 0),
 
                 ("TwoArgs", 1, 0, 0),
                 ("TwoArgs", 1, 1, 1),
 
-                ("TwoArgs", 2, 4, 0),
-                ("TwoArgs", 3, 4, 1),
+                ("TwoArgs", 1, 4, 0),
+                ("TwoArgs", 2, 4, 1),
 
-                ("RegArg", 4, 1, 0),
-                ("RegArg", 4, 0, 1),
-                ("RegArg", 4, 3, 2),
+                ("RegArg", 3, 1, 0),
+                ("RegArg", 3, 0, 1),
+                ("RegArg", 3, 3, 2),
 
-                ("SingleAndRegArgs", 5, 4, 0),
-                ("SingleAndRegArgs", 5, 2, 1),
-                ("SingleAndRegArgs", 5, 3, 2),
-                ("SingleAndRegArgs", 5, 1, 3),
+                ("SingleAndRegArgs", 4, 4, 0),
+                ("SingleAndRegArgs", 4, 2, 1),
+                ("SingleAndRegArgs", 4, 3, 2),
+                ("SingleAndRegArgs", 4, 1, 3),
             };
 
             GateGrid grid = null!;
@@ -325,6 +326,172 @@ namespace Compiler.Tests
             Assert.AreEqual("q", grid.Names[0], "Qubit identifier should be correct");
             Assert.AreEqual("H", grid.At(0, 0)!.Value.Name, "Gate should be at a correct position");
             Assert.AreEqual("MResetZ", grid.At(1, 0)!.Value.Name, "Gate should be at a correct position");
+        }
+
+        [Test]
+        public async Task ExpandsComplexOperationsToIntrinsics()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("ExpandableOperationCalls");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            Dictionary<string, List<GateGrid>>? grids = null;
+
+            compiler.OnGrids += (_, dictionary) => grids = dictionary;
+            compiler.OnDiagnostics += (_, diags) => Assert.Fail($"There should be no diagnostics, but got: {diags}");
+
+            (string, int, int)[] expected =
+            {
+                ("__control__", 0, 0), // CX
+                ("X", 0, 1),
+
+                ("__control__", 1, 1), // CY
+                ("Y", 1, 2),
+
+                ("__control__", 2, 0), // CZ
+                ("Z", 2, 2),
+
+                ("__control__", 3, 1), // CNOT
+                ("X", 3, 2),
+
+                ("__control__", 4, 0), // CCNOT
+                ("__control__", 4, 1),
+                ("X", 4, 2),
+
+                ("__control__", 5, 0), // AndLadder
+                ("__control__", 5, 1),
+                ("X", 5, 3),
+                ("__control__", 6, 2),
+                ("__control__", 6, 3),
+                ("X", 6, 4),
+
+                ("__control__", 7, 0), // ApplyCNOTChainWithTarget
+                ("X", 7, 1),
+                ("__control__", 8, 1),
+                ("X", 8, 2),
+                ("__control__", 9, 2),
+                ("X", 9, 3),
+                ("__control__", 10, 3),
+                ("X", 10, 4),
+
+                ("I", 11, 0), // ApplyToEachCA
+                ("I", 11, 1),
+                ("I", 11, 2),
+                ("I", 11, 3),
+                ("I", 11, 4),
+
+                ("Reset", 12, 0), // ResetAll
+                ("Reset", 12, 1),
+                ("Reset", 12, 2),
+                ("Reset", 12, 3),
+                ("Reset", 12, 4),
+            };
+
+            // Act
+            await compiler.Compile(code);
+
+            // Assert
+            Assert.NotNull(grids);
+            GateGrid grid = grids!["ExpandableOperationCalls.RunProgram"].Single();
+
+            foreach ((string name, int x, int y) in expected)
+            {
+                QuantumGate? gate = grid.At(x, y);
+                Assert.IsTrue(gate.HasValue, $"There should be a gate at {x}, {y}");
+                Assert.AreEqual(name, gate!.Value.Name, "Gate should be at the correct position");
+            }
+        }
+
+        [Test]
+        public async Task ExpandsCustomOperationsToIntrinsics()
+        {
+            // Arrange
+            string code = await Helpers.GetSourceFile("CustomExpansion");
+            var compiler = new QsCompiler(Helpers.ConsoleLogger);
+            Dictionary<string, List<GateGrid>>? grids = null;
+
+            compiler.OnGrids += (_, dictionary) => grids = dictionary;
+            compiler.OnDiagnostics += (_, diags) => Assert.Fail($"There should be no diagnostics, but got: {diags}");
+
+            (string, int, int)[] expectedDefault =
+            {
+                ("Custom", 0, 0), // First application
+                ("Custom", 0, 1),
+
+                ("Custom", 1, 0), // Second application
+                ("Custom", 1, 1),
+            };
+
+            (string, int, int)[] expectedExpanded =
+            {
+                ("H", 0, 0), // First application
+                ("__control__", 1, 0),
+                ("X", 1, 1),
+                ("Reset", 2, 0),
+                ("Reset", 2, 1),
+
+                ("H", 3, 0), // Second application
+                ("__control__", 4, 0),
+                ("X", 4, 1),
+                ("Reset", 5, 0),
+                ("Reset", 5, 1),
+            };
+
+            (string, int, int)[] expectedCustomOp =
+            {
+                ("H", 0, 0),
+                ("__control__", 1, 0),
+                ("X", 1, 1),
+                ("Reset", 2, 0),
+                ("Reset", 2, 1),
+            };
+
+            // Act: no expansion
+            await compiler.Compile(code, expanding: false);
+
+            // Assert: main grid
+            Assert.NotNull(grids);
+            GateGrid mainGrid = grids!["CustomExpansion.Main"].Single();
+
+            foreach ((string name, int x, int y) in expectedDefault)
+            {
+                QuantumGate? gate = mainGrid.At(x, y);
+                Assert.IsTrue(gate.HasValue, $"There should be a gate at {x}, {y}");
+                Assert.AreEqual(name, gate!.Value.Name, "Gate should be at the correct position");
+            }
+
+            // Assert: custom op grid
+            GateGrid customOpGrid = grids!["CustomExpansion.Custom"].First();
+
+            foreach ((string name, int x, int y) in expectedCustomOp)
+            {
+                QuantumGate? gate = customOpGrid.At(x, y);
+                Assert.IsTrue(gate.HasValue, $"There should be a gate at {x}, {y}");
+                Assert.AreEqual(name, gate!.Value.Name, "Gate should be at the correct position");
+            }
+
+            // Act: with custom operation expansion
+            await compiler.Compile(code, expanding: true);
+
+            // Assert: main grid
+            Assert.NotNull(grids);
+            mainGrid = grids!["CustomExpansion.Main"].Single();
+
+            foreach ((string name, int x, int y) in expectedExpanded)
+            {
+                QuantumGate? gate = mainGrid.At(x, y);
+                Assert.IsTrue(gate.HasValue, $"There should be a gate at {x}, {y}");
+                Assert.AreEqual(name, gate!.Value.Name, "Gate should be at the correct position");
+            }
+
+            // Assert: custom op grid
+            customOpGrid = grids!["CustomExpansion.Custom"].First();
+
+            foreach ((string name, int x, int y) in expectedCustomOp)
+            {
+                QuantumGate? gate = customOpGrid.At(x, y);
+                Assert.IsTrue(gate.HasValue, $"There should be a gate at {x}, {y}");
+                Assert.AreEqual(name, gate!.Value.Name, "Gate should be at the correct position");
+            }
         }
     }
 }

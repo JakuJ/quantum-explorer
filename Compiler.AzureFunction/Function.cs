@@ -38,7 +38,7 @@ namespace Compiler.AzureFunction
             compiler.OnGrids += (_, s) => { payload.Grids = s; };
             compiler.OnStatesRecorded += (_, s) => { payload.States = s; };
 
-            await compiler.Compile(code);
+            await compiler.Compile(code, req.Headers.ContainsKey("x-expanding-operations"));
 
             string message = JsonConvert.SerializeObject(payload);
 

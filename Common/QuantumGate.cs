@@ -23,6 +23,11 @@ namespace Common
             ArgIndex = argIndex;
         }
 
+        /// <summary>
+        /// Gets the full name of the gate.
+        /// </summary>
+        public string FullName => $"{Namespace}.{Name}";
+
         /// <summary>Returns whether two gates represent different arguments of the same operation call.</summary>
         /// <param name="other">The other gate.</param>
         /// <returns>Whether this and the other gate are part of the same operation call.</returns>
@@ -33,6 +38,6 @@ namespace Common
             && ArgIndex != other.Value.ArgIndex;
 
         /// <inheritdoc/>
-        public override string ToString() => Namespace + "." + Name;
+        public override string ToString() => FullName;
     }
 }
