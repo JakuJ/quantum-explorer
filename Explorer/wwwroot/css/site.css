@@ -124,6 +124,10 @@ a, .btn-link {
   background: var(--text-secondary); 
 }
 
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Helper class for hiding scrollbars on overflow */
 .no-scrollbar {
   -ms-overflow-style: none; /* Internet Explorer 10+ */

@@ -5,31 +5,32 @@
 <div class="composer-container">
     @if (isPlaceholder)
     {
-        <Placeholder/>
+        <Placeholder />
     }
     else
     {
         <div id="composer-top-bar" class="nav-tabs-container">
-            <div id="tabs-div" class="no-scrollbar">
-            <ul class="nav nav-tabs">
-                @foreach (string key in keysNames.Keys)
-                {
-                    <li class="nav-item">
-                        <a class="nav-link noselect @(selectedKey == key ? "active" : "")" @onclick="@(() => OnTabChange(key))">@key</a>
-                    </li>
-                }
-            </ul>
+            <div id="tabs-div">
+                <ul class="nav nav-tabs">
+                    @foreach (string key in keysNames.Keys)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link noselect @(selectedKey == key ? "active" : "")"
+                                @onclick="@(() => OnTabChange(key))">@key</a>
+                        </li>
+                    }
+                </ul>
             </div>
-        <div id="toggle-div" @onclick="OnToggleChanged">
-            <input id="expand-toggle" type="checkbox" data-toggle="toggle" data-height="34px">
+            <div id="toggle-div" @onclick="OnToggleChanged">
+                <input id="expand-toggle" type="checkbox" data-toggle="toggle" data-height="34px">
+            </div>
         </div>
+        <div class="composer-content">
+            @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
+            {
+                <Grids GridList="@(ast[keysNames[selectedKey]])" />
+            }
         </div>
-    <div class="composer-content">
-        @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
-        {
-            <Grids GridList="@(ast[keysNames[selectedKey]])"/>
-        }
-    </div>
     }
 </div>
 

@@ -2,6 +2,7 @@ using Bunit;
 using Bunit.TestDoubles;
 using Common;
 using Explorer.Components.Composer;
+using Explorer.Components.Composer.Drawing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
