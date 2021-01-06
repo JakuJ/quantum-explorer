@@ -27,8 +27,8 @@ namespace Explorer.Tests
             ctx.Services.TryAddSingleton(_ => Helpers.GetMockEnvironment().Object);
 
             GateGrid grid = new();
-            grid.AddGate(0, new QuantumGate("X"));
-            grid.AddGate(0, CustomGateFactory.MakeCustomGate("__control__"));
+            grid.AddGate(0, 0, new QuantumGate("X"));
+            grid.AddGate(0, 1, CustomGateFactory.MakeCustomGate("__control__"));
 
             // Act
             IRenderedComponent<Grid> cut = ctx.RenderComponent<Grid>(("GateGrid", grid));
@@ -38,8 +38,8 @@ namespace Explorer.Tests
             IRenderedComponent<Line> lineComponent = cut.FindComponent<Line>();
 
             // Check if the proper line is displayed
-            lineComponent.MarkupMatches(@"<svg height=""40"" width=""110"" class=""composer-svg""style=""left:0px; top: 0px;"">
-                <line x1=""0"" y1=""20"" x2=""110"" y2=""20"" class=""composer-line""></line></svg>");
+            lineComponent.MarkupMatches(@"<svg height=""40"" width=""60"" class=""composer-svg""style=""left:0px; top: 0px;"">
+                <line x1=""0"" y1=""20"" x2=""60"" y2=""20"" class=""composer-line""></line></svg>");
         }
     }
 }
