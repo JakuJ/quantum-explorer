@@ -363,6 +363,17 @@ namespace Common.Tests
             }
         }
 
+        [Test]
+        public void GateGridsAreNotEqual()
+        {
+            // Arrange
+            var gateGrid1 = new GateGrid(1, 2);
+            var gateGrid2 = new GateGrid(2, 2);
+
+            // Act && Assert
+            Assert.AreNotEqual(gateGrid1, gateGrid2);
+        }
+
         private QuantumGate[] SampleGates(int howMany) => Enumerable.Range(0, howMany).Select(i => new QuantumGate($"Op{i}")).ToArray();
     }
 }
