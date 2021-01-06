@@ -96,88 +96,98 @@ namespace Simulator
             }
 
             // Check if this operation is phantom
-            bool isPhantom = ExpandedOps.Any(x => x.Match(op.FullName).Success)
-                          || (expanding && userNamespaces.Contains(@namespace));
+            bool isCustom = userNamespaces.Contains(@namespace);
+            bool isPhantom = ExpandedOps.Any(x => x.Match(op.FullName).Success) || (expanding && isCustom);
 
-            // If it's not the entry-point operation
-            if (operationStack.Count > 0)
+            // If it's not the entry-point operation and it takes qubit arguments
+            if (operationStack.Count > 0 && qubits.Length > 0)
             {
-                // Find first non-phantom parent
-                int i = operationStack.Count - 1;
-                (string parentOperation, bool isParentPhantom) = operationStack[i];
-                while (!expanding && isParentPhantom)
-                {
-                    (parentOperation, isParentPhantom) = operationStack[--i];
-                }
+                bool hasPhantomParent;
+                GateGrid[] gridsToAdd = Array.Empty<GateGrid>();
+                bool isParentCustom = userNamespaces.Any(x => operationStack.Last().Item1.StartsWith(x));
 
-                // If we had a phantom parent, we would like to place this call in the last column
-                // and not add another one.
-                bool hasPhantomParent = expanding || i != operationStack.Count - 1;
-
-                // Add corresponding column(s)
-                if (qubits.Length > 0)
+                if (!expanding)
                 {
-                    GateGrid[] gridsToAdd = Array.Empty<GateGrid>();
-                    if (!expanding && gateGrids.TryGetValue(parentOperation, out var grids))
+                    // Find first non-phantom parent
+                    int i = operationStack.Count - 1;
+                    (string parentOperation, bool isParentPhantom) = operationStack[i];
+                    while (!expanding && isParentPhantom)
+                    {
+                        (parentOperation, isParentPhantom) = operationStack[--i];
+                    }
+
+                    hasPhantomParent = i != operationStack.Count - 1;
+
+                    // Only add gates to the parent grid
+                    if (gateGrids.TryGetValue(parentOperation, out var grids))
                     {
                         gridsToAdd = new[] { grids.Last() };
                     }
-                    else if (expanding)
-                    {
-                        gridsToAdd = operationStack
-                                    .FindAll(x => gateGrids.ContainsKey(x.Item1))
-                                    .Select(x => gateGrids[x.Item1].Last())
-                                    .ToArray();
-                    }
+                }
+                else
+                {
+                    hasPhantomParent = true;
 
-                    foreach (var grid in gridsToAdd)
+                    // Add gates to all grids on the stack
+                    gridsToAdd = operationStack
+                                .FindAll(x => gateGrids.ContainsKey(x.Item1))
+                                .Select(x => gateGrids[x.Item1].Last())
+                                .ToArray();
+                }
+
+                // Add gates to grid[s]
+                foreach (var grid in gridsToAdd)
+                {
+                    if (isPhantom)
                     {
-                        if (isPhantom)
+                        // Insert an empty column at the end unless one was already inserted
+                        // This however has an exception: we do not insert a column if the operation is custom
+                        if (!isCustom
+                         && grid.Height != 0 && Enumerable.Range(0, grid.Height).Any(r => grid.At(grid.Width - 1, r) != null))
                         {
-                            // Do not insert an empty column at the end if one was already inserted
-                            // This is a workaround for nested phantom operations
-                            if (!hasPhantomParent &&
-                                (grid.Height == 0 || Enumerable.Range(0, grid.Height).Any(r => grid.At(grid.Width - 1, r) != null)))
-                            {
-                                grid.InsertColumn(grid.Width);
-                            }
+                            Console.WriteLine($"Inserting column at {grid.Width} because Phantom");
+                            grid.InsertColumn(grid.Width);
                         }
-                        else
+                    }
+                    else
+                    {
+                        // We place multiple gates in the same column if the parent is phantom and not custom
+                        bool shouldPlaceInTheSameColumn = hasPhantomParent && !isParentCustom;
+                        int x = grid.Width - (shouldPlaceInTheSameColumn ? 1 : 0);
+                        x = Math.Max(0, x); // do not go to negative indices
+
+                        foreach ((int argIndex, int qubitID) in qubits.Enumerate())
                         {
-                            int x = grid.Width - (hasPhantomParent ? 1 : 0); // !expanding &&
+                            // If a name was already set on the qubit, the ID itself might have been
+                            // changed in the meantime due to qubit re-allocations
+                            int idx = grid.Names.IndexOf(qubitIds[qubitID]);
+                            int qubit = idx != -1 ? idx : qubitID;
+                            int k = x;
 
-                            foreach ((int argIndex, int qubitID) in qubits.Enumerate())
+                            // If a qubit occurs more than one time, move subsequent gates to the right
+                            while (grid.At(k, qubit) != null)
                             {
-                                // If a name was already set on the qubit, the ID itself might have been changed in the meantine
-                                // due to qubit re-allocations
-                                int idx = grid.Names.IndexOf(qubitIds[qubitID]);
-                                int qubit = idx != -1 ? idx : qubitID;
+                                k++;
+                            }
 
-                                // If a qubit occurs more than one time, move subsequent gates to the right
-                                int k = x;
-                                while (grid.At(k, qubit) != null)
-                                {
-                                    k++;
-                                }
-
+                            if (controls != null && Array.IndexOf(controls, qubitID) >= 0)
+                            {
                                 // Create custom gates for control qubits
-                                if (controls != null && Array.IndexOf(controls, qubitID) >= 0)
-                                {
-                                    grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
-                                    Console.WriteLine($"Adding control to grid at {k}, {qubit}");
-                                }
-                                else
-                                {
-                                    grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
-                                    Console.WriteLine($"Adding {op.Name} to grid at {k}, {qubit}");
-                                }
+                                grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
+                                Console.WriteLine($"Adding control to grid at {k}, {qubit}");
+                            }
+                            else
+                            {
+                                // And normal gates for intrinsics / custom operations
+                                grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
+                                Console.WriteLine($"Adding {op.Name} to grid at {k}, {qubit}");
+                            }
 
-                                if (qubit == qubitID)
-                                {
-                                    // Set qubit identifier
-                                    Console.WriteLine($"Setting name {qubitIds[qubit]} to {qubit}, formerly {grid.Names[qubit] ?? "-"}");
-                                    grid.SetName(qubit, qubitIds[qubit]);
-                                }
+                            // Set qubit identifier if not present
+                            if (grid.Names[qubit] == null)
+                            {
+                                Console.WriteLine($"Setting name {qubitIds[qubit]} to {qubit}");
+                                grid.SetName(qubit, qubitIds[qubit]);
                             }
                         }
                     }
