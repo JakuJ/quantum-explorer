@@ -165,7 +165,7 @@ namespace Simulator
                                              .Range(0, grid.Height)
                                              .Select(r => grid.At(grid.Width - 1, r))
                                              .Where(x => x.HasValue)
-                                             .Any(x => x.Value.FullName != op.FullName);
+                                             .Any(x => x!.Value.FullName != op.FullName);
 
                     if (sharesQubits
                      || lastColumnHasCtl
