@@ -140,12 +140,25 @@ namespace Simulator
                 // Add gates to grid[s]
                 foreach (var grid in gridsToAdd)
                 {
+                    // If a name was already set on the qubit, the ID itself might have been
+                    // changed in the meantime due to qubit re-allocations
+                    // This array holds qubit IDs for the gate, and the original ones from the simulator
+                    (int, int)[] actualQubits = qubits.Select(q =>
+                    {
+                        int idx = grid.Names.IndexOf(qubitIds[q]);
+                        return idx != -1 ? (idx, q) : (q, q);
+                    }).ToArray();
+
                     // Check if we can place this gate set in the last column
                     var lastColumn = Enumerable
                                     .Range(0, grid.Height)
                                     .Where(r => grid.At(grid.Width - 1, r) != null)
                                     .ToHashSet();
-                    bool sharesQubits = qubits.ToHashSet().Overlaps(lastColumn);
+
+                    bool sharesQubits = actualQubits
+                                       .Select(x => x.Item1)
+                                       .ToHashSet()
+                                       .Overlaps(lastColumn);
 
                     bool lastColumnHasCtl = Enumerable
                                            .Range(0, grid.Height)
@@ -162,19 +175,14 @@ namespace Simulator
                      || (metadata?.IsControlled ?? false)
                      || lastColumnHasOther)
                     {
-                        Console.WriteLine($"Shares qubits, adding column at {grid.Width}");
                         grid.InsertColumn(grid.Width);
                     }
 
                     // Index of last column
                     int x = Math.Max(0, grid.Width - 1);
 
-                    foreach ((int argIndex, int qubitID) in qubits.Enumerate())
+                    foreach ((int argIndex, (int qubit, int qubitId)) in actualQubits.Enumerate())
                     {
-                        // If a name was already set on the qubit, the ID itself might have been
-                        // changed in the meantime due to qubit re-allocations
-                        int idx = grid.Names.IndexOf(qubitIds[qubitID]);
-                        int qubit = idx != -1 ? idx : qubitID;
                         int k = x;
 
                         // If a qubit occurs more than one time, move subsequent gates to the right
@@ -183,7 +191,7 @@ namespace Simulator
                             k++;
                         }
 
-                        if (controls != null && Array.IndexOf(controls, qubitID) >= 0)
+                        if (controls != null && Array.IndexOf(controls, qubitId) >= 0)
                         {
                             // Create custom gates for control qubits
                             grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
