@@ -80,8 +80,6 @@ namespace Simulator
             int[]? controls = null;
             string @namespace = op.FullName[..^(op.Name.Length + 1)];
 
-            Console.WriteLine($"\n=====\nOperation is {op.FullName}");
-
             // Get runtime information about this operation application
             RuntimeMetadata? metadata = op.GetRuntimeMetadata(data);
             if (metadata != null)
@@ -119,7 +117,6 @@ namespace Simulator
                 while (isParentPhantom && !isParentCustom);
 
                 bool valid = gateGrids.TryGetValue(parentOperation, out var grids);
-                Console.WriteLine($"Is valid? {valid}");
 
                 if (valid)
                 {
@@ -195,19 +192,16 @@ namespace Simulator
                         {
                             // Create custom gates for control qubits
                             grid.AddGate(k, qubit, CustomGateFactory.MakeCustomGate("__control__"));
-                            Console.WriteLine($"Adding control to grid at {k}, {qubit}");
                         }
                         else
                         {
                             // And normal gates for intrinsics / custom operations
                             grid.AddGate(k, qubit, new QuantumGate(op.Name, @namespace, argIndex));
-                            Console.WriteLine($"Adding {op.Name} to grid at {k}, {qubit}");
                         }
 
                         // Set qubit identifier if not present
                         if (grid.Names[qubit] == null)
                         {
-                            Console.WriteLine($"Setting name {qubitIds[qubit]} to {qubit}");
                             grid.SetName(qubit, qubitIds[qubit]);
                         }
                     }
@@ -228,14 +222,11 @@ namespace Simulator
                 gateGrids.Add(op.FullName, new List<GateGrid>());
             }
 
-            Console.WriteLine($"Adding grid for operation {op.FullName}");
             gateGrids[op.FullName].Add(new GateGrid());
         }
 
         private void OperationEndHandler(ICallable op, IApplyData data)
         {
-            Console.WriteLine($"{op.FullName} ending");
-
             List<GateGrid>? grids = gateGrids.GetValueOrDefault(operationStack.Last().Item1);
             GateGrid? last = grids?.Last();
 
@@ -289,13 +280,11 @@ namespace Simulator
                             for (var i = 0; i < ids.Length; i++)
                             {
                                 sim.qubitIds[ids[i]] = $"{id}[{i}]";
-                                Console.WriteLine($"Qubit {ids[i]} is {id}[{i}]");
                             }
                         }
                         else
                         {
                             sim.qubitIds[ids[0]] = id;
-                            Console.WriteLine($"Qubit {ids[0]} is {id}");
                         }
 
                         return QVoid.Instance;
