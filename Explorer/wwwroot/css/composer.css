@@ -151,9 +151,5 @@ li.nav-item.grid-selector-item {
 .placeholder-icon {
   height: 70%;
   fill: var(--surface);
-  filter: drop-shadow(0 0.2rem 0.8rem var(--popup));
-}
-
-.placeholder-icon:hover {
-  fill: var(--logo);
+  filter: drop-shadow(0 0.2rem 1rem var(--accent));
 }
