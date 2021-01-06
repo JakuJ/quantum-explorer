@@ -6,13 +6,13 @@
     [Parameter]
     public Func<Task<string>>? GetCode { get; set; }
 
-    private string fileName = "QEcode.qs";
+    private string fileNamePrefix = "QuantumEditor";
 
     private async Task OnClicked()
     {
         if (GetCode == null) return;
         string code = await GetCode.Invoke();
 
-        await JsRuntime.InvokeVoidAsync("Library.saveTextFile", fileName, code);
+        await JsRuntime.InvokeVoidAsync("Library.saveTextFile", fileNamePrefix + "_" + DateTime.Now.ToString("dd_M_yyyy") + ".qs", code);
     }
 }
