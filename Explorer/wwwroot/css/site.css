@@ -137,13 +137,3 @@ a, .btn-link {
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
-
-/* Helper class for hiding scrollbars on overflow */
-.no-scrollbar {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
-}

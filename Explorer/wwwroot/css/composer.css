@@ -199,5 +199,7 @@ li.nav-item.grid-selector-item {
 .placeholder-icon {
   height: 70%;
   fill: var(--surface);
-  filter: drop-shadow(0 0.2rem 1rem var(--accent));
+  filter: drop-shadow(0 0.2rem 0.5rem var(--accent));
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
 }
