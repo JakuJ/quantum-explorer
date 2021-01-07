@@ -39,6 +39,13 @@ a, .btn-link {
 
 #compile {
   padding: 0.25rem;
+  color: white;
+  background-color: var(--primary);
+}
+
+:root.dark-mode #compile {
+  color: black;
+  background-color: var(--logo);
 }
 
 .bar-icon {
@@ -116,15 +123,15 @@ a, .btn-link {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--surface); 
+  background: var(--surface);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent); 
+  background: var(--accent);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary); 
+  background: var(--text-secondary);
 }
 
 ::-webkit-scrollbar-corner {

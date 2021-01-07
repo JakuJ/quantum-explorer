@@ -13,6 +13,7 @@
   --link: var(--primary);
   --valid: var(--green);
   --invalid: var(--red);
+  --secondary: #56efbb;
 }
 
 :root.dark-mode {

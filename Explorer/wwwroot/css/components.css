@@ -236,8 +236,8 @@ select:focus {
   border-color: transparent;
 }
 
-.bar-btn:disabled{
-    color: var(--shadow);
+.bar-btn:disabled {
+  color: var(--shadow);
 }
 
 .bar-btn:focus {
@@ -302,6 +302,27 @@ select:focus {
 .dropdown-menu > a.dropdown-item:hover {
   background-color: var(--hover);
   cursor: pointer;
+}
+
+/* Visualizer and graph colours */
+
+.ui-treenode-content-selected {
+  background-color: var(--primary);
+}
+
+.ui-treenode-content:not(.ui-treenode-content-selected):hover {
+  background-color: var(--accent);
+  color: var(--text);
+}
+
+.rz-scheme-pastel .rz-series-0 {
+  fill: var(--primary);
+  stroke: var(--primary);
+}
+
+.rz-scheme-pastel .rz-series-1 {
+  fill: var(--secondary);
+  stroke: var(--secondary);
 }
 
 /* modals */

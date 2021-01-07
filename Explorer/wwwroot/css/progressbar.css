@@ -18,6 +18,10 @@
   height: 5px;
 }
 
+:root.dark-mode .subline {
+  background: var(--logo);
+}
+
 .inc {
   animation: increase 2s infinite;
 }

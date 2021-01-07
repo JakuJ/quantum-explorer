@@ -189,6 +189,10 @@ li.nav-item.grid-selector-item {
 }
 
 .toggle-handle {
+  background-color: var(--hover);
+}
+
+:root.dark-mode .toggle-handle {
   background-color: white;
 }
 
