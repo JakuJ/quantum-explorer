@@ -183,7 +183,7 @@ li.nav-item.grid-selector-item {
   font-size: 14px;
 }
 
-.toggle-off, .toggle-off:hover {
+.toggle-on, .toggle-on:hover, .toggle-off, .toggle-off:hover {
   color: var(--text);
   background-color: var(--accent);
 }
