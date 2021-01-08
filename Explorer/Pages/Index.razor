@@ -1,12 +1,10 @@
 @page "/"
 @page "/{LoadedCodeId:guid}"
-@using System.Text
-@using Microsoft.Extensions.Logging
-@using Common
 @using Compiler
-@using AstTransformations
 @using DatabaseHandler
-@using Microsoft.Quantum.QsCompiler.SyntaxTree
+@using Microsoft.Extensions.Logging
+@using System.Text
+@using Common
 @inject IJSRuntime JsRuntime;
 @inject ICompiler Compiler;
 @inject ILogger<Index> Logger;
@@ -152,7 +150,7 @@
             {
                 (_, code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
             }
-            catch (KeyNotFoundException) { } // todo: show message using toasts
+            catch (KeyNotFoundException) { }
             return code;
         }
         return null;

@@ -21,10 +21,7 @@ Make sure you have the following installed:
 Use the `dotnet` CLI:
 
 ```shell
-# build
-dotnet build
-    
-# run
+# build & run
 dotnet run --project Explorer
 
 # test
@@ -91,10 +88,14 @@ To set up a local database from migrations you should have [Entity Framework Cor
 If you want to use MS SQL Server in a Docker container, run:
 ```shell
 docker pull microsoft/mssql-server-linux:2017-latest
-docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1401:1433 -d microsoft/mssql-server-linux:2017-latest
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
+
+# or
+
+docker-compose up --build database
 ```
 Then change the `ConnectionString` in `Explorer/appsetting.json` to:
-`"Server=127.0.0.1,1401;Database=CodeDatabase;User Id=SA;Password=YourStrong!Passw0rd;"`
+`"Server=127.0.0.1,1433;Database=CodeDatabase;User Id=SA;Password=YourStrong!Passw0rd;"`
 
 Next, from the root folder of the repository, run:
 

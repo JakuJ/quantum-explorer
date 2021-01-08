@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace DatabaseHandler
 {
+    /// <inheritdoc />
     /// <summary>
     /// Handles saving and retrieving code from the database.
     /// </summary>
@@ -16,10 +16,7 @@ namespace DatabaseHandler
         /// Initializes a new instance of the <see cref="CodeDatabaseHandler"/> class.
         /// </summary>
         /// <param name="ctx">Database context.</param>
-        public CodeDatabaseHandler(CodeDbContext ctx)
-        {
-            context = ctx;
-        }
+        public CodeDatabaseHandler(CodeDbContext ctx) => context = ctx;
 
         /// <inheritdoc/>
         public bool CheckConnection() => context.Database.CanConnect();
@@ -27,7 +24,7 @@ namespace DatabaseHandler
         /// <inheritdoc/>
         public (string Name, string Code) GetCode(Guid key)
         {
-            var codeInfo = context.CodeInformations.FirstOrDefault(c => c.Id == key);
+            CodeInformation? codeInfo = context.CodeInformations.FirstOrDefault(c => c.Id == key);
             if (codeInfo == null)
             {
                 throw new KeyNotFoundException("Could not find code matching given key");
