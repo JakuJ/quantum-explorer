@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Common
 {
     /// <summary>Represents a grid of quantum gates.</summary>
+    [JsonObject(MemberSerialization.OptIn)]
     public class GateGrid
     {
+        [JsonProperty]
         private readonly List<List<QuantumGate?>> grid = new();
 
         /// <summary>Initializes a new instance of the <see cref="GateGrid"/> class.</summary>
@@ -19,7 +22,11 @@ namespace Common
         /// <param name="height">The number of qubits in this circuit.</param>
         public GateGrid(int height, int width) => Expand(width, height);
 
+        [JsonConstructor]
+        private GateGrid(List<List<QuantumGate?>> grid) => this.grid = grid;
+
         /// <summary>Gets the array of identifiers associated with the qubits.</summary>
+        [JsonProperty]
         public List<string?> Names { get; private set; } = new();
 
         /// <summary>Gets the length of the longest lane in this grid.</summary>

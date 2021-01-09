@@ -52,7 +52,12 @@ namespace Compiler.AzureFunction
 
             try
             {
-                JsonSerializerSettings settings = new() { MaxDepth = 128 };
+                JsonSerializerSettings settings = new()
+                {
+                    MaxDepth = 128,
+                    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                };
+
                 payload = JsonConvert.DeserializeObject<Payload>(responseString, settings)
                        ?? throw new Exception("Payload received from Azure Function was null");
             }
