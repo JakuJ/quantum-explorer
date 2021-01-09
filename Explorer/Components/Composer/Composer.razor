@@ -28,12 +28,10 @@
                 <input id="expand-toggle" type="checkbox" data-toggle="toggle" data-height="34px" data-onstyle="default">
             </div>
         </div>
-        <div class="composer-content">
-            @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
-            {
-                <Grids GridList="@(ast[keysNames[selectedKey]])"/>
-            }
-        </div>
+        @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
+        {
+            <Grids GridList="@(ast[keysNames[selectedKey]])" />
+        }
     }
 </div>
 

@@ -4,13 +4,6 @@
   flex-direction: column;
 }
 
-.composer-content {
-  flex: 1;
-  overflow-y: scroll;
-  height: 100%;
-  width: 100%;
-}
-
 .click-box {
   width: calc(100% - 10px);
   height: 100%;
@@ -23,17 +16,9 @@
   padding: 0;
 }
 
-.grids {
-  display: flex;
-  position: relative;
-}
-
-.grid-selector {
-  height: 100%;
-  width: 30px;
-}
-
-li.nav-item.grid-selector-item {
+.grids {  
+  flex: 1;
+  overflow: hidden;
   display: flex;
 }
 
@@ -47,6 +32,20 @@ li.nav-item.grid-selector-item {
   width: 100%;
   padding: 2px;
   display: inline-block;
+  overflow: auto;
+  flex-grow: 1;
+  order: 0;
+}
+
+.grid-selector-container {
+  flex-grow: 0;
+  order: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+li.nav-item.grid-selector-item {
+  display: flex;
 }
 
 .grid-outer-row {
