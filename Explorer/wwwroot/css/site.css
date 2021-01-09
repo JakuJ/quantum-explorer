@@ -50,6 +50,11 @@ a, .btn-link {
   filter: invert(1);
 }
 
+.center-icon {
+  display: block;
+  margin: 0 auto;
+}
+
 .toast {
   margin: 0.75rem 1.5rem;
   border-radius: 0;
