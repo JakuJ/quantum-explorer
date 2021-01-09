@@ -22,7 +22,7 @@
         <ShareButton GetCode="@(() => Editor.GetCode())" IsDisabled="@(!DatabaseHandler.CheckConnection())"></ShareButton>
         <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28"/>
         <LsStatus />
-        <button class="bar-btn" data-toggle="modal" data-target="#aboutModal"><img class="bar-icon" src="/images/icons/about.svg" alt="" width="20" height="20"></button>
+        <button class="bar-btn" data-toggle="modal" data-target="#aboutModal"><img class="bar-icon" src="/images/icons/information.svg" alt="" width="20" height="20"></button>
         <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
     </div>
     <Progress @ref="progress"></Progress>
