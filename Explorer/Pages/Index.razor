@@ -12,8 +12,9 @@
 @inject NavigationManager NavigationManager;
 
 <div class="main">
-    <div class="top-row px-4">
+    <div class="top-row pl-2 pr-4">
         <Toasts />
+        <AppLogo />
         <UploadButton Filter=".qs" OnFileContentLoaded="@(async code => await Editor.SetCode(code))" />
         <DownloadButton GetCode="@(() => Editor.GetCode())" />
         <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/" />

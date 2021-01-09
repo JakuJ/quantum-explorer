@@ -37,6 +37,12 @@ a, .btn-link {
   text-overflow: ellipsis;
 }
 
+.main .top-row .app-logo {
+  margin-right: auto;
+  height: calc(100% - 1rem);
+  fill: var(--logo);
+}
+
 #compile {
   padding: 0.25rem;
   color: white;
