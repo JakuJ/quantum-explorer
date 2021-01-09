@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @page "/{LoadedCodeId:guid}"
 @using Compiler
 @using DatabaseHandler
@@ -23,7 +23,10 @@
         <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
             <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="" width="24" height="24">
         </button>
-        <button id="compile" @ref="compileButtonRef" class="btn px-2" @onclick="OnCompile">Compile & Run</button>
+		<div id="toggle-div" @onclick="OnToggleChanged">
+            <input id="expand-toggle" type="checkbox" data-toggle="toggle" data-height="34px" data-onstyle="default">
+        </div>
+        <button id="compile" @ref="compileButtonRef" class="btn px-2" @onclick="OnCompile">Run simulation</button>
     </div>
     <Progress @ref="progress"></Progress>
     <div class="content">
@@ -57,6 +60,8 @@
 
     private readonly StringBuilder output = new();
 
+    private bool expanding;
+
     [Parameter]
     public Guid? LoadedCodeId { get; set; }
 
@@ -84,7 +89,7 @@
 
         Task task = new(() => // run compilation in a separate thread so that we don't block the UI
         {
-            Compiler.Compile(code, Composer.Expanding).ContinueWith(
+            Compiler.Compile(code, expanding).ContinueWith(
                 async t =>
                 {
                     await ToggleCompilation(false);
@@ -103,6 +108,7 @@
 
         await JsRuntime.InvokeVoidAsync("Library.initPopOverDestroyer");
         await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
+        await JsRuntime.InvokeVoidAsync("Library.initializeToggles");
 
         if (LoadedCodeId != null)
         {
@@ -146,6 +152,8 @@
         await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);
     }
 
+    private void OnToggleChanged() => expanding = !expanding;
+
     private string GetCodeFromDatabase()
     {
         if (LoadedCodeId != null && DatabaseHandler.CheckConnection())
@@ -160,5 +168,4 @@
         }
         return null;
     }
-
 }

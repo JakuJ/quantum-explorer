@@ -160,24 +160,6 @@ li.nav-item.grid-selector-item {
 }
 
 /* Operation expansion toggle */
-
-#composer-top-bar {
-  display: flex;
-  overflow: hidden;
-}
-
-#tabs-div {
-  order: 0;
-  flex-grow: 1;
-  overflow-x: scroll;
-  overflow-y: hidden;
-}
-
-#toggle-div {
-  order: 1;
-  flex-grow: 0;
-}
-
 .toggle-group > label {
   font-size: 14px;
 }
