@@ -303,3 +303,24 @@ select:focus {
   background-color: var(--hover);
   cursor: pointer;
 }
+
+/* modals */
+
+.modal-content {
+  border-radius: 0;
+  background-color: var(--popup);
+}
+
+.modal-header {
+  border-bottom-color: var(--hover);
+}
+
+.modal-header>button.close{
+  color: var(--text);
+  text-shadow: var(--hover);
+}
+
+.modal-header>button.close:focus{
+  outline:none;
+  box-shadow:none;
+}

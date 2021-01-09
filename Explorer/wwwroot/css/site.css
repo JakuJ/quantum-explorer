@@ -41,14 +41,12 @@ a, .btn-link {
   padding: 0.25rem;
 }
 
-#dark-mode-toggle {
+.bar-icon {
   cursor: pointer;
   background: transparent;
-  width: 28px;
-  height: 28px;
 }
 
-:root.dark-mode #dark-mode-toggle {
+:root.dark-mode .bar-icon {
   filter: invert(1);
 }
 
