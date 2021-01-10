@@ -54,6 +54,27 @@ a, .btn-link {
   background-color: var(--logo);
 }
 
+#compileButtonGroup > .dropdown-toggle {
+    padding: 0.375rem 0.3rem;
+    margin: 0;
+}
+
+#compileButtonGroup > .dropdown-toggle:focus {
+  outline:none;
+  box-shadow:none;
+}
+
+.compile-dropdown {
+    border: none;
+    margin-top: 0px;
+    margin-right: -1px;
+    color: var(--text);
+}
+
+.compile-dropdown > .form-inline {
+    margin-left: 4px;
+}
+
 .bar-icon {
   cursor: pointer;
   background: transparent;

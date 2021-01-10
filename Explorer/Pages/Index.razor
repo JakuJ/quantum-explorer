@@ -21,13 +21,24 @@
         <ShareButton GetCode="@(() => Editor.GetCode())" IsDisabled="@(!DatabaseHandler.CheckConnection())"></ShareButton>
         <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28"/>
         <LsStatus />
+        <!-- Compile button -->
+        <div class="dropdown btn-group" id="compileButtonGroup">
+            <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"/>
+            <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
+                <form class="form-inline">                   
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox">
+                        <label class="form-check-label">
+                            Show custom op
+                        </label>
+                    </div>
+                </form>
+            </div>
+        </div>
         <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
             <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="" width="24" height="24">
         </button>
-		<div id="toggle-div" @onclick="OnToggleChanged">
-            <input id="expand-toggle" type="checkbox" data-toggle="toggle" data-height="34px" data-onstyle="default">
-        </div>
-        <button id="compile" @ref="compileButtonRef" class="btn px-2" @onclick="OnCompile">Run simulation</button>
     </div>
     <Progress @ref="progress"></Progress>
     <div class="content">
