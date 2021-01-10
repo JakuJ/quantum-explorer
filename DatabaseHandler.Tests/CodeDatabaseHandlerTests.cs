@@ -82,28 +82,28 @@ namespace DatabaseHandler.Tests
         }
 
         [Test]
-        public void ChecksConnectionTrue()
+        public async void ChecksConnectionTrue()
         {
             // Arrange
             CodeDbContext dbContext = GetCodeDbContext();
             CodeDatabaseHandler databaseHandler = new(dbContext);
 
             // Act
-            bool canConnect = databaseHandler.CheckConnection();
+            bool canConnect = await databaseHandler.CheckConnection();
 
             // Assert
             Assert.IsTrue(canConnect, "Db should be able to connect");
         }
 
         [Test]
-        public void ChecksConnectionFalse()
+        public async void ChecksConnectionFalse()
         {
             // Arrange
             CodeDbContext dbContext = new(new DbContextOptionsBuilder<CodeDbContext>().UseSqlServer("incorrectConnectionString").Options);
             CodeDatabaseHandler databaseHandler = new(dbContext);
 
             // Act
-            bool canConnect = databaseHandler.CheckConnection();
+            bool canConnect = await databaseHandler.CheckConnection();
 
             // Assert
             Assert.IsFalse(canConnect, "Db should not be able to connect");

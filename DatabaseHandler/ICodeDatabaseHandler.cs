@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DatabaseHandler
 {
@@ -28,6 +29,6 @@ namespace DatabaseHandler
         /// Checks if database is available.
         /// </summary>
         /// <returns><see langword="true"/> if can connect. Otherwise <see langword="false"/>.</returns>
-        public bool CheckConnection();
+        public Task<bool> CheckConnection();
     }
 }

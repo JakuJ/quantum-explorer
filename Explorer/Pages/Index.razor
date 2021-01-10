@@ -18,7 +18,7 @@
         <UploadButton Filter=".qs" OnFileContentLoaded="@(async code => await Editor.SetCode(code))" />
         <DownloadButton GetCode="@(() => Editor.GetCode())" />
         <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/" />
-        <ShareButton GetCode="@(() => Editor.GetCode())" IsDisabled="@(!DatabaseHandler.CheckConnection())"></ShareButton>
+        <ShareButton GetCode="@(() => Editor.GetCode())" CheckIfActive="DatabaseHandler.CheckConnection"></ShareButton>
         <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28" />
         <LsStatus />
         <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
@@ -173,9 +173,9 @@
 
     private void OnToggleChanged() => expanding = !expanding;
 
-    private string GetCodeFromDatabase()
+    private async Task<string> GetCodeFromDatabase()
     {
-        if (LoadedCodeId != null && DatabaseHandler.CheckConnection())
+        if (LoadedCodeId != null && await DatabaseHandler.CheckConnection())
         {
             string code = null;
             try
