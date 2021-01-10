@@ -35,7 +35,7 @@
             }
             @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
             {
-                <Grids GridList="@(ast[keysNames[selectedKey]])"/>
+                <Grids GridList="@(ast[keysNames[selectedKey]])" />
             }
         </div>
     }
