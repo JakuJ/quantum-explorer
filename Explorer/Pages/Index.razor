@@ -22,8 +22,8 @@
         <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28"/>
         <LsStatus />
         <!-- Compile button -->
-        <div class="dropdown btn-group" id="compileButtonGroup">
-            <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
+        <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
+            <button id="compile" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" />
             <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
                 <form class="form-inline">

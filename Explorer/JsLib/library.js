@@ -10,11 +10,22 @@ export {showSharePopOver, initPopOverDestroyer} from './share';
 // Helper functions for disabling and enabling DOM elements
 
 export function disable(ref) {
-  ref.disabled = true;
+    var c = ref.children;
+    for (var i = 0; i < c.length; i++) {
+        if (c[i].classList.contains("btn")) {
+            c[i].disabled = true;
+        }
+    }
 }
 
 export function enable(ref) {
-  ref.disabled = false;
+    var c = ref.children;
+    console.log(c);
+    for (var i = 0; i < c.length; i++) {
+        if (c[i].classList.contains("btn")) {
+            c[i].disabled = false;
+        }
+    }
 }
 
 export function copyToClipboard() {
