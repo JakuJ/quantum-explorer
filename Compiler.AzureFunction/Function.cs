@@ -1,5 +1,5 @@
-using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Compiler.AzureFunction.Serialization;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +8,8 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+
+[assembly: InternalsVisibleTo("Compiler.Tests")]
 
 namespace Compiler.AzureFunction
 {

@@ -51,8 +51,8 @@ This version of the application executes Q# compilation and simulation on the sa
 The production version of the app is deployed to an Azure Web App for Containers running
 at https://quantum-explorer.azurewebsites.net.
 
-The deployment is performed manually by pushing the Docker container (or rather, its build context, the build is remote) to Azure Container Repository (ACR).
-Run the following Azure CLI commands from the root folder of the repository:
+The deployment is performed manually by pushing the Docker container (or rather, its build context, the build is remote)
+to Azure Container Repository (ACR). Run the following Azure CLI commands from the root folder of the repository:
 
 ```shell 
 az acr build --registry QuantumExplorer --image explorer:<tag> --build-arg NODE_ENV=production --verbose .
@@ -72,20 +72,31 @@ The runtime config involves setting **application settings** as follows:
 This version of the application executes Q# compilation and simulation using the Azure Function from
 the `Compiler.AzureFunction` project.
 
-In order to access the production endpoint, the `FUNCTION_KEY` environment variable has to be provided.
-Otherwise, the `401 Unauthorized` status code is returned. 
+In order to access the production endpoint, the `FUNCTION_KEY` environment variable has to be provided. Otherwise,
+the `401 Unauthorized` status code is returned.
 
 ### Azure Functions app
 
-The Q# compiler module used in production is deployed to Azure Functions.
-In order to push a new version of the app, open this repository in VS Code with the Azure Functions extension installed.
-Rebuild the `Compiler.AzureFunction` project and deploy from the extension to the `qs-compiler` Azure Functions app.
+The Q# compiler module used in production is deployed to Azure Functions. In order to push a new version of the app,
+open this repository in VS Code with the Azure Functions extension installed. Rebuild the `Compiler.AzureFunction`
+project and deploy from the extension to the `qs-compiler` Azure Functions app.
+
+To test the function locally run the following command in the `Compiler.AzureFunction` directory:
+
+```shell
+func host start --port 7071 --pause-on-error --verbose --csharp
+```
+
+and set the `FUNCTION_ENDPOINT` environment variable to the link it gives you.
+Also, the `ASPNETCORE_ENVIRONMENT` variable has to be set to "Production".
 
 ### Database
 
-To set up a local database from migrations you should have [Entity Framework Core tools](https://docs.microsoft.com/en-us/ef/core/cli/dotnet) installed.
+To set up a local database from migrations you should
+have [Entity Framework Core tools](https://docs.microsoft.com/en-us/ef/core/cli/dotnet) installed.
 
 If you want to use MS SQL Server in a Docker container, run:
+
 ```shell
 docker pull microsoft/mssql-server-linux:2017-latest
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
@@ -94,6 +105,7 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1433
 
 docker-compose up --build database
 ```
+
 Then change the `ConnectionString` in `Explorer/appsetting.json` to:
 `"Server=127.0.0.1,1433;Database=CodeDatabase;User Id=SA;Password=YourStrong!Passw0rd;"`
 

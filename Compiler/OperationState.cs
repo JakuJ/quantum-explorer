@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Newtonsoft.Json;
 
@@ -38,5 +39,22 @@ namespace Compiler
         /// </summary>
         [JsonProperty("R")]
         public List<(int Idx, Complex Value)>? Results { get; set; }
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
+        {
+            if (obj is OperationState other)
+            {
+                return Name == other.Name
+                    && Children.SequenceEqual(other.Children)
+                    && (Arguments != null && other.Arguments != null ? Arguments.SequenceEqual(other.Arguments) : true)
+                    && (Results != null && other.Results != null ? Results.SequenceEqual(other.Results) : true);
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => base.GetHashCode();
     }
 }
