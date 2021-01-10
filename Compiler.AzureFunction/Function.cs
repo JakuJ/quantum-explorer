@@ -1,5 +1,7 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
+using Compiler.AzureFunction.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -40,7 +42,12 @@ namespace Compiler.AzureFunction
 
             await compiler.Compile(code, req.Headers.ContainsKey("x-expanding-operations"));
 
-            string message = JsonConvert.SerializeObject(payload);
+            JsonSerializerSettings settings = new()
+            {
+                ContractResolver = RenamingContractResolver.Instance,
+            };
+
+            string message = JsonConvert.SerializeObject(payload, settings);
 
             return new OkObjectResult(message);
         }

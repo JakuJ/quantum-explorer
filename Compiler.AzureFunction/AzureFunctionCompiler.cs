@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Compiler.AzureFunction.Connection;
+using Compiler.AzureFunction.Serialization;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -56,6 +57,8 @@ namespace Compiler.AzureFunction
                 {
                     MaxDepth = 128,
                     ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                    ContractResolver = RenamingContractResolver.Instance,
+                    Converters = { ComplexConverter.Instance },
                 };
 
                 payload = JsonConvert.DeserializeObject<Payload>(responseString, settings)
