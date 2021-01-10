@@ -39,6 +39,7 @@
 
 .grid-selector-container {
   flex-grow: 0;
+  flex-shrink: 0;
   order: 1;
   overflow-y: auto;
   overflow-x: hidden;
