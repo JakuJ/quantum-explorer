@@ -1,11 +1,12 @@
 @using Microsoft.Extensions.Logging
+@using System.Diagnostics.CodeAnalysis
 @using Common
 @inject CellMenusNotifier Notifier
 @inject ILogger<Cell> Logger
 @implements IDisposable
 
 <SnapPoint X="@X" Y="@Y" Half="@false" @ref="snapPoint" Locked="@(QuantumGate.HasValue)"/>
-<div class="grid-cell">
+<div class="grid-cell @clickedCellStr">
     @if (QuantumGate.HasValue)
     {
         <Gate Name="@(QuantumGate.Value.Name)" @ref="gate" ClickAction="OnClick"/>
@@ -117,4 +118,7 @@
 
         Notifier.NotifyMenuClosed();
     }
+
+    [ExcludeFromCodeCoverage] // Reason: the coverage tool doesn't see the execution of this method
+    private string clickedCellStr => clicked ? "clicked" : "";
 }

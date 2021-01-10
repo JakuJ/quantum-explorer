@@ -3,12 +3,12 @@ using System;
 namespace Common
 {
     /// <summary>
-    /// A class notifying cells and the composer about the cell menu state changes.
+    /// A class notifying cells and the composer's grids about the cell menu state changes.
     /// </summary>
     public class CellMenusNotifier
     {
         /// <summary>
-        /// Triggered by a cell (when a gate is added/deleted) or the composer (when the button is clicked).
+        /// Triggered by a cell (when a gate is added/deleted) or the grids (when the button is clicked).
         /// </summary>
         public void NotifyMenuClosed() => NotifyClosed?.Invoke();
 
@@ -18,12 +18,12 @@ namespace Common
         public void NotifyMenuOpened() => NotifyOpened?.Invoke();
 
         /// <summary>
-        /// Notifies cells to close a menu and the composer to hide the button.
+        /// Notifies cells to close a menu and the grids to hide the button.
         /// </summary>
         public event Action NotifyClosed = null!;
 
         /// <summary>
-        /// Notifies the composer that a menu is opened.
+        /// Notifies the grids that a menu is opened.
         /// Triggers to display the button behind the menu to block any other functionalities.
         /// </summary>
         public event Action NotifyOpened = null!;

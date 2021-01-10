@@ -14,18 +14,17 @@
 .click-box {
   width: 100%;
   height: 100%;
-  position: relative;
-  float: right;
+  position: absolute;
   z-index: 500;
-  background-color: transparent;
+  background-color: var(--surface);
+  opacity: 75%;
   border: none;
   padding: 0;
-  backdrop-filter: blur(2px) contrast(0.9);
-  -webkit-backdrop-filter: blur(2px) contrast(0.9);
 }
 
 .grids {
   display: flex;
+  position: relative;
 }
 
 .grid-selector {
@@ -79,6 +78,10 @@ li.nav-item.grid-selector-item {
   height: 40px;
   margin-left: 10px;
   overflow: visible;
+}
+
+.grid-cell.clicked {
+  background-color: var(--primary);
 }
 
 .grid-blankcell-button {

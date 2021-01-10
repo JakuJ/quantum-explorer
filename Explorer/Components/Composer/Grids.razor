@@ -1,8 +1,14 @@
 @using Microsoft.Extensions.Logging
 @using Common
 @inject ILogger<Grids> Logger
+@inject CellMenusNotifier Notifier
+@implements IDisposable
 
 <div class="grids">
+    @if(clickBox)
+    {
+        <button class="click-box" @onclick="OnBoxClick"/>
+    }
     <Grid GateGrid="@(GridList[keysNames[selectedGridKey]])"/>
     @if(GridList.Count > 1)
     {
@@ -27,6 +33,20 @@
 
     private string selectedGridKey { get; set; } = null!;
 
+    private bool clickBox = false;
+
+    public void Dispose()
+    {
+        Notifier.NotifyClosed -= OnCloseMenuNotify;
+        Notifier.NotifyOpened -= OnOpenMenuNotify;
+    }
+
+    protected override void OnInitialized()
+    {
+        Notifier.NotifyClosed += OnCloseMenuNotify;
+        Notifier.NotifyOpened += OnOpenMenuNotify;
+    }
+
     protected override void OnParametersSet()
     {
         keysNames = Enumerable
@@ -39,5 +59,19 @@
     {
         selectedGridKey = key;
         Logger.LogDebug($"Grid with key {key} was selected.");
+    }
+
+    private void OnBoxClick() => Notifier.NotifyMenuClosed();
+
+    private void OnCloseMenuNotify()
+    {
+        clickBox = false;
+        StateHasChanged();
+    }
+
+    private void OnOpenMenuNotify()
+    {
+        clickBox = true;
+        StateHasChanged();
     }
 }

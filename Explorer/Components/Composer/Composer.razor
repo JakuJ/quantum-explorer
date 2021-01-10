@@ -2,8 +2,6 @@
 @using Common
 @inject IJSRuntime JsRuntime
 @inject ILogger<Composer> Logger
-@inject CellMenusNotifier Notifier
-@implements IDisposable
 
 <div class="composer-container">
     @if (isPlaceholder)
@@ -29,10 +27,6 @@
             </div>
         </div>
         <div class="composer-content">
-            @if(clickBox)
-            {
-                <button class="click-box" @onclick="OnBoxClick"/>
-            }
             @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
             {
                 <Grids GridList="@(ast[keysNames[selectedKey]])" />
@@ -44,25 +38,11 @@
 @code {
     private bool isPlaceholder = true;
 
-    private bool clickBox = false;
-
     private Dictionary<string, List<GateGrid>> ast = new();
 
     private Dictionary<string, string> keysNames = new();
 
     private string selectedKey = "";
-
-    public void Dispose()
-    {
-        Notifier.NotifyClosed -= OnCloseMenuNotify;
-        Notifier.NotifyOpened -= OnOpenMenuNotify;
-    }
-
-    protected override void OnInitialized()
-    {
-        Notifier.NotifyClosed += OnCloseMenuNotify;
-        Notifier.NotifyOpened += OnOpenMenuNotify;
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
         => await JsRuntime.InvokeVoidAsync("Library.initializeToggles");
@@ -116,18 +96,4 @@
     void OnTabChange(string key) => selectedKey = key;
 
     void OnToggleChanged() => Expanding = !Expanding;
-
-    private void OnBoxClick() => Notifier.NotifyMenuClosed();
-
-    private void OnCloseMenuNotify()
-    {
-        clickBox = false;
-        StateHasChanged();
-    }
-
-    private void OnOpenMenuNotify()
-    {
-        clickBox = true;
-        StateHasChanged();
-    }
 }
