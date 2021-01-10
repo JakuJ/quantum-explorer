@@ -7,11 +7,13 @@
 </div>
 
 @code {
+
     [Parameter]
-    public int Left { get; set; } = 0;
+    public int Left { get; set; }
 
     [Parameter]
     public Action<string?> ExitMenu { get; set; } = null!;
 
     private void OnClick(string? gateName) => ExitMenu?.Invoke(gateName);
+
 }

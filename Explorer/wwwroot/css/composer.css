@@ -12,12 +12,13 @@
 }
 
 .click-box {
-  width: 100%;
+  width: calc(100% - 10px);
   height: 100%;
-  position: absolute;
+  position: fixed;
+  top: 0;
+  left: 0;
   z-index: 500;
-  background-color: var(--surface);
-  opacity: 75%;
+  background-color: transparent;
   border: none;
   padding: 0;
 }
@@ -92,8 +93,9 @@ li.nav-item.grid-selector-item {
   border: none;
 }
 
-.grid-blankcell-button:hover, .grid-blankcell-button:focus {
-  background-color: var(--accent);
+.grid-blankcell-button:hover,
+.grid-blankcell-button:focus {
+  background-color: var(--primary);
   opacity: 0.6;
 }
 

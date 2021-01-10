@@ -3,11 +3,13 @@
 </div>
 
 @code {
+
     [Parameter]
-    public int Left { get; set; } = 0;
+    public int Left { get; set; }
 
     [Parameter]
     public Action<bool> ExitMenu { get; set; } = null!;
 
     private void OnClick(bool deleteGate) => ExitMenu?.Invoke(deleteGate);
+
 }

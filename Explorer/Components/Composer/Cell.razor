@@ -1,30 +1,30 @@
-@using Microsoft.Extensions.Logging
-@using System.Diagnostics.CodeAnalysis
-@using Common
 @inject CellMenusNotifier Notifier
 @inject ILogger<Cell> Logger
+@using Microsoft.Extensions.Logging
+@using Common
+@using System.Diagnostics.CodeAnalysis
 @implements IDisposable
 
 <SnapPoint X="@X" Y="@Y" Half="@false" @ref="snapPoint" Locked="@(QuantumGate.HasValue)"/>
-<div class="grid-cell @clickedCellStr">
+<div class="grid-cell @ClickedCellStr">
     @if (QuantumGate.HasValue)
     {
         <Gate Name="@(QuantumGate.Value.Name)" @ref="gate" ClickAction="OnClick"/>
     }
     else
     {
-        <button class="grid-blankcell-button" @onclick="OnClick"/>
+        <button class="grid-blankcell-button" @onclick="OnClick"></button>
     }
 </div>
-@if(clicked)
+@if (Clicked)
 {
-    @if(QuantumGate.HasValue)
+    @if (QuantumGate.HasValue)
     {
-        <DeleteGateMenu ExitMenu="@ExitDeleteGateMenu" Left="@(50*X)"/>
+        <DeleteGateMenu ExitMenu="@ExitDeleteGateMenu" Left="@(50 * X)"/>
     }
     else
     {
-        <AddGateMenu ExitMenu="@ExitAddGateMenu" Left="@(50*X)"/>
+        <AddGateMenu ExitMenu="@ExitAddGateMenu" Left="@(50 * X)"/>
     }
 }
 
@@ -34,7 +34,7 @@
 
     private SnapPoint snapPoint = null!;
 
-    private bool clicked { get; set; } = false;
+    private bool Clicked { get; set; } = false;
 
     [Parameter]
     public QuantumGate? QuantumGate { get; set; }
@@ -53,16 +53,6 @@
 
     [Parameter]
     public Action<string> DeleteGate { get; set; } = null!;
-
-    /// <summary>
-    /// Notifies the CellMenusNotifier that the menu state is being changed
-    /// </summary>
-    /// <returns></returns>
-    public void OnCloseMenuNotify()
-    {
-        clicked = false;
-        StateHasChanged();
-    }
 
     public void Dispose()
     {
@@ -87,20 +77,28 @@
         }
     }
 
+    /// <summary>
+    /// Notifies the CellMenusNotifier that the menu state is being changed
+    /// </summary>
+    /// <returns></returns>
+    private void OnCloseMenuNotify()
+    {
+        Clicked = false;
+        StateHasChanged();
+    }
+
     private void OnClick()
     {
-        Logger.LogDebug($"Click cell  X={X}  Y={Y}");
-        clicked = true;
+        Clicked = true;
         Notifier.NotifyMenuOpened();
         StateHasChanged();
     }
 
     private void ExitAddGateMenu(string? gateName)
     {
-        if(gateName != null)
+        if (gateName != null)
         {
             // Add a new gate with given name to this cell.
-            Logger.LogDebug($"Adding gate {0}", gateName);
             AddGate?.Invoke(gateName, snapPoint.Id);
         }
 
@@ -109,16 +107,16 @@
 
     private void ExitDeleteGateMenu(bool deleteGate)
     {
-        if(deleteGate)
+        if (deleteGate)
         {
             // Delete the gate
-            Logger.LogDebug($"Deleting gate {0} {1}", gate?.Id, gate?.Name);
             DeleteGate?.Invoke(snapPoint.Id);
         }
 
         Notifier.NotifyMenuClosed();
     }
 
-    [ExcludeFromCodeCoverage] // Reason: the coverage tool doesn't see the execution of this method
-    private string clickedCellStr => clicked ? "clicked" : "";
+    [ExcludeFromCodeCoverage] // Reason: the coverage tool doesn't see the execution of this property
+    private string ClickedCellStr => Clicked ? "clicked" : "";
+
 }

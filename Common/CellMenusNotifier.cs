@@ -8,6 +8,17 @@ namespace Common
     public class CellMenusNotifier
     {
         /// <summary>
+        /// Notifies cells to close a menu and the grids to hide the button.
+        /// </summary>
+        public event Action? NotifyClosed;
+
+        /// <summary>
+        /// Notifies the grids that a menu is opened.
+        /// Triggers to display the button behind the menu to block any other functionalities.
+        /// </summary>
+        public event Action? NotifyOpened;
+
+        /// <summary>
         /// Triggered by a cell (when a gate is added/deleted) or the grids (when the button is clicked).
         /// </summary>
         public void NotifyMenuClosed() => NotifyClosed?.Invoke();
@@ -16,16 +27,5 @@ namespace Common
         /// Triggered by a cell (on click).
         /// </summary>
         public void NotifyMenuOpened() => NotifyOpened?.Invoke();
-
-        /// <summary>
-        /// Notifies cells to close a menu and the grids to hide the button.
-        /// </summary>
-        public event Action NotifyClosed = null!;
-
-        /// <summary>
-        /// Notifies the grids that a menu is opened.
-        /// Triggers to display the button behind the menu to block any other functionalities.
-        /// </summary>
-        public event Action NotifyOpened = null!;
     }
 }
