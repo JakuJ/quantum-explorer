@@ -1,6 +1,8 @@
 @using Microsoft.Extensions.Logging
 @using Common
-@inject ILogger<Cell> Logger;
+@inject CellMenusNotifier Notifier
+@inject ILogger<Cell> Logger
+@implements IDisposable
 
 <SnapPoint X="@X" Y="@Y" Half="@false" @ref="snapPoint" Locked="@(QuantumGate.HasValue)"/>
 <div class="grid-cell">
@@ -51,6 +53,26 @@
     [Parameter]
     public Action<string> DeleteGate { get; set; } = null!;
 
+    /// <summary>
+    /// Notifies the CellMenusNotifier that the menu state is being changed
+    /// </summary>
+    /// <returns></returns>
+    public void OnCloseMenuNotify()
+    {
+        clicked = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Notifier.NotifyClosed -= OnCloseMenuNotify;
+    }
+
+    protected override void OnInitialized()
+    {
+        Notifier.NotifyClosed += OnCloseMenuNotify;
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -68,6 +90,7 @@
     {
         Logger.LogDebug($"Click cell  X={X}  Y={Y}");
         clicked = true;
+        Notifier.NotifyMenuOpened();
         StateHasChanged();
     }
 
@@ -80,8 +103,7 @@
             AddGate?.Invoke(gateName, snapPoint.Id);
         }
 
-        clicked = false;
-        StateHasChanged();
+        Notifier.NotifyMenuClosed();
     }
 
     private void ExitDeleteGateMenu(bool deleteGate)
@@ -93,7 +115,6 @@
             DeleteGate?.Invoke(snapPoint.Id);
         }
 
-        clicked = false;
-        StateHasChanged();
+        Notifier.NotifyMenuClosed();
     }
 }
