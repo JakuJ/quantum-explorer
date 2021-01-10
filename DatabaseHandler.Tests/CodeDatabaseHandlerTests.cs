@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 
@@ -82,7 +83,7 @@ namespace DatabaseHandler.Tests
         }
 
         [Test]
-        public async void ChecksConnectionTrue()
+        public async Task ChecksConnectionTrue()
         {
             // Arrange
             CodeDbContext dbContext = GetCodeDbContext();
@@ -96,7 +97,7 @@ namespace DatabaseHandler.Tests
         }
 
         [Test]
-        public async void ChecksConnectionFalse()
+        public async Task ChecksConnectionFalse()
         {
             // Arrange
             CodeDbContext dbContext = new(new DbContextOptionsBuilder<CodeDbContext>().UseSqlServer("incorrectConnectionString").Options);
