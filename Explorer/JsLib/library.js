@@ -3,7 +3,7 @@
 
 export {initializeSplitPanes} from './split-panes';
 export {toggleTheme} from './theme';
-export {initGrids, initializeToggles, setReference} from './composer';
+export {initGrids, setReference} from './composer';
 export {Editor} from './editor';
 export {showSharePopOver, initPopOverDestroyer} from './share';
 
