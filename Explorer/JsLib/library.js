@@ -20,7 +20,6 @@ export function disable(ref) {
 
 export function enable(ref) {
     var c = ref.children;
-    console.log(c);
     for (var i = 0; i < c.length; i++) {
         if (c[i].classList.contains("btn")) {
             c[i].disabled = false;

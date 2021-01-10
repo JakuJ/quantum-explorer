@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @page "/{LoadedCodeId:guid}"
 @using Compiler
 @using DatabaseHandler
@@ -19,8 +19,11 @@
         <DownloadButton GetCode="@(() => Editor.GetCode())" />
         <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/" />
         <ShareButton GetCode="@(() => Editor.GetCode())" IsDisabled="@(!DatabaseHandler.CheckConnection())"></ShareButton>
-        <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28"/>
+        <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28" />
         <LsStatus />
+        <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
+            <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="" width="24" height="24">
+        </button>
         <!-- Compile button -->
         <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
             <button id="compile" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
@@ -28,7 +31,7 @@
             <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
                 <form class="form-inline">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" @onchange="CustomOperationCheckboxChanged" checked >
+                        <input class="form-check-input" type="checkbox" @onchange="CustomOperationCheckboxChanged" checked>
                         <label class="form-check-label">
                             Show custom op
                         </label>
@@ -36,9 +39,6 @@
                 </form>
             </div>
         </div>
-        <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
-            <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="" width="24" height="24">
-        </button>
     </div>
     <Progress @ref="progress"></Progress>
     <div class="content">
@@ -120,7 +120,6 @@
 
         await JsRuntime.InvokeVoidAsync("Library.initPopOverDestroyer");
         await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
-        await JsRuntime.InvokeVoidAsync("Library.initializeToggles");
 
         if (LoadedCodeId != null)
         {
@@ -159,7 +158,7 @@
     {
         if (Composer != null)
         {
-            Composer.Expanding = checkedValue.Value is bool value && value;
+            expanding = checkedValue.Value is bool value && value;
         }
     }
 
