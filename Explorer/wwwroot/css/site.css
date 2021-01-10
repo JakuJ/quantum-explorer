@@ -44,14 +44,17 @@ a, .btn-link {
 }
 
 #compile {
-  padding: 0.25rem;
-  color: white;
-  background-color: var(--primary);
+    padding: 0.25rem;
 }
 
-:root.dark-mode #compile {
-  color: black;
-  background-color: var(--logo);
+#compileButtonGroup {
+    color: white;
+    background-color: var(--primary);
+}
+
+:root.dark-mode #compileButtonGroup {
+    color: black;
+    background-color: var(--logo);
 }
 
 #compileButtonGroup > .dropdown-toggle {
@@ -59,9 +62,13 @@ a, .btn-link {
     margin: 0;
 }
 
+#compileButtonGroup > .dropdown-toggle:hover {
+    background-color:rgba(0, 0, 0, 0.1);
+}
+
 #compileButtonGroup > .dropdown-toggle:focus {
-  outline:none;
-  box-shadow:none;
+    outline: none;
+    box-shadow: none;
 }
 
 .compile-dropdown {
@@ -69,10 +76,8 @@ a, .btn-link {
     margin-top: 0px;
     margin-right: -1px;
     color: var(--text);
-}
-
-.compile-dropdown > .form-inline {
-    margin-left: 4px;
+    white-space: nowrap;
+    padding: 8px 4px 8px 4px;
 }
 
 .bar-icon {

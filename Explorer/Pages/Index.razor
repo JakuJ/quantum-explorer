@@ -26,14 +26,14 @@
         </button>
         <!-- Compile button -->
         <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
-            <button id="compile" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" />
+            <button id="compile" class="btn px-2" @onclick="OnCompile">Compile & Run</button>
+            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" />
             <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
                 <form class="form-inline">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" @onchange="CustomOperationCheckboxChanged" checked>
                         <label class="form-check-label">
-                            Show custom op
+                            Show custom operations
                         </label>
                     </div>
                 </form>
