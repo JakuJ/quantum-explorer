@@ -24,6 +24,7 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped<CellMenusNotifier>();
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grids>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
@@ -77,6 +78,7 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped<CellMenusNotifier>();
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grids>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
@@ -124,6 +126,7 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped<CellMenusNotifier>();
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Gate>>().Object);

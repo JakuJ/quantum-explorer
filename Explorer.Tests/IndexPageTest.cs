@@ -21,6 +21,7 @@ namespace Explorer.Tests
         {
             TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped<Common.CellMenusNotifier>();
             ctx.Services.AddSingleton(_ => Mock.Of<ICodeDatabaseHandler>());
             ctx.Services.AddSingleton(_ => Mock.Of<ICompiler>());
             ctx.Services.AddSingleton(_ => Mock.Of<IWebHostEnvironment>());
