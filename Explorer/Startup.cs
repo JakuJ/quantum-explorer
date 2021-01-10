@@ -67,9 +67,9 @@ namespace Explorer
             }
 
             services.AddDbContext<CodeDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DatabaseConnection"),
-                    x => x.MigrationsAssembly("DatabaseHandler")));
+                                                     options.UseSqlServer(
+                                                         Configuration.GetConnectionString("DatabaseConnection"),
+                                                         x => x.MigrationsAssembly("DatabaseHandler")));
             services.AddScoped<ICodeDatabaseHandler, CodeDatabaseHandler>();
             services.AddScoped<Common.CellMenusNotifier>();
         }

@@ -155,7 +155,7 @@
             {
                 (_, code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
             }
-            catch (KeyNotFoundException) { } // todo: show message using toasts
+            catch (KeyNotFoundException) { }
             return code;
         }
         return null;

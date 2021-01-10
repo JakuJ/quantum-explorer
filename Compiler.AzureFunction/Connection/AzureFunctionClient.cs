@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace Compiler.AzureFunction.Connection
 {
     /// <inheritdoc />
-    [ExcludeFromCodeCoverage] // TODO: Integration tests
+    [ExcludeFromCodeCoverage] // Reason: not testable locally without external scripts
     public class AzureFunctionClient : IHttpClient
     {
         private static readonly string Endpoint;

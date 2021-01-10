@@ -5,6 +5,7 @@ using NUnit.Framework;
 namespace Common.Tests
 {
     [TestFixture]
+    [Parallelizable]
     public class ScopedTimerTest
     {
         [Test]

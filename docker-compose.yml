@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  language-server:
+    build:
+      context: ../qsharp-compiler-mirror
+    image: language-server
+    container_name: language-server
+    ports:
+      - "8091:8091"
+  database:
+    image: microsoft/mssql-server-linux:2017-latest
+    container_name: database
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
+  explorer:
+    build:
+      context: .
+    image: explorer
+    container_name: explorer
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - LANGUAGE_SERVER_URL=ws://language-server:8091
+    ports:
+      - "5000:80"
+    depends_on:
+      - language-server
+      - database

@@ -15,6 +15,7 @@
 
 
 @code {
+
     [Parameter]
     public Func<Task<string>>? GetCode { get; set; }
 
@@ -32,8 +33,9 @@
         {
             sharedCode = code;
             Guid id = DatabaseHandler.SaveCode("", code);
-            sharedLink = NavigationManager.BaseUri + id.ToString();
+            sharedLink = $"{NavigationManager.BaseUri}{id}";
         }
         await JsRuntime.InvokeVoidAsync("Library.showSharePopOver", sharedLink);
     }
+
 }

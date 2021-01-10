@@ -39,6 +39,7 @@ COPY DatabaseHandler/ DatabaseHandler/
 COPY Simulator/ Simulator/
 COPY AstTransformations/ AstTransformations/
 WORKDIR Explorer
+RUN sed -i.bak 's/127\.0\.0\.1/database/' appsettings.Development.json # docker-compose networking
 RUN dotnet build -c Release --no-restore
 
 # Publish the app
