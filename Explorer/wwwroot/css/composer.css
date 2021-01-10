@@ -11,8 +11,21 @@
   width: 100%;
 }
 
+.click-box {
+  width: calc(100% - 10px);
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 500;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
 .grids {
   display: flex;
+  position: relative;
 }
 
 .grid-selector {
@@ -68,6 +81,24 @@ li.nav-item.grid-selector-item {
   overflow: visible;
 }
 
+.grid-cell.clicked {
+  background-color: var(--primary);
+}
+
+.grid-blankcell-button {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+}
+
+.grid-blankcell-button:hover,
+.grid-blankcell-button:focus {
+  background-color: var(--primary);
+  opacity: 0.6;
+}
+
 .gate {
   width: 40px;
   height: 40px;
@@ -76,6 +107,9 @@ li.nav-item.grid-selector-item {
   z-index: 99;
   cursor: pointer;
   overflow: hidden;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .gate.gate-border {
@@ -88,6 +122,7 @@ li.nav-item.grid-selector-item {
 .gate-name {
   vertical-align: baseline;
   font-size: x-large;
+  color: var(--text);
 }
 
 .row-id {
@@ -114,6 +149,15 @@ li.nav-item.grid-selector-item {
 .composer-line {
   stroke: var(--text);
   stroke-width: 2;
+}
+
+.gate-menu.dropdown {
+  position: absolute;
+}
+
+.gate-menu.dropdown-menu {
+  display: grid;
+  position: absolute;
 }
 
 /* Operation expansion toggle */

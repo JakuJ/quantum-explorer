@@ -1,0 +1,15 @@
+<div class="gate-menu dropdown-menu" style="left: @(Left)px;">
+    <a class="dropdown-item" @onclick="@(_ => OnClick(true))">Delete gate</a>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Left { get; set; }
+
+    [Parameter]
+    public Action<bool> ExitMenu { get; set; } = null!;
+
+    private void OnClick(bool deleteGate) => ExitMenu?.Invoke(deleteGate);
+
+}

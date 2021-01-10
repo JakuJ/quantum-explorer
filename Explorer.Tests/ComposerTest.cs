@@ -18,12 +18,11 @@ namespace Explorer.Tests
     [Parallelizable]
     public class ComposerTest
     {
-        [Test]
-        public async Task RendersComposer()
+        private static TestContext GetTestContext()
         {
-            // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
+            ctx.Services.TryAddScoped<CellMenusNotifier>();
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grids>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
@@ -31,6 +30,14 @@ namespace Explorer.Tests
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<Cell>>().Object);
             ctx.Services.TryAddScoped(_ => new Mock<ILogger<SnapPoint>>().Object);
             ctx.Services.TryAddSingleton(_ => Helpers.GetMockEnvironment().Object);
+            return ctx;
+        }
+
+        [Test]
+        public async Task RendersComposer()
+        {
+            // Arrange
+            using var ctx = GetTestContext();
 
             GateGrid grid = new();
             grid.AddGate(0, new QuantumGate("H"));
@@ -75,15 +82,7 @@ namespace Explorer.Tests
         public async Task RendersComposerDifferentNamespaces()
         {
             // Arrange
-            using TestContext ctx = new();
-            ctx.Services.AddMockJSRuntime();
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grids>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Gate>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Cell>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<SnapPoint>>().Object);
-            ctx.Services.TryAddSingleton(_ => Helpers.GetMockEnvironment().Object);
+            using var ctx = GetTestContext();
 
             GateGrid grid = new();
             grid.AddGate(0, new QuantumGate("H"));
@@ -122,14 +121,7 @@ namespace Explorer.Tests
         public void ThrowsInvalidOperation()
         {
             // Arrange
-            using TestContext ctx = new();
-            ctx.Services.AddMockJSRuntime();
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Composer>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Grid>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Gate>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<Cell>>().Object);
-            ctx.Services.TryAddScoped(_ => new Mock<ILogger<SnapPoint>>().Object);
-            ctx.Services.TryAddSingleton(_ => Helpers.GetMockEnvironment().Object);
+            using var ctx = GetTestContext();
 
             IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
             Dictionary<string, List<GateGrid>> astEmpty = new();
@@ -150,6 +142,105 @@ namespace Explorer.Tests
 
             // Assert
             Assert.AreEqual(123, cut.Markup.Length);
+        }
+
+        [Test]
+        public async Task OpensClosesMenuInteractively()
+        {
+            // Arrange
+            using var ctx = GetTestContext();
+
+            Dictionary<string, List<GateGrid>> astTab = new()
+            {
+                { "DefaultNamespace", new List<GateGrid> { new GateGrid(1, 1) } },
+            };
+
+            // Act
+            IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
+            await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astTab));
+
+            var blankCellButton = cut.Find(".grid-blankcell-button");
+            blankCellButton.Click(); // click the button -> show menu to add new gate
+
+            var clickBox = cut.FindAll(".click-box")[0];
+            clickBox.Click(); // hide the menu
+
+            // Assert
+            // Check if the click box has disappeared
+            Assert.Throws<ElementNotFoundException>(() => cut.Find(".click-box"));
+
+            // Check if the Grid component is rendered
+            IRenderedComponent<Grid> gridComponent = cut.FindComponent<Grid>();
+
+            // Check if there is a blank cell
+            Assert.IsNotNull(gridComponent.Find(".grid-blankcell-button"));
+        }
+
+        [Test]
+        public async Task AddsGateInteractively()
+        {
+            // Arrange
+            using var ctx = GetTestContext();
+
+            Dictionary<string, List<GateGrid>> astTab = new()
+            {
+                { "DefaultNamespace", new List<GateGrid> { new GateGrid(1, 1) } },
+            };
+
+            // Act
+            IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
+            await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astTab));
+
+            var blankCellButton = cut.Find(".grid-blankcell-button");
+            blankCellButton.Click(); // click the button -> show menu to add new gate
+
+            var addGateLink = cut.FindAll(".gate-menu.dropdown-menu .dropdown-item")[0];
+            addGateLink.Click(); // add the Pauli-X gate
+
+            // Assert
+            // Check if the addGateLink refers to Pauli-X gate
+            addGateLink.TextContent.Equals("Pauli-X");
+
+            // Check if the Grid component is rendered
+            IRenderedComponent<Grid> gridComponent = cut.FindComponent<Grid>();
+
+            // Check if the gate icon is displayed
+            Assert.IsNotNull(gridComponent.Find("circle"));
+        }
+
+        [Test]
+        public async Task DeletesGateInteractively()
+        {
+            // Arrange
+            using var ctx = GetTestContext();
+
+            GateGrid grid = new();
+            grid.AddGate(0, new QuantumGate("H"));
+
+            Dictionary<string, List<GateGrid>> astTab = new()
+            {
+                { "DefaultNamespace", new List<GateGrid> { grid } },
+            };
+
+            // Act
+            IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
+            await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astTab));
+
+            var hCellButton = cut.Find(".grid-cell .gate");
+            hCellButton.Click(); // click the button -> show menu to delete the gate
+
+            var delGateLink = cut.FindAll(".gate-menu.dropdown-menu .dropdown-item")[0];
+            delGateLink.Click(); // delete the gate
+
+            // Assert
+            // Check if the delGateLink refers to deleting gate
+            delGateLink.TextContent.Equals("Delete gate");
+
+            // Check if the Grid component is rendered
+            IRenderedComponent<Grid> gridComponent = cut.FindComponent<Grid>();
+
+            // Check if there are no gates left
+            Assert.Throws<ElementNotFoundException>(() => gridComponent.Find(".gate"));
         }
     }
 }

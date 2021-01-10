@@ -1,8 +1,8 @@
-@using Common
-@using Microsoft.Extensions.Logging
-@using System.Diagnostics.CodeAnalysis
 @inject IJSRuntime JsRuntime
 @inject ILogger<Grid> Logger;
+@using Microsoft.Extensions.Logging
+@using Common
+@using System.Diagnostics.CodeAnalysis
 @implements IDisposable
 
 <div class="grid-container">
@@ -20,7 +20,7 @@
                     @if (localQGate.HasValue)
                     {
                         bool isControl = localQGate.Value.IsControlGate();
-                        @for (var y2 = y + 1; y2 < gates.GetLength(1); y2++)
+                        @for (int y2 = y + 1; y2 < gates.GetLength(1); y2++)
                         {
                             QuantumGate? g2 = gates[x, y2];
                             bool isControl2 = g2?.IsControlGate() ?? isControl;
@@ -28,12 +28,11 @@
                             {
                                 // a gate controls another one
                                 int xPix = 10 + 50 * x;
-                                int y1Pix = 20;
+                                const int y1Pix = 20;
                                 int y2Pix = 50 * (y2 - y);
                                 <div class="line-container">
                                     <Line Y1="0" Y2="@y2Pix" Left="@xPix" Top="@y1Pix"/>
                                 </div>
-                                Logger.LogDebug("Controlled gate: {0} {1} {2}", x, y, y2);
                             }
                         }
                     }
@@ -41,7 +40,7 @@
                     // Snap point between the cells
                     <SnapPoint X="@x" Y="@y" Half="@true" @ref="SnapRef"/>
 
-                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints"/>
+                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints" AddGate="@Add" DeleteGate="@Delete"/>
                 }
             </div>
         </div>
@@ -86,7 +85,7 @@
         reference?.Dispose();
     }
 
-    [ExcludeFromCodeCoverage] // Reason: called by JS functions, awaiting E2E tests
+    [ExcludeFromCodeCoverage] // Reason: called by JS functions
     [JSInvokable]
     public void Expand(string gateId, string snapId)
     {
@@ -99,7 +98,7 @@
         ForceRerender();
     }
 
-    [ExcludeFromCodeCoverage] // Reason: called by JS functions, awaiting E2E tests
+    [ExcludeFromCodeCoverage] // Reason: called by JS functions
     [JSInvokable]
     public void Move(string gateId, string snapId)
     {
@@ -108,6 +107,21 @@
 
         GateGrid.MoveGate(oldSnap.X, oldSnap.Y, newSnap.X, newSnap.Y);
 
+        ForceRerender();
+    }
+
+    private void Add(string gateName, string snapId)
+    {
+        SnapPoint snap = snapPoints[snapId];
+        var gate = new QuantumGate(gateName);
+        GateGrid.AddGate(snap.X, snap.Y, gate);
+        ForceRerender();
+    }
+
+    private void Delete(string snapId)
+    {
+        SnapPoint snap = snapPoints[snapId];
+        GateGrid.RemoveAt(snap.X, snap.Y, false);
         ForceRerender();
     }
 

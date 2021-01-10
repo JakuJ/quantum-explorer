@@ -2,10 +2,11 @@
 @using Common
 @inject IJSRuntime JsRuntime
 @inject ILogger<Composer> Logger
+
 <div class="composer-container">
     @if (isPlaceholder)
     {
-        <Placeholder />
+        <Placeholder/>
     }
     else
     {
@@ -16,7 +17,9 @@
                     {
                         <li class="nav-item">
                             <a class="nav-link noselect @(selectedKey == key ? "active" : "")"
-                                @onclick="@(() => OnTabChange(key))">@key</a>
+                               @onclick="@(() => OnTabChange(key))">
+                                @key
+                            </a>
                         </li>
                     }
                 </ul>
@@ -28,7 +31,7 @@
         <div class="composer-content">
             @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
             {
-                <Grids GridList="@(ast[keysNames[selectedKey]])" />
+                <Grids GridList="@(ast[keysNames[selectedKey]])"/>
             }
         </div>
     }
