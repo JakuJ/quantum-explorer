@@ -24,11 +24,11 @@
         <!-- Compile button -->
         <div class="dropdown btn-group" id="compileButtonGroup">
             <button id="compile" @ref="compileButtonRef" class="btn btn-primary px-2" @onclick="OnCompile">Compile & Run</button>
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"/>
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" />
             <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
-                <form class="form-inline">                   
+                <form class="form-inline">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox">
+                        <input class="form-check-input" type="checkbox" @onchange="CustomOperationCheckboxChanged" checked >
                         <label class="form-check-label">
                             Show custom op
                         </label>
@@ -153,6 +153,14 @@
 
         output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
         Visualizer.SetOutput(output.ToString());
+    }
+
+    private void CustomOperationCheckboxChanged(ChangeEventArgs checkedValue)
+    {
+        if (Composer != null)
+        {
+            Composer.Expanding = checkedValue.Value is bool value && value;
+        }
     }
 
     #endregion
