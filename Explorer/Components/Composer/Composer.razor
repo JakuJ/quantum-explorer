@@ -11,29 +11,20 @@
     else
     {
         <div id="composer-top-bar" class="nav-tabs-container">
-            <div id="tabs-div">
-                <ul class="nav nav-tabs">
-                    @foreach (string key in keysNames.Keys)
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link noselect @(selectedKey == key ? "active" : "")"
-                               @onclick="@(() => OnTabChange(key))">
-                                @key
-                            </a>
-                        </li>
-                    }
-                </ul>
-            </div>
-            <div id="toggle-div" @onclick="OnToggleChanged">
-                <input id="expand-toggle" type="checkbox" data-toggle="toggle" data-height="34px">
-            </div>
+            <ul class="nav nav-tabs">
+                @foreach (string key in keysNames.Keys)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link noselect @(selectedKey == key ? "active" : "")"
+                            @onclick="@(() => OnTabChange(key))">@key</a>
+                    </li>
+                }
+            </ul>
         </div>
-        <div class="composer-content">
-            @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
-            {
-                <Grids GridList="@(ast[keysNames[selectedKey]])"/>
-            }
-        </div>
+        @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
+        {
+            <Grids GridList="@(ast[keysNames[selectedKey]])" />
+        }
     }
 </div>
 
@@ -45,11 +36,6 @@
     private Dictionary<string, string> keysNames = new();
 
     private string selectedKey = "";
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-        => await JsRuntime.InvokeVoidAsync("Library.initializeToggles");
-
-    public bool Expanding { get; private set; }
 
     private Dictionary<string, string> GetKeyNames()
     {
@@ -96,7 +82,4 @@
     }
 
     void OnTabChange(string key) => selectedKey = key;
-
-    void OnToggleChanged() => Expanding = !Expanding;
-
 }

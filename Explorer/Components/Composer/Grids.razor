@@ -12,7 +12,7 @@
     <Grid GateGrid="@(GridList[keysNames[SelectedGridKey]])"/>
     @if (GridList.Count > 1)
     {
-        <nav aria-label="Grid selector" class="grid-selector-container">
+        <nav class="grid-selector-container">
             <ul class="nav nav-tabs nav-left grid-pagination">
                 @foreach (string key in keysNames.Keys)
                 {
