@@ -14,7 +14,7 @@ namespace Simulator
     /// <inheritdoc />
     public class InterceptingSimulator : QuantumSimulator
     {
-        private static readonly Regex[] ExpandedOps = new[]
+        private static readonly Regex[] ExpandedOps = new[] // TODO: Expand everything BUT the intrinsics
         {
             @"Microsoft\.Quantum\.Canon\..+",
             @"Microsoft\.Quantum\.Arrays\..+",
@@ -44,6 +44,9 @@ namespace Simulator
         /// </summary>
         public InterceptingSimulator(IEnumerable<string> userNamespaces, bool expanding) : base(false)
         {
+            // throwing our own exceptions produces unnecessary logs
+            DisableExceptionPrinting();
+
             this.expanding = expanding;
             this.userNamespaces = userNamespaces.ToImmutableHashSet();
             OnOperationStart += OperationStartHandler;
@@ -72,10 +75,24 @@ namespace Simulator
             return ret;
         }
 
-        private void AllocateQubitsHandler(IQArray<Qubit> qubits) => allocationQueue.Enqueue(qubits.Select(x => x.Id).ToArray());
+        private void AllocateQubitsHandler(IQArray<Qubit> qubits)
+            => allocationQueue.Enqueue(qubits.Select(x => x.Id).ToArray());
 
         private void OperationStartHandler(ICallable op, IApplyData data)
         {
+            // Look out for use-after-release
+            if (data.Qubits != null)
+            {
+                try
+                {
+                    this.CheckQubits(new QArray<Qubit>(data.Qubits), "arguments");
+                }
+                catch (ArgumentException)
+                {
+                    throw new ExecutionFailException($"Attempted to apply an operation to a released qubit.\nOperation: {op.FullName}");
+                }
+            }
+
             int[] qubits = (data.Qubits?.Select(x => x.Id) ?? Enumerable.Empty<int>()).ToArray();
             int[]? controls = null;
             string @namespace = op.FullName[..^(op.Name.Length + 1)];
@@ -227,8 +244,13 @@ namespace Simulator
 
         private void OperationEndHandler(ICallable op, IApplyData data)
         {
+            if (operationStack.Count == 0)
+            {
+                return;
+            }
+
             List<GateGrid>? grids = gateGrids.GetValueOrDefault(operationStack.Last().Item1);
-            GateGrid? last = grids?.Last();
+            GateGrid? last = grids?.LastOrDefault();
 
             if (last != null)
             {

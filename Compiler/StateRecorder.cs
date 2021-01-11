@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
@@ -57,7 +58,13 @@ namespace Compiler
 
             dumper.Dump();
             currentOperation.Results = dumper.Values;
-            currentOperation = parents[currentOperation];
+
+            // keys can be missing from the dictionary if the simulation gets interrupted
+            // like whenever use-after-release happens
+            if (parents.ContainsKey(currentOperation))
+            {
+                currentOperation = parents[currentOperation];
+            }
         }
     }
 }

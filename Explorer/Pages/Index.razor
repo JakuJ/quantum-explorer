@@ -13,21 +13,21 @@
 
 <div class="main">
     <div class="top-row pl-2 pr-4">
-        <Toasts />
+        <Toasts/>
         <img src="/images/QE-logo-192x192.png" alt="App logo" class="app-logo"/>
-        <UploadButton Filter=".qs" OnFileContentLoaded="@(async code => await Editor.SetCode(code))" />
-        <DownloadButton GetCode="@(() => Editor.GetCode())" />
-        <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/" />
+        <UploadButton Filter=".qs" OnFileContentLoaded="@(async code => await Editor.SetCode(code))"/>
+        <DownloadButton GetCode="@(() => Editor.GetCode())"/>
+        <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/"/>
         <ShareButton GetCode="@(() => Editor.GetCode())" CheckIfActive="DatabaseHandler.CheckConnection"></ShareButton>
-        <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28" />
-        <LsStatus />
+        <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28"/>
+        <LsStatus/>
         <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
             <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="" width="24" height="24">
         </button>
         <!-- Compile button -->
         <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
             <button id="compile" class="btn px-2" @onclick="OnCompile">Compile & Run</button>
-            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" />
+            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
             <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
                 <form class="form-inline">
                     <div class="form-check">
@@ -44,14 +44,14 @@
     <div class="content">
         <div id="splitPanes">
             <div id="left-pane" class="split split-horizontal split-content">
-                <Editor @ref="Editor" GetInitialCode="@GetCodeFromDatabase" />
+                <Editor @ref="Editor" GetInitialCode="@GetCodeFromDatabase"/>
             </div>
             <div id="right-pane" class="split split-horizontal">
                 <div id="top-pane" class="split split-content">
-                    <Composer @ref="Composer" />
+                    <Composer @ref="Composer"/>
                 </div>
                 <div id="bottom-pane" class="split split-content">
-                    <Visualizer @ref="Visualizer" />
+                    <Visualizer @ref="Visualizer"/>
                 </div>
             </div>
         </div>
@@ -84,7 +84,11 @@
         Compiler.OnDiagnostics += DiagnosticsHandler;
         Compiler.OnGrids += GridsHandler;
         Compiler.OnOutput += OutputHandler;
-        Compiler.OnStatesRecorded += (_, states) => { Visualizer.ShowStates(states); };
+        Compiler.OnStatesRecorded += async (_, states) =>
+        {
+            await ToggleCompilation(false);
+            await Visualizer.ShowStates(states);
+        };
     }
 
     /// <summary>On-click handler for the compilation button.</summary>
@@ -95,7 +99,7 @@
         await ToggleCompilation(true);
         output.Clear();
 
-        Visualizer.SetPlaceholder("Processing...");
+        await Visualizer.SetPlaceholder("Processing...");
 
         string code = await Editor.GetCode();
 
@@ -106,7 +110,7 @@
                 {
                     await ToggleCompilation(false);
                     var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
-                    Visualizer.SetOutput(messages);
+                    await Visualizer.SetOutput(messages);
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
         }, TaskCreationOptions.LongRunning);
@@ -133,7 +137,7 @@
     {
         await ToggleCompilation(false);
         output.AppendLine(val);
-        Visualizer.SetOutput(output.ToString());
+        await Visualizer.SetOutput(output.ToString());
     }
 
     private async void GridsHandler(object _, Dictionary<string, List<GateGrid>> grids)
@@ -151,7 +155,7 @@
         }
 
         output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
-        Visualizer.SetOutput(output.ToString());
+        await Visualizer.SetOutput(output.ToString());
     }
 
     private void CustomOperationCheckboxChanged(ChangeEventArgs checkedValue)
@@ -173,17 +177,18 @@
 
     private async Task<string> GetCodeFromDatabase()
     {
-        if (LoadedCodeId != null && await DatabaseHandler.CheckConnection())
+        if (LoadedCodeId == null || !await DatabaseHandler.CheckConnection())
         {
-            string code = null;
-            try
-            {
-                (_, code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
-            }
-            catch (KeyNotFoundException) { }
-            return code;
+            return null;
         }
-        return null;
+
+        string code = null;
+        try
+        {
+            (_, code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
+        }
+        catch (KeyNotFoundException) { }
+        return code;
     }
 
 }

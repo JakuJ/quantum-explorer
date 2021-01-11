@@ -47,8 +47,8 @@ namespace Compiler
             {
                 return Name == other.Name
                     && Children.SequenceEqual(other.Children)
-                    && (Arguments != null && other.Arguments != null ? Arguments.SequenceEqual(other.Arguments) : true)
-                    && (Results != null && other.Results != null ? Results.SequenceEqual(other.Results) : true);
+                    && (Arguments == null || other.Arguments == null || Arguments.SequenceEqual(other.Arguments))
+                    && (Results == null || other.Results == null || Results.SequenceEqual(other.Results));
             }
 
             return false;

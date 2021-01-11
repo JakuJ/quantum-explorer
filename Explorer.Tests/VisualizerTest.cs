@@ -108,7 +108,7 @@ namespace Explorer.Tests
             return states;
         }
 
-        private static IEnumerable<OperationState> GenerateSampleStates(IEnumerable<int> sizes)
+        private static List<OperationState> GenerateSampleStates(IEnumerable<int> sizes)
         {
             List<OperationState> states = new();
             var addAsChild = false;
@@ -142,7 +142,7 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            IEnumerable<OperationState> states = GenerateSampleStates(new[] { 5, 4, 8, 3, 6 });
+            List<OperationState> states = GenerateSampleStates(new[] { 5, 4, 8, 3, 6 });
 
             // Act
             var vis = ctx.RenderComponent<Visualizer>();
@@ -159,7 +159,7 @@ namespace Explorer.Tests
             // Arrange
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
-            IEnumerable<OperationState> states =
+            List<OperationState> states =
                 GenerateSampleStates(new[] { 6, 4, 9, 16, 80, 45, 32, 89, 3, 54, 6, 4, 9, 16, 80, 45, 32, 89, 3, 54 });
 
             // Act

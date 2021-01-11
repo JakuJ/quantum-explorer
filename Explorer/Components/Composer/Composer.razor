@@ -16,14 +16,16 @@
                 {
                     <li class="nav-item">
                         <a class="nav-link noselect @(selectedKey == key ? "active" : "")"
-                            @onclick="@(() => OnTabChange(key))">@key</a>
+                           @onclick="@(() => OnTabChange(key))">
+                            @key
+                        </a>
                     </li>
                 }
             </ul>
         </div>
         @if (keysNames.ContainsKey(selectedKey) && ast.ContainsKey(keysNames[selectedKey]))
         {
-            <Grids GridList="@(ast[keysNames[selectedKey]])" />
+            <Grids GridList="@(ast[keysNames[selectedKey]])"/>
         }
     }
 </div>
@@ -56,18 +58,6 @@
 
     public async Task UpdateGridsAsync(Dictionary<string, List<GateGrid>> gridsDict)
     {
-        isPlaceholder = false;
-
-        // force the underlying Grid component to render from scratch
-        foreach ((string _, List<GateGrid> grids) in ast)
-        {
-            grids.Clear();
-        }
-
-        ast.Clear();
-        keysNames.Clear();
-        await InvokeAsync(StateHasChanged);
-
         // Remove tabs which contain no displayable grids
         IEnumerable<string> emptyKeys = gridsDict.Where(x => x.Value.Count == 0).Select(x => x.Key);
         foreach (string emptyKey in emptyKeys)
@@ -75,11 +65,34 @@
             gridsDict.Remove(emptyKey);
         }
 
+        // If there is nothing to display, stay on the placeholder
+        if (gridsDict.Count == 0)
+        {
+            isPlaceholder = true;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        isPlaceholder = false;
+
+        // Force the underlying Grid component to render from scratch
+        foreach ((string _, List<GateGrid> grids) in ast)
+        {
+            grids.Clear();
+        }
+
+        ast.Clear();
+        keysNames.Clear();
+        selectedKey = "";
+        await InvokeAsync(StateHasChanged);
+
+        // Re-render the component with new data
         ast = gridsDict;
         keysNames = GetKeyNames();
-        selectedKey = keysNames.First().Key ?? "";
+        selectedKey = keysNames.Count > 0 ? keysNames.First().Key : "";
         await InvokeAsync(StateHasChanged);
     }
 
     void OnTabChange(string key) => selectedKey = key;
+
 }
