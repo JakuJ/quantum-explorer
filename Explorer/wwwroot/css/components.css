@@ -236,8 +236,17 @@ select:focus {
   border-color: transparent;
 }
 
+.bar-btn.bar-btn-icon {
+  margin: 6px 3px;
+  padding: 2px;
+}
+
 .bar-btn:disabled {
   color: var(--shadow);
+}
+
+.bar-btn:hover {
+  background: var(--accent);
 }
 
 .bar-btn:focus {

@@ -43,6 +43,10 @@ a, .btn-link {
   fill: var(--logo);
 }
 
+.alert {
+  border-radius: 0px;
+}
+
 #compile {
     padding: 0.25rem;
     color: var(--compile);
@@ -89,6 +93,13 @@ a, .btn-link {
 .bar-icon {
   cursor: pointer;
   background: transparent;
+  width: 28px;
+  height: 28px;
+}
+
+.ls-status-icon {
+  width: 16px;
+  height: 16px;
 }
 
 :root.dark-mode .bar-icon {
