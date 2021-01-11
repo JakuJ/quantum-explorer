@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.QsCompiler;
 using Microsoft.Quantum.QsCompiler.CompilationBuilder;
 using Microsoft.Quantum.QsCompiler.SyntaxTree;
+using Microsoft.Quantum.Simulation.Core;
 using Simulator;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 using Diagnostic = Microsoft.VisualStudio.LanguageServer.Protocol.Diagnostic;
@@ -209,22 +210,34 @@ namespace Compiler
                 using InterceptingSimulator sim = new(userNamespaces, expanding);
                 StateRecorder recorder = new(sim);
 
-                // simulate the entry point operation using reflection
-                object? invocation = type.InvokeMember("Run", BindingFlags.InvokeMethod, null, type, new object?[] { sim });
-
-                if (invocation is Task task)
+                var simSuccess = true;
+                try
                 {
-                    await task;
+                    // simulate the entry point operation using reflection
+                    object? invocation = type.InvokeMember("Run", BindingFlags.InvokeMethod, null, type, new object?[] { sim });
+
+                    if (invocation is Task task)
+                    {
+                        await task;
+                    }
+                }
+                catch (ExecutionFailException e)
+                {
+                    OnDiagnostics?.Invoke(this, e.Message);
+                    simSuccess = false;
                 }
 
-                OnOutput?.Invoke(this, sim.Messages);
-                OnStatesRecorded?.Invoke(this, recorder.Root.Children);
-
-                Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
-
-                if (grids.Count > 0)
+                if (simSuccess)
                 {
-                    OnGrids?.Invoke(this, grids);
+                    OnOutput?.Invoke(this, sim.Messages);
+                    OnStatesRecorded?.Invoke(this, recorder.Root.Children);
+
+                    Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
+
+                    if (grids.Count > 0)
+                    {
+                        OnGrids?.Invoke(this, grids);
+                    }
                 }
             }
             else
