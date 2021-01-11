@@ -65,5 +65,30 @@ namespace Compiler.Tests
             Assert.IsTrue(compiled, "Compilation should be successful");
             Assert.IsTrue(executed, "Execution must emit output.");
         }
+
+        [Test]
+        public async Task HandlesUseAfterRelease()
+        {
+            // Arrange
+            string sourceCode = await Helpers.GetSourceFile("UseAfterRelease");
+            QsCompiler compiler = new(Helpers.ConsoleLogger);
+            var failed = false;
+
+            compiler.OnDiagnostics += (_, s) =>
+            {
+                failed = true;
+                Assert.IsTrue(s.StartsWith("Attempted to apply an operation to a released qubit."));
+            };
+
+            compiler.OnOutput += (_, s) => Assert.Fail("Code should not return any output");
+            compiler.OnStatesRecorded += (_, _) => Assert.Fail("Code should not return any states");
+            compiler.OnGrids += (_, _) => Assert.Fail("Code should not return any grids");
+
+            // Act
+            await compiler.Compile(sourceCode);
+
+            // Assert
+            Assert.IsTrue(failed, "Simulation should fail with diagnostics");
+        }
     }
 }
