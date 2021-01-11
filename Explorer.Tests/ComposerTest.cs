@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Bunit;
 using Bunit.TestDoubles;
 using Common;
+using Explorer.Components;
 using Explorer.Components.Composer;
 using Explorer.Components.Composer.Drawing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -118,7 +119,7 @@ namespace Explorer.Tests
         }
 
         [Test]
-        public void ThrowsInvalidOperation()
+        public void ShowsPlaceholderOnNoGrids()
         {
             // Arrange
             using var ctx = GetTestContext();
@@ -126,9 +127,9 @@ namespace Explorer.Tests
             IRenderedComponent<Composer> cut = ctx.RenderComponent<Composer>();
             Dictionary<string, List<GateGrid>> astEmpty = new();
 
-            // Act & Assert - check if setting the empty AST throws an exception
-            Assert.ThrowsAsync<InvalidOperationException>(
-                async () => await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astEmpty)));
+            // Act & Assert - check if setting the empty AST shows the placeholder
+            Assert.DoesNotThrowAsync(async () => await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astEmpty)));
+            cut.FindComponent<Placeholder>();
         }
 
         [Test]

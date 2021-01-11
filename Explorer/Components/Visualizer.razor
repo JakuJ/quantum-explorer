@@ -15,7 +15,7 @@
         @if (isPlaceholder)
         {
             <div class="vis-placeholder">
-                @Output
+                @Placeholder
             </div>
         }
         else
@@ -87,7 +87,9 @@
 
 @code {
 
-    private string Output { get; set; } = "Run the simulation to see the output";
+    private string Placeholder { get; set; } = "Run the simulation to see the output";
+
+    private string Output { get; set; } = "";
 
     private bool isPlaceholder = true;
 
@@ -121,13 +123,24 @@
     /// Displays text in the placeholder.
     /// </summary>
     /// <param name="text">Text to be set in placeholder.</param>
-    public async void SetPlaceholder(string text) => await SetText(text, true);
+    public async void SetPlaceholder(string text)
+    {
+        isPlaceholder = true;
+        Placeholder = text;
+        Output = "<No output>";
+        await InvokeAsync(StateHasChanged);
+    }
 
     /// <summary>
     /// Sets simulation and compilation output in output console tab.
     /// </summary>
     /// <param name="text">Text to be set in console.</param>
-    public async void SetOutput(string text) => await SetText(text, false);
+    public async void SetOutput(string text)
+    {
+        isPlaceholder = false;
+        Output = text;
+        await InvokeAsync(StateHasChanged);
+    }
 
     /// <summary>
     /// Passes quantum states of operations to be listed in a tree.
@@ -139,13 +152,6 @@
         selectedOperation = null;
         chartData = null;
         isPlaceholder = false;
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task SetText(string text, bool asPlaceholder)
-    {
-        isPlaceholder = asPlaceholder;
-        Output = text;
         await InvokeAsync(StateHasChanged);
     }
 
