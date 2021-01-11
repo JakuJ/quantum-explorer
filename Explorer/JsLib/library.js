@@ -9,22 +9,12 @@ export {showSharePopOver, initPopOverDestroyer} from './share';
 
 // Helper functions for disabling and enabling DOM elements
 
-export function disable(ref) {
-    var c = ref.children;
-    for (var i = 0; i < c.length; i++) {
-        if (c[i].classList.contains("btn")) {
-            c[i].disabled = true;
-        }
+export function setDisabled(ref, disabled) {
+  for (let c of ref.children) {
+    if (c.classList.contains('btn')) {
+      c.disabled = disabled;
     }
-}
-
-export function enable(ref) {
-    var c = ref.children;
-    for (var i = 0; i < c.length; i++) {
-        if (c[i].classList.contains("btn")) {
-            c[i].disabled = false;
-        }
-    }
+  }
 }
 
 export function copyToClipboard() {
@@ -38,12 +28,11 @@ export function changeUrl(url) {
 }
 
 export function saveTextFile(filename, data) {
-  var blob = new Blob([data], { type: 'text/csv' });
+  const blob = new Blob([data], {type: 'text/csv'});
   if (window.navigator.msSaveOrOpenBlob) {
     window.navigator.msSaveBlob(blob, filename);
-  }
-  else {
-    var elem = window.document.createElement('a');
+  } else {
+    const elem = window.document.createElement('a');
     elem.href = window.URL.createObjectURL(blob);
     elem.download = filename;
     document.body.appendChild(elem);

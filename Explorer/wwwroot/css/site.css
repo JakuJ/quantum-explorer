@@ -79,7 +79,11 @@ a, .btn-link {
     margin-right: -1px;
     color: var(--text);
     white-space: nowrap;
-    padding: 8px 4px 8px 4px;
+    padding: 8px 12px;
+}
+
+.compile-dropdown .form-check-input {
+  cursor: pointer;
 }
 
 .bar-icon {

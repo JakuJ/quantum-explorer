@@ -168,7 +168,7 @@
     private async Task ToggleCompilation(bool running)
     {
         progress.Running = running;
-        await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);
+        await JsRuntime.InvokeVoidAsync("Library.setDisabled", compileButtonRef, running);
     }
 
     private async Task<string> GetCodeFromDatabase()
@@ -185,4 +185,5 @@
         }
         return null;
     }
+
 }
