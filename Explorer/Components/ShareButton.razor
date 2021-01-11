@@ -4,7 +4,7 @@
 @inject NavigationManager NavigationManager;
 
 <div>
-    <button class="bar-btn" id="popoverShareButton" @onclick="OnClicked" disabled="@IsDisabled">Share</button>
+    <button class="bar-btn" id="popoverShareButton" @onclick="OnClicked" disabled="@isDisabled">Share</button>
     <div id="popover-content" class="d-none">
         <div class="share-popover">
             <input type="text" id="link-placeholder" readonly class="form-control-plaintext share-link" onfocus="this.select();">
@@ -20,10 +20,19 @@
     public Func<Task<string>>? GetCode { get; set; }
 
     [Parameter]
-    public bool IsDisabled { get; set; } = true;
+    public Func<Task<bool>>? CheckIfActive { get; set; }
 
     string sharedLink = "";
     string? sharedCode = null;
+    bool isDisabled = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (CheckIfActive != null)
+        {
+            isDisabled = !(await CheckIfActive.Invoke());
+        }
+    }
 
     private async Task OnClicked()
     {

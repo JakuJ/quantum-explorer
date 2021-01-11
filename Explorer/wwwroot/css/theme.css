@@ -14,6 +14,7 @@
   --valid: var(--green);
   --invalid: var(--red);
   --secondary: #56efbb;
+  --compile: white;
 }
 
 :root.dark-mode {
@@ -25,4 +26,5 @@
   --shadow: rgba(255, 255, 255, 0.2);
   --hover: #262626;
   --popup: #333;
+  --compile: black;
 }

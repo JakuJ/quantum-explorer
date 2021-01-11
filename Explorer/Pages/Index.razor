@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @page "/{LoadedCodeId:guid}"
 @using Compiler
 @using DatabaseHandler
@@ -14,20 +14,31 @@
 <div class="main">
     <div class="top-row pl-2 pr-4">
         <Toasts />
-        <AppLogo />
+        <img src="/images/QE-logo-192x192.png" alt="App logo" class="app-logo"/>
         <UploadButton Filter=".qs" OnFileContentLoaded="@(async code => await Editor.SetCode(code))" />
         <DownloadButton GetCode="@(() => Editor.GetCode())" />
         <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/" />
-        <ShareButton GetCode="@(() => Editor.GetCode())" IsDisabled="@(!DatabaseHandler.CheckConnection())"></ShareButton>
-        <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28"/>
+        <ShareButton GetCode="@(() => Editor.GetCode())" CheckIfActive="DatabaseHandler.CheckConnection"></ShareButton>
+        <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28" />
         <LsStatus />
         <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
             <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="" width="24" height="24">
         </button>
-		<div id="toggle-div" @onclick="OnToggleChanged">
-            <input id="expand-toggle" type="checkbox" data-toggle="toggle" data-height="34px" data-onstyle="default">
+        <!-- Compile button -->
+        <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
+            <button id="compile" class="btn px-2" @onclick="OnCompile">Compile & Run</button>
+            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" />
+            <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
+                <form class="form-inline">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" @onchange="CustomOperationCheckboxChanged">
+                        <label class="form-check-label">
+                            Show custom operations
+                        </label>
+                    </div>
+                </form>
+            </div>
         </div>
-        <button id="compile" @ref="compileButtonRef" class="btn px-2" @onclick="OnCompile">Run simulation</button>
     </div>
     <Progress @ref="progress"></Progress>
     <div class="content">
@@ -61,7 +72,7 @@
 
     private readonly StringBuilder output = new();
 
-    private bool expanding;
+    private bool expanding = true;
 
     [Parameter]
     public Guid? LoadedCodeId { get; set; }
@@ -109,7 +120,6 @@
 
         await JsRuntime.InvokeVoidAsync("Library.initPopOverDestroyer");
         await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
-        await JsRuntime.InvokeVoidAsync("Library.initializeToggles");
 
         if (LoadedCodeId != null)
         {
@@ -144,20 +154,26 @@
         Visualizer.SetOutput(output.ToString());
     }
 
+    private void CustomOperationCheckboxChanged(ChangeEventArgs checkedValue)
+    {
+        if (Composer != null)
+        {
+            expanding = !(checkedValue.Value is bool value && value);
+        }
+    }
+
     #endregion
 
     /// <summary>Toggle the progressbar and whether the compilation button is enabled.</summary>
     private async Task ToggleCompilation(bool running)
     {
         progress.Running = running;
-        await JsRuntime.InvokeVoidAsync(running ? "Library.disable" : "Library.enable", compileButtonRef);
+        await JsRuntime.InvokeVoidAsync("Library.setDisabled", compileButtonRef, running);
     }
 
-    private void OnToggleChanged() => expanding = !expanding;
-
-    private string GetCodeFromDatabase()
+    private async Task<string> GetCodeFromDatabase()
     {
-        if (LoadedCodeId != null && DatabaseHandler.CheckConnection())
+        if (LoadedCodeId != null && await DatabaseHandler.CheckConnection())
         {
             string code = null;
             try
@@ -169,4 +185,5 @@
         }
         return null;
     }
+
 }

@@ -44,14 +44,46 @@ a, .btn-link {
 }
 
 #compile {
-  padding: 0.25rem;
-  color: white;
-  background-color: var(--primary);
+    padding: 0.25rem;
+    color: var(--compile);
 }
 
-:root.dark-mode #compile {
-  color: black;
-  background-color: var(--logo);
+#compileButtonGroup {
+    color: var(--compile);
+    background-color: var(--primary);
+}
+
+:root.dark-mode #compileButtonGroup {
+    color: var(--compile);
+    background-color: var(--logo);
+}
+
+#compileButtonGroup > .dropdown-toggle {
+    padding: 0.375rem 0.3rem;
+    margin: 0;
+    color: var(--compile);
+}
+
+#compileButtonGroup > .dropdown-toggle:hover {
+    background-color:rgba(0, 0, 0, 0.1);
+}
+
+#compileButtonGroup > .dropdown-toggle:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.compile-dropdown {
+    border: none;
+    margin-top: 0px;
+    margin-right: -1px;
+    color: var(--text);
+    white-space: nowrap;
+    padding: 8px 12px;
+}
+
+.compile-dropdown .form-check-input {
+  cursor: pointer;
 }
 
 .bar-icon {

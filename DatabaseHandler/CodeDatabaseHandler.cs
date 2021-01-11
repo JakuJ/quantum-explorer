@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DatabaseHandler
 {
@@ -19,7 +20,7 @@ namespace DatabaseHandler
         public CodeDatabaseHandler(CodeDbContext ctx) => context = ctx;
 
         /// <inheritdoc/>
-        public bool CheckConnection() => context.Database.CanConnect();
+        public async Task<bool> CheckConnection() => await context.Database.CanConnectAsync();
 
         /// <inheritdoc/>
         public (string Name, string Code) GetCode(Guid key)

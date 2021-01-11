@@ -292,7 +292,6 @@ select:focus {
 .dropdown-menu {
   background-color: var(--popup);
   border-radius: 0;
-  margin-left: 6px;
 }
 
 .dropdown-menu > a.dropdown-item {
