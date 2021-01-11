@@ -87,7 +87,7 @@
         Compiler.OnStatesRecorded += async (_, states) =>
         {
             await ToggleCompilation(false);
-            Visualizer.ShowStates(states);
+            await Visualizer.ShowStates(states);
         };
     }
 
@@ -99,7 +99,7 @@
         await ToggleCompilation(true);
         output.Clear();
 
-        Visualizer.SetPlaceholder("Processing...");
+        await Visualizer.SetPlaceholder("Processing...");
 
         string code = await Editor.GetCode();
 
@@ -110,7 +110,7 @@
                 {
                     await ToggleCompilation(false);
                     var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
-                    Visualizer.SetOutput(messages);
+                    await Visualizer.SetOutput(messages);
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
         }, TaskCreationOptions.LongRunning);
@@ -137,7 +137,7 @@
     {
         await ToggleCompilation(false);
         output.AppendLine(val);
-        Visualizer.SetOutput(output.ToString());
+        await Visualizer.SetOutput(output.ToString());
     }
 
     private async void GridsHandler(object _, Dictionary<string, List<GateGrid>> grids)
@@ -155,7 +155,7 @@
         }
 
         output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
-        Visualizer.SetOutput(output.ToString());
+        await Visualizer.SetOutput(output.ToString());
     }
 
     private void CustomOperationCheckboxChanged(ChangeEventArgs checkedValue)
