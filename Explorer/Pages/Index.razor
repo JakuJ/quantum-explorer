@@ -24,6 +24,9 @@
         <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
             <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="" width="24" height="24">
         </button>
+        <button class="bar-btn" data-toggle="modal" data-target="#hintsModal">
+            <img class="bar-icon center-icon" src="/images/icons/usage_hints.svg" alt="" width="24" height="24">
+        </button>
         <!-- Compile button -->
         <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
             <button id="compile" class="btn px-2" @onclick="OnCompile">Compile & Run</button>
@@ -58,6 +61,7 @@
     </div>
     <!-- Modals -->
     <AboutModal ModalId="aboutModal"/>
+    <HintsModal ModalId="hintsModal"/>
 </div>
 
 @code {

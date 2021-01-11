@@ -154,6 +154,10 @@ a, .btn-link {
   background-color: var(--background) !important;
 }
 
+#hintsModal .modal-dialog {
+  max-width: 75%;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 10px;
