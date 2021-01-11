@@ -9,20 +9,21 @@
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
         @if (items != null)
         {
-            @foreach (var item in items)
+            @foreach ((string name, string code) in items)
             {
-                <a class="dropdown-item noselect" @onclick="@(()=>OnPicked(item.code))">@item.name</a>
+                <a class="dropdown-item noselect" @onclick="@(() => OnPicked(code))">@name</a>
             }
         }
     </div>
 </div>
 
 @code {
+
     /// <summary>
     /// Action to be invoked when code from list is selected.
     /// </summary>
     [Parameter]
-    public Action<string>? OnSelected { get; set; } = null;
+    public Action<string>? OnSelected { get; set; }
 
     /// <summary>
     /// Path to folder with code examples stored as *.qs files.
@@ -50,13 +51,20 @@
     private List<(string name, string code)> GetExampleCodes(string folderPath)
     {
         List<(string name, string code)> codes = new();
-        if (!Directory.Exists(folderPath)) return codes;
+
+        if (!Directory.Exists(folderPath))
+        {
+            return codes;
+        }
+
         foreach (string file in Directory.EnumerateFiles(folderPath, "*.qs"))
         {
             string name = Path.GetFileNameWithoutExtension(file).Replace('_', ' ');
             string code = File.ReadAllText(file);
             codes.Add((name, code));
         }
+
         return codes;
     }
+
 }

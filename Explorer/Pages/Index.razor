@@ -18,7 +18,7 @@
         <UploadButton Filter=".qs" OnFileContentLoaded="@(async code => await Editor.SetCode(code))"/>
         <DownloadButton GetCode="@(() => Editor.GetCode())"/>
         <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/"/>
-        <ShareButton GetCode="@(() => Editor.GetCode())" IsDisabled="@(!DatabaseHandler.CheckConnection())"></ShareButton>
+        <ShareButton GetCode="@(() => Editor.GetCode())" CheckIfActive="DatabaseHandler.CheckConnection"></ShareButton>
         <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28"/>
         <LsStatus/>
         <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
@@ -27,7 +27,7 @@
         <!-- Compile button -->
         <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
             <button id="compile" class="btn px-2" @onclick="OnCompile">Compile & Run</button>
-            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" />
+            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
             <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
                 <form class="form-inline">
                     <div class="form-check">
@@ -177,7 +177,7 @@
 
     private async Task<string> GetCodeFromDatabase()
     {
-        if (LoadedCodeId == null || ! await DatabaseHandler.CheckConnection())
+        if (LoadedCodeId == null || !await DatabaseHandler.CheckConnection())
         {
             return null;
         }
