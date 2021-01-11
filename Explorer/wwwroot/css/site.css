@@ -45,21 +45,23 @@ a, .btn-link {
 
 #compile {
     padding: 0.25rem;
+    color: var(--compile);
 }
 
 #compileButtonGroup {
-    color: white;
+    color: var(--compile);
     background-color: var(--primary);
 }
 
 :root.dark-mode #compileButtonGroup {
-    color: black;
+    color: var(--compile);
     background-color: var(--logo);
 }
 
 #compileButtonGroup > .dropdown-toggle {
     padding: 0.375rem 0.3rem;
     margin: 0;
+    color: var(--compile);
 }
 
 #compileButtonGroup > .dropdown-toggle:hover {
