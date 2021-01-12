@@ -1,74 +1,36 @@
-<UniversalModal ModalId="@ModalId" Title="Usage hints">
+<UniversalModal ModalId="@ModalId" Title="Help">
     <div id="hints-scr"></div>
-    <h1>Code editor</h1>
-    <p>On the left side of the app you can see the editor. It accepts the Q# code which defines the quantum computer's operations.</p>
-    <h2>Q# code</h2>
-    <p>Under the defined namespace you can open some of the <a href="https://docs.microsoft.com/pl-pl/qsharp/api/">Q# libraries</a> to define the operations, especially:</p>
+    <h2>(1) Top bar</h2>
+    <p>Left to right:</p>
     <ul>
-        <li><a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.intrinsic">Microsoft.Quantum.Intrinsic</a> which contain some basic quantum gates (i.e. <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.intrinsic.x">Pauli-X</a>, <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.intrinsic.h">Hadamard</a>, <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.intrinsic.cnot">CNOT</a>, <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.intrinsic.reset">Reset</a>).</li>
-        <li><a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.canon">Microsoft.Quantum.Canon</a> useful to apply a gate multiple times (i.e. <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.canon.applytoeach">ApplyToEach</a>, <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.canon.repeat">Repeat</a>).</li>
-        <li><a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.math">Microsoft.Quantum.Math</a> with classical mathematical functions and data types (i.e. <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.math.sin">Sin</a>, <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.math.round">Round</a>, <a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.math.min">Min</a>).</li>
-        <li><a href="https://docs.microsoft.com/pl-pl/qsharp/api/qsharp/microsoft.quantum.measurement">Microsoft.Quantum.Measurement</a> with operations measuring the qubits.</li>
+        <li>Upload - opens a file selection modal. You can upload your own code from a <code>.qs</code> file</li>
+        <li>Download - download the code that's currently in the editor as a <code>.qs</code> file</li>
+        <li>Examples - load one of the Q# code samples</li>
+        <li>Share - generate a link to share the currently edited code</li>
+        <li>Language server status - documents progress in connecting to the language server</li>
+        <li>Sun icon - change between light and dark modes</li>
+        <li>About - displays the general information about the project and its authors</li>
+        <li>Help - you are here &#128516;</li>
+        <li>Run simulation - initiates the simulation process</li>
+        <li>Dropdown menu - grants access to the "Show custom operations" option, specyfing whether user-defined operations are to be shown in the composer.</li>
     </ul>
-    <h2>Code execution</h2>
-    <p>The entry program operation has to be marked with the <code>@@EntryPoint()</code> decorator. The simulation is started from this operation.</p>
-    <p>All dependent operations are simulated with the input parameters passed from their parent operations.</p>
 
-    <h1>Top bar</h1>
-    <h2>Upload</h2>
-    <p>Enables to upload your own code saved as a <code>.qs</code> file.</p>
-    <h2>Download</h2>
-    <p>Downloads the currently edited code as a <code>.qs</code> file.</p>
-    <h2>Examples</h2>
-    <p>Loads one of the example algorithms to the Editor:</p>
-    <ul>
-        <li><a href="https://docs.microsoft.com/pl-pl/quantum/tutorials/search">Simple Grover Search</a> (search for unstructured data with below-linear complexity)</li>
-        <li><a href="https://docs.microsoft.com/pl-pl/samples/microsoft/quantum/quantum-teleportation/">Quantum Teleportation</a></li>
-        <li><a href="https://docs.microsoft.com/pl-pl/quantum/tutorials/quantum-random-number-generator">Random Number Generation</a></li>
-        <li><a href="https://onevara.com/goquantumcloud/Microsoft-Quantum/-/blob/main/samples/getting-started/measurement/Measurement.qs">Measurements</a></li>
-    </ul>
-    <h2>Share</h2>
-    <p>Generates and copies a link for the edited code.</p>
-    <h2>Light/dark theme switch</h2>
-    <h2>Language server support status</h2>
-    <!-- to complete -->
-    <ul>
-        <li>Connected</li>
-        <li>Syntax only</li>
-        <li>Disconnected</li>
-    </ul>
-    <h2>About</h2>
-    <p>Displays the general information about the project and its authors.</p>
-    <h2>Usage hints</h2>
-    <p>You are here &#128516;</p>
-    <h2>Run simulation</h2>
-    <p>Proceeds with the program simulation after which the Composer and Visualizer get updated.</p>
-    <h3><i>Intrinsics only</i> option</h3>
-    <p><i>Show custom</i> option tells the simulator to show references to the custom operations in the Composer as they are defined in Q# code.</p>
-    <p>With the <i>Intrinsics only</i> option it is possible to expand the composite operations for displaying only the intrinsic operations inside the quantum circuits in the Composer.</p>
+    <h2>(2) Editor</h2>
+    <p>This is where you edit your Q# code. The entry-point operation has to be marked with the <code>@@EntryPoint()</code> decorator. You have access to every standard library in the <code>Microsoft.Quantum</code> namespace. Given that a connection with the language server is established, you will have access to IntelliSense in the editor.</p>
 
-    <h1>Composer</h1>
-    <p>Draws the quantum circuits representing callbacks of operations defined in the Editor.<br></p>
-    <p>The main Composer displays the tabs view where each tab represents a single <b>operation</b>.</p>
-    <p>Under each tab you can see a selector where each number refers to an ongoing callback of selected operation. This single operation callback is represented as a quantum circuit.</p>
-    <h2><a href="https://en.wikipedia.org/wiki/Quantum_circuit">Quantum circuit</a></h2>
-    <p>Shown as a grid of quantum gates.</p>
-    <p>Each row of the grid consists of a <a href="https://en.wikipedia.org/wiki/Qubit">qubit</a> name and a list of ongoing operations applied to the qubit.</p>
-    <h2><a href="https://en.wikipedia.org/wiki/Quantum_gate">Quantum gate</a></h2>
-    <p>An operation applied to a single qubit or a group of qubits, displayed as a grid cell.</p>
-    <p>A gate acting on <i>n</i> qubits is represented by a <i>2<sup>n</sup>&times;2<sup>n</sup></i> unitary matrix.</p>
-    <p>Similarly to logic gates on classical computers, quantum gates are processed by a quantum computer in a constant time.</p>
+    <h2> (3) Composer</h2>
+    <p>Renders quantum circuits representing calls to operations that happened during the simulation of your code. Each tab represents a single operation from your code.</p>
+    <p>The circuit is indexed with the identifiers of the qubits allocated during the simulation.</p>
+    <p>If separate calls to the same operation produce different circuits, these are available usign the picker on the right hand side (call numbers).</p>
 
-    <h1>Visualizer</h1>
-    <h2>Output</h2>
-    <p>Displays the messages given by the program alongside with the entry operation output.</p>
-    <h2>Trace</h2>
-    <p>Displays a tree of ongoing program operations.</p>
-    <p>For each operation a list of possible measured values with the corresponding <a href="https://en.wikipedia.org/wiki/Quantum_state">quantum states</a> is displayed.</p>
-    <h3>Arguments/results</h3>
-    <p>Switches between displaying the quantum states before and after applying the gates.</p>
-    <h3>Show zero states</h3>
-    <p>Shows or hides values with the quantum state of zero.</p>
+    <h2> (4) Visualizer</h2>
+    <p><b>Output tab</b></p>
+    <p>Displays the messages printed by the program (use the <code>Message</code> operation from the <code>Microsoft.Quantum.Intrinsic</code> namespace)</p>
+
+    <p><b>Trace tab</b></p>
+    <p>Displays a tree of operations that were applied to the quantum register during the simulation. For each operation, a bar chart of imaginary numbers corresponding to possible <a href="https://en.wikipedia.org/wiki/Quantum_state">quantum states</a> is displayed.</p>
+    <p>The "Arguments / Results" selector switches between displaying the quantum states before and after applying the operation. </p>
+    <p>The "Show zero states" checkbox shows or hides quantum states with the amplitude of zero.</p>
 </UniversalModal>
 
 @code {
