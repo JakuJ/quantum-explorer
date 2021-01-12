@@ -17,6 +17,12 @@ a, .btn-link {
   height: 100%;
 }
 
+.form-control {
+  border: none;
+  background-color: var(--accent);
+  color: var(--text);
+}
+
 /* Top row */
 
 .main .top-row {
