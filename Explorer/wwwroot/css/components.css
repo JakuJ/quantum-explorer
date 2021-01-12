@@ -236,8 +236,17 @@ select:focus {
   border-color: transparent;
 }
 
+.bar-btn.bar-btn-icon {
+  margin: 6px 3px;
+  padding: 2px;
+}
+
 .bar-btn:disabled {
   color: var(--shadow);
+}
+
+.bar-btn:hover {
+  background: var(--accent);
 }
 
 .bar-btn:focus {
@@ -343,4 +352,11 @@ select:focus {
 .modal-header>button.close:focus{
   outline:none;
   box-shadow:none;
+}
+
+/* Usage hints modal */
+#hints-scr {
+  padding-top: 62.13%;
+  background-image: var(--hints-url);
+  background-size: contain;
 }

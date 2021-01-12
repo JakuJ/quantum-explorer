@@ -10,11 +10,12 @@
   --hover: #bfbfbf;
   --logo: #fed758;
   /* re-exported from Bootstrap */
-  --link: var(--primary);
+  --link: #17a2b8; /* .text-info */
   --valid: var(--green);
   --invalid: var(--red);
   --secondary: #56efbb;
   --compile: white;
+  --hints-url: url("images/hints_scr_light.png");
 }
 
 :root.dark-mode {
@@ -26,5 +27,7 @@
   --shadow: rgba(255, 255, 255, 0.2);
   --hover: #262626;
   --popup: #333;
-  --compile: black;
+  --link: #5bc0de; /* .bd-callout-info */
+  --compile: var(--surface);
+  --hints-url: url("images/hints_scr_dark.png");
 }

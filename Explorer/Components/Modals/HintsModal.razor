@@ -1,0 +1,41 @@
+<UniversalModal ModalId="@ModalId" Title="Help">
+    <div id="hints-scr"></div>
+    <h2>(1) Top bar</h2>
+    <p>Left to right:</p>
+    <ul>
+        <li>Upload - opens a file selection modal. You can upload your own code from a <code>.qs</code> file</li>
+        <li>Download - download the code that's currently in the editor as a <code>.qs</code> file</li>
+        <li>Examples - load one of the Q# code samples</li>
+        <li>Share - generate a link to share the currently edited code</li>
+        <li>Language server status - documents progress in connecting to the language server</li>
+        <li>Sun icon - change between light and dark modes</li>
+        <li>About - displays the general information about the project and its authors</li>
+        <li>Help - you are here &#128516;</li>
+        <li>Run simulation - initiates the simulation process</li>
+        <li>Dropdown menu - grants access to the "Show custom operations" option, specyfing whether user-defined operations are to be shown in the composer.</li>
+    </ul>
+
+    <h2>(2) Editor</h2>
+    <p>This is where you edit your Q# code. The entry-point operation has to be marked with the <code>@@EntryPoint()</code> decorator. You have access to every standard library in the <code>Microsoft.Quantum</code> namespace. Given that a connection with the language server is established, you will have access to IntelliSense in the editor.</p>
+
+    <h2> (3) Composer</h2>
+    <p>Renders quantum circuits representing calls to operations that happened during the simulation of your code. Each tab represents a single operation from your code.</p>
+    <p>The circuit is indexed with the identifiers of the qubits allocated during the simulation.</p>
+    <p>If separate calls to the same operation produce different circuits, these are available usign the picker on the right hand side (call numbers).</p>
+
+    <h2> (4) Visualizer</h2>
+    <p><b>Output tab</b></p>
+    <p>Displays the messages printed by the program (use the <code>Message</code> operation from the <code>Microsoft.Quantum.Intrinsic</code> namespace)</p>
+
+    <p><b>Trace tab</b></p>
+    <p>Displays a tree of operations that were applied to the quantum register during the simulation. For each operation, a bar chart of imaginary numbers corresponding to possible <a href="https://en.wikipedia.org/wiki/Quantum_state">quantum states</a> is displayed.</p>
+    <p>The "Arguments / Results" selector switches between displaying the quantum states before and after applying the operation. </p>
+    <p>The "Show zero states" checkbox shows or hides quantum states with the amplitude of zero.</p>
+</UniversalModal>
+
+@code {
+
+    [Parameter]
+    public string ModalId { get; set; } = "";
+
+}

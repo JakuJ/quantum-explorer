@@ -2,12 +2,12 @@
 @using System.Text.Json.Serialization
 @implements IDisposable
 
-<div id="ls-status" class="alert alert-light" role="alert">
+<div id="ls-status" class="alert alert-light bar-btn" role="alert">
     @switch (state)
     {
         case ConnectionState.Disconnected:
         {
-            <img src="/images/icons/disconnected.svg" alt="" width="16" height="16">
+            <img src="/images/icons/disconnected.svg" class="ls-status-icon" alt="Disconnected">
             @:Disconnected
             break;
         }
@@ -19,13 +19,13 @@
         }
         case ConnectionState.Connected:
         {
-            <img src="/images/icons/connected.svg" alt="" width="16" height="16">
+            <img src="/images/icons/connected.svg" class="ls-status-icon" alt="Connected">
             @:Connected
             break;
         }
         case ConnectionState.SyntaxOnly:
         {
-            <img src="/images/icons/warning.svg" alt="" width="16" height="16">
+            <img src="/images/icons/warning.svg" class="ls-status-icon" alt="Warning">
             @:Syntax only
             break;
         }

@@ -37,7 +37,6 @@ const [
 ].map(x => path.join('syntax', x));
 
 // Default code for the editor
-// TODO: When we have the database up and running, fetch it from there
 const DEFAULT_CODE = `namespace HelloWorld {
 
     open Microsoft.Quantum.Intrinsic;

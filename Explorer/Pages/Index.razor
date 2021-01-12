@@ -19,10 +19,15 @@
         <DownloadButton GetCode="@(() => Editor.GetCode())"/>
         <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/"/>
         <ShareButton GetCode="@(() => Editor.GetCode())" CheckIfActive="DatabaseHandler.CheckConnection"></ShareButton>
-        <img class="bar-icon" src="/images/icons/dark-mode.svg" onclick="Library.toggleTheme()" alt="" width="28" height="28"/>
         <LsStatus/>
-        <button class="bar-btn" data-toggle="modal" data-target="#aboutModal">
-            <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="" width="24" height="24">
+        <button class="bar-btn bar-btn-icon" onclick="Library.toggleTheme()">
+            <img class="bar-icon" src="/images/icons/dark-mode.svg" alt="Dark mode toggle"/>
+        </button>
+        <button class="bar-btn bar-btn-icon" data-toggle="modal" data-target="#aboutModal">
+            <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="About icon">
+        </button>
+        <button class="bar-btn bar-btn-icon" data-toggle="modal" data-target="#hintsModal">
+            <img class="bar-icon center-icon" src="/images/icons/help.svg" alt="Help icon">
         </button>
         <!-- Compile button -->
         <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
@@ -58,6 +63,7 @@
     </div>
     <!-- Modals -->
     <AboutModal ModalId="aboutModal"/>
+    <HintsModal ModalId="hintsModal"/>
 </div>
 
 @code {
