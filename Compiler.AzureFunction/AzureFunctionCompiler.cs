@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Compiler.AzureFunction
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ICompiler"/>
     public class AzureFunctionCompiler : ICompiler
     {
         private readonly IHttpClient client;

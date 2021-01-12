@@ -2,7 +2,7 @@ using System.Runtime.Loader;
 
 namespace Compiler
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="AssemblyLoadContext"/>
     public class QSharpLoadContext : AssemblyLoadContext
     {
         /// <inheritdoc cref="AssemblyLoadContext" />

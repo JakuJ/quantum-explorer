@@ -6,6 +6,7 @@ using Microsoft.Quantum.QsCompiler.SyntaxTree;
 
 namespace Compiler
 {
+    /// <inheritdoc cref="IRewriteStep"/>
     /// <summary>
     /// A custom compilation step that adds calls to <see cref="Simulator.Custom.TagAllocation"/> after each "using" statement.
     /// </summary>

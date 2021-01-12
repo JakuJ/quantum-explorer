@@ -21,7 +21,7 @@ using DiagnosticSeverity = Microsoft.VisualStudio.LanguageServer.Protocol.Diagno
 
 namespace Compiler
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="ICompiler"/>
     public class QsCompiler : ICompiler
     {
         private static string[]? qsharpReferences;

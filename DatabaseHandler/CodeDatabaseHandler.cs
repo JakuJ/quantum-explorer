@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DatabaseHandler
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="ICodeDatabaseHandler"/>
     /// <summary>
     /// Handles saving and retrieving code from the database.
     /// </summary>

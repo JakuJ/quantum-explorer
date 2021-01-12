@@ -7,7 +7,7 @@ using static Microsoft.Quantum.Simulation.Simulators.QuantumSimulator;
 
 namespace Compiler
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="StateDumper"/>
     public class CustomDumper : StateDumper
     {
         /// <inheritdoc cref="StateDumper"/>
