@@ -14,11 +14,8 @@ namespace Simulator
     /// <inheritdoc />
     public class InterceptingSimulator : QuantumSimulator
     {
-        private static readonly Regex[] ExpandedOps = new[] // TODO: Expand everything BUT the intrinsics
+        private static readonly Regex[] ExpandedOps = new[]
         {
-            @"Microsoft\.Quantum\.Canon\..+",
-            @"Microsoft\.Quantum\.Arrays\..+",
-            @"Microsoft\.Quantum\.Arithmetic\..+",
             @"Microsoft\.Quantum\.Measurement\.(M[^R]|[^M]).+",
             @"Microsoft\.Quantum\.Intrinsic\.C?CNOT",
             @"Microsoft\.Quantum\.Intrinsic\.ResetAll",
@@ -112,7 +109,7 @@ namespace Simulator
 
             // Check if this operation is phantom
             bool isCustom = userNamespaces.Contains(@namespace);
-            bool isPhantom = ExpandedOps.Any(x => x.Match(op.FullName).Success) || (expanding && isCustom);
+            bool isPhantom = ShouldExpand(op.FullName) || (expanding && isCustom);
 
             // If it's not the entry-point operation and it takes qubit arguments
             if (!isPhantom && operationStack.Count > 0 && qubits.Length > 0)
@@ -269,6 +266,13 @@ namespace Simulator
 
             operationStack.RemoveAt(operationStack.Count - 1);
         }
+
+        private bool ShouldExpand(string fullName) =>
+            !userNamespaces.Any(fullName.StartsWith) &&
+            fullName.StartsWith("Microsoft.Quantum") &&
+            !((fullName.StartsWith("Microsoft.Quantum.Intrinsic") ||
+               fullName.StartsWith("Microsoft.Quantum.Measurement")) &&
+              !ExpandedOps.Any(r => r.IsMatch(fullName)));
 
         /// <summary>A custom intrinsic operation for runtime allocation tagging.</summary>
         public class TagAllocationImpl : TagAllocation

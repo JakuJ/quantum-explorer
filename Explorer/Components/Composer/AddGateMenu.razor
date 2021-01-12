@@ -3,7 +3,8 @@
     <a class="dropdown-item" @onclick="@(_ => OnClick("Y"))">Pauli-Y</a>
     <a class="dropdown-item" @onclick="@(_ => OnClick("Z"))">Pauli-Z</a>
     <a class="dropdown-item" @onclick="@(_ => OnClick("H"))">Hadamard</a>
-    <a class="dropdown-item" @onclick="@(_ => OnClick("MResetX"))">MResetX</a>
+    <a class="dropdown-item" @onclick="@(_ => OnClick("__control__"))">Control</a>
+    <a class="dropdown-item" @onclick="@(_ => OnClick("MResetZ"))">MResetZ</a>
 </div>
 
 @code {

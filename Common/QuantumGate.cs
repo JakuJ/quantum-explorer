@@ -31,19 +31,9 @@ namespace Common
         [JsonIgnore]
         public string FullName => $"{Namespace}.{Name}";
 
-        /// <summary>Returns whether two gates represent different arguments of the same operation call.</summary>
-        /// <param name="other">The other gate.</param>
-        /// <returns>Whether this and the other gate are part of the same operation call.</returns>
-        public bool SameOperation(QuantumGate? other)
-            => other.HasValue
-            && Namespace == other.Value.Namespace
-            && Name == other.Value.Name
-            && ArgIndex != other.Value.ArgIndex;
-
         /// <summary>Returns whether this object is a control gate.</summary>
         /// <returns>Whether this is a control gate.</returns>
-        public bool IsControlGate()
-            => Namespace == "__custom__" && Name == "__control__";
+        public bool IsControlGate() => Name == "__control__";
 
         /// <inheritdoc/>
         public override string ToString() => FullName;
