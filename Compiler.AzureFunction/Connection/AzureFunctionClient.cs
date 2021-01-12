@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Compiler.AzureFunction.Connection
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="IHttpClient"/>
     [ExcludeFromCodeCoverage] // Reason: not testable locally without external scripts
     public class AzureFunctionClient : IHttpClient
     {

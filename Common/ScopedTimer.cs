@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Common
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="IDisposable"/>
     /// <summary>
     /// A class that measures time from object creation to its disposal.
     /// </summary>

@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Compiler.AzureFunction.Serialization
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="JsonConverter"/>
     /// <summary>
     /// Provides the ability to deserialize <see cref="T:System.Numerics.Complex" /> objects
     /// from JSON objects that contain "R" and "I" keys.

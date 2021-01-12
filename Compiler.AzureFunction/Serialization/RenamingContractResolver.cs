@@ -7,7 +7,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace Compiler.AzureFunction.Serialization
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="DefaultContractResolver"/>
     /// <summary>
     /// Manages property name resolution in <see cref="Complex"/> and <see cref="ValueTuple{T,T}"/> types
     /// during JSON serialization.

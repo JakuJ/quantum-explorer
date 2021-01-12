@@ -9,7 +9,7 @@ using Microsoft.Quantum.QsCompiler.Transformations.BasicTransformations;
 
 namespace Compiler
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="IRewriteStep"/>
     /// <summary>A compiler rewrite step that generates C# code in-memory.</summary>
     // ReSharper disable once ClassNeverInstantiated.Global
     internal class InMemoryEmitter : IRewriteStep

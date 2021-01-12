@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Compiler.Tests
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="IHttpClient"/>
     /// <summary>A client which executes the Azure Function locally.</summary>
     public class LocalAzureFunctionClient : IHttpClient
     {

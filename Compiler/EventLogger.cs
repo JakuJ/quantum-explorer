@@ -7,7 +7,7 @@ using static Microsoft.VisualStudio.LanguageServer.Protocol.DiagnosticSeverity;
 
 namespace Compiler
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="LogTracker"/>
     public sealed class EventLogger : LogTracker
     {
         private readonly Action<string> logAction;

@@ -11,7 +11,7 @@ using Simulator.Custom;
 
 namespace Simulator
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="QuantumSimulator"/>
     public class InterceptingSimulator : QuantumSimulator
     {
         private static readonly Regex[] ExpandedOps = new[] // TODO: Expand everything BUT the intrinsics
