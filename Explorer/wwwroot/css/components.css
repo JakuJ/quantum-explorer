@@ -353,3 +353,10 @@ select:focus {
   outline:none;
   box-shadow:none;
 }
+
+/* Usage hints modal */
+#hints-scr {
+  padding-top: 62.13%;
+  background-image: var(--hints-url);
+  background-size: contain;
+}
