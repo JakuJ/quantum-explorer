@@ -27,4 +27,5 @@
   --hover: #262626;
   --popup: #333;
   --link: #5bc0de; /* .bd-callout-info */
+  --compile: var(--surface);
 }
