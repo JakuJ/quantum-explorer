@@ -1,0 +1,39 @@
+#splitPanes {
+  width: 100%;
+  height: 100%;
+  padding-top: 8px;
+}
+
+.split {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.split.split-content {
+  padding: 1px;
+  background: var(--surface);
+}
+
+.gutter {
+  background-color: var(--text-secondary);
+}
+
+.gutter.gutter-horizontal {
+  cursor: ew-resize;
+  -webkit-mask: url('../images/icons/horizontal-grip.svg') no-repeat center;
+  mask: url('../images/icons/horizontal-grip.svg') no-repeat center;
+}
+
+.gutter.gutter-vertical {
+  cursor: ns-resize;
+  -webkit-mask: url('../images/icons/vertical-grip.svg') no-repeat center;
+  mask: url('../images/icons/vertical-grip.svg') no-repeat center;
+}
+
+.split.split-horizontal,
+.gutter.gutter-horizontal {
+  height: 100%;
+  float: left;
+}

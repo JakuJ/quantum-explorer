@@ -1,0 +1,200 @@
+@page "/"
+@page "/{LoadedCodeId:guid}"
+@using Compiler
+@using DatabaseHandler
+@using Microsoft.Extensions.Logging
+@using System.Text
+@using Common
+@inject IJSRuntime JsRuntime;
+@inject ICompiler Compiler;
+@inject ILogger<Index> Logger;
+@inject ICodeDatabaseHandler DatabaseHandler;
+@inject NavigationManager NavigationManager;
+
+<div class="main">
+    <div class="top-row pl-2 pr-4">
+        <Toasts/>
+        <img src="/images/QE-logo-192x192.png" alt="App logo" class="app-logo"/>
+        <UploadButton Filter=".qs" OnFileContentLoaded="@(async code => await Editor.SetCode(code))"/>
+        <DownloadButton GetCode="@(() => Editor.GetCode())"/>
+        <ExamplesDropdown OnSelected="@(async code => await Editor.SetCode(code))" ExamplesFolderPath="./CodeExamples/"/>
+        <ShareButton GetCode="@(() => Editor.GetCode())" CheckIfActive="DatabaseHandler.CheckConnection"></ShareButton>
+        <LsStatus/>
+        <button class="bar-btn bar-btn-icon" onclick="Library.toggleTheme()">
+            <img class="bar-icon" src="/images/icons/dark-mode.svg" alt="Dark mode toggle"/>
+        </button>
+        <button class="bar-btn bar-btn-icon" data-toggle="modal" data-target="#aboutModal">
+            <img class="bar-icon center-icon" src="/images/icons/information.svg" alt="About icon">
+        </button>
+        <button class="bar-btn bar-btn-icon" data-toggle="modal" data-target="#hintsModal">
+            <img class="bar-icon center-icon" src="/images/icons/help.svg" alt="Help icon">
+        </button>
+        <!-- Compile button -->
+        <div class="dropdown btn-group" id="compileButtonGroup" @ref="compileButtonRef">
+            <button id="compile" class="btn px-2" @onclick="OnCompile">Compile & Run</button>
+            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+            <div class="dropdown-menu compile-dropdown drop dropdown-menu-right">
+                <form class="form-inline">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" @onchange="CustomOperationCheckboxChanged">
+                        <label class="form-check-label">
+                            Show custom operations
+                        </label>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <Progress @ref="progress"></Progress>
+    <div class="content">
+        <div id="splitPanes">
+            <div id="left-pane" class="split split-horizontal split-content">
+                <Editor @ref="Editor" GetInitialCode="@GetCodeFromDatabase"/>
+            </div>
+            <div id="right-pane" class="split split-horizontal">
+                <div id="top-pane" class="split split-content">
+                    <Composer @ref="Composer"/>
+                </div>
+                <div id="bottom-pane" class="split split-content">
+                    <Visualizer @ref="Visualizer"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modals -->
+    <AboutModal ModalId="aboutModal"/>
+    <HintsModal ModalId="hintsModal"/>
+</div>
+
+@code {
+#nullable disable
+
+    private Editor Editor;
+    private Composer Composer;
+    private Visualizer Visualizer;
+
+    private Progress progress;
+    private ElementReference compileButtonRef;
+
+    private readonly StringBuilder output = new();
+
+    private bool expanding = true;
+
+    [Parameter]
+    public Guid? LoadedCodeId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Compiler.OnDiagnostics += DiagnosticsHandler;
+        Compiler.OnGrids += GridsHandler;
+        Compiler.OnOutput += OutputHandler;
+        Compiler.OnStatesRecorded += async (_, states) =>
+        {
+            await ToggleCompilation(false);
+            await Visualizer.ShowStates(states);
+        };
+    }
+
+    /// <summary>On-click handler for the compilation button.</summary>
+    private async Task OnCompile()
+    {
+        if (progress.Running) return;
+
+        await ToggleCompilation(true);
+        output.Clear();
+
+        await Visualizer.SetPlaceholder("Processing...");
+
+        string code = await Editor.GetCode();
+
+        Task task = new(() => // run compilation in a separate thread so that we don't block the UI
+        {
+            Compiler.Compile(code, expanding).ContinueWith(
+                async t =>
+                {
+                    await ToggleCompilation(false);
+                    var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
+                    await Visualizer.SetOutput(messages);
+                },
+                TaskContinuationOptions.OnlyOnFaulted);
+        }, TaskCreationOptions.LongRunning);
+
+        task.Start();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await JsRuntime.InvokeVoidAsync("Library.initPopOverDestroyer");
+        await JsRuntime.InvokeVoidAsync("Library.initializeSplitPanes");
+
+        if (LoadedCodeId != null)
+        {
+            await JsRuntime.InvokeVoidAsync("Library.changeUrl", NavigationManager.BaseUri);
+        }
+    }
+
+    #region Compilation event handlers
+
+    private async void DiagnosticsHandler(object _, string val)
+    {
+        await ToggleCompilation(false);
+        output.AppendLine(val);
+        await Visualizer.SetOutput(output.ToString());
+    }
+
+    private async void GridsHandler(object _, Dictionary<string, List<GateGrid>> grids)
+    {
+        await Composer.UpdateGridsAsync(grids);
+    }
+
+    private async void OutputHandler(object _, string stdout)
+    {
+        await ToggleCompilation(false);
+
+        if (output.Length != 0)
+        {
+            output.AppendLine();
+        }
+
+        output.AppendLine(string.IsNullOrEmpty(stdout) ? "No messages" : stdout);
+        await Visualizer.SetOutput(output.ToString());
+    }
+
+    private void CustomOperationCheckboxChanged(ChangeEventArgs checkedValue)
+    {
+        if (Composer != null)
+        {
+            expanding = !(checkedValue.Value is bool value && value);
+        }
+    }
+
+    #endregion
+
+    /// <summary>Toggle the progressbar and whether the compilation button is enabled.</summary>
+    private async Task ToggleCompilation(bool running)
+    {
+        progress.Running = running;
+        await JsRuntime.InvokeVoidAsync("Library.setDisabled", compileButtonRef, running);
+    }
+
+    private async Task<string> GetCodeFromDatabase()
+    {
+        if (LoadedCodeId == null || !await DatabaseHandler.CheckConnection())
+        {
+            return null;
+        }
+
+        string code = null;
+        try
+        {
+            (_, code) = DatabaseHandler.GetCode(LoadedCodeId.Value);
+        }
+        catch (KeyNotFoundException) { }
+        return code;
+    }
+
+}

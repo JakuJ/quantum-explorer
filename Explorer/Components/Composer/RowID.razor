@@ -1,0 +1,12 @@
+<div class="row-id">
+    @DisplayedName
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Name { get; set; }
+
+    private string DisplayedName => Name == null ? "" : Name.Length > 10 ? $"{Name.Substring(0, 8)}.." : Name;
+
+}

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\msbuild\Test.props" />
+
+  <ItemGroup Label="Projects">
+    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
+    <ProjectReference Include="..\Compiler.AzureFunction\Compiler.AzureFunction.csproj" />
+    <ProjectReference Include="..\Compiler\Compiler.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="Test source files">
+    <Content Include="TestSources\*.qs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,20 @@
+<UniversalModal ModalId="@ModalId" Title="About">
+    <p style="text-align: center;">
+        <img src="/images/QE-logo-192x192.png" width="50" alt="App logo"/>
+    </p>
+    <p><b>Quantum Explorer</b> is a diploma project for Warsaw University of Technology</p>
+    <p>The app is developed by:</p>
+    <ul>
+        <li>Jakub Janaszkiewicz</li>
+        <li>Kamil Górzyński</li>
+        <li>Adam Kowalczyk</li>
+    </ul>
+    <p>Project repository is hosted on <a href="https://github.com/JakuJ/quantum-explorer">GitHub</a></p>
+</UniversalModal>
+
+@code {
+
+    [Parameter]
+    public string ModalId { get; set; } = "";
+
+}

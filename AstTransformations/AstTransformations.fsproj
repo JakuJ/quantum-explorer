@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\msbuild\Source.props" />
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <LangVersion>5.0</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="NodeCreation.fs" />
+        <Compile Include="AllocationTagging.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Common\Common.csproj" />
+        <ProjectReference Include="..\Simulator\Simulator.csproj" />
+    </ItemGroup>
+
+</Project>

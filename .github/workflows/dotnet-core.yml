@@ -1,0 +1,40 @@
+name: .NET Core
+
+on:
+  push:
+  pull_request:
+    branches:
+    - master
+    - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
+    - name: Run unit tests
+      run: |
+        dotnet test --no-restore --collect "XPlat Code Coverage" --results-directory ./TestResults
+        cd ./TestResults
+        bash -c 'x=1; for f in ./*/*.xml; do mv "$f" "./coverage${x}.xml"; ((x++)); done'
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        directory: ./TestResults/
+        flags: unittests

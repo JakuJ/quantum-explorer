@@ -1,0 +1,187 @@
+.composer-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.click-box {
+  width: calc(100% - 10px);
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 500;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+.grids {  
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+.grid-outer-container {
+  height: 100%;
+  width: 100%;
+}
+
+.grid-container {
+  height: 100%;
+  width: 100%;
+  padding: 2px;
+  display: inline-block;
+  overflow: auto;
+  flex-grow: 1;
+  order: 0;
+}
+
+.grid-selector-container {
+  flex-grow: 0;
+  flex-shrink: 0;
+  order: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+li.nav-item.grid-selector-item {
+  display: flex;
+}
+
+.grid-outer-row {
+  display: flex;
+}
+
+.grid-row {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  margin: 5px 0;
+  display: -ms-flexbox;
+  display: inline-flex;
+  overflow: visible; /* hidden fixes the overflow but hides the gates while dragging! */
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+}
+
+.grid-snap {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+}
+
+.grid-cell {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+  overflow: visible;
+}
+
+.grid-cell.clicked {
+  background-color: var(--primary);
+}
+
+.grid-blankcell-button {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+}
+
+.grid-blankcell-button:hover,
+.grid-blankcell-button:focus {
+  background-color: var(--primary);
+  opacity: 0.6;
+}
+
+.gate {
+  width: 40px;
+  height: 40px;
+  float: left;
+  text-align: center;
+  z-index: 99;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.gate.gate-border {
+  border: var(--text);
+  border-width: 2px;
+  border-style: solid;
+  background: var(--surface);
+}
+
+.gate-name {
+  vertical-align: baseline;
+  font-size: x-large;
+  color: var(--text);
+}
+
+.row-id {
+  width: 80px;
+  min-width: 80px;
+  height: 40px;
+  line-height: 40px;
+  margin: 5px 0;
+  padding-left: 5px;
+  float: left;
+  text-align: left;
+  background: var(--accent);
+  z-index: 98;
+}
+
+.line-container {
+  position: absolute;
+}
+
+.composer-svg {
+  position: absolute;
+}
+
+.composer-line {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.gate-menu.dropdown {
+  position: absolute;
+}
+
+.gate-menu.dropdown-menu {
+  display: grid;
+  position: absolute;
+}
+
+/* Operation expansion toggle */
+.toggle-group > label {
+  font-size: 14px;
+}
+
+.toggle-on, .toggle-on:hover, .toggle-off, .toggle-off:hover {
+  color: var(--text);
+  background-color: var(--accent);
+}
+
+.toggle-handle {
+  background-color: var(--hover);
+}
+
+:root.dark-mode .toggle-handle {
+  background-color: white;
+}
+
+.vis-placeholder > .app-logo {
+  height: 70%;
+  fill: var(--surface);
+  filter: drop-shadow(0 0.2rem 0.5rem var(--accent));
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+}

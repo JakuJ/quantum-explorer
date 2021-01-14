@@ -1,0 +1,74 @@
+@inject ILogger<Grids> Logger
+@inject CellMenusNotifier Notifier
+@using Microsoft.Extensions.Logging
+@using Common
+@implements IDisposable
+
+<div class="grids">
+    @if (clickBox)
+    {
+        <button class="click-box" @onclick="OnBoxClick"></button>
+    }
+    <Grid GateGrid="@(GridList[keysNames[SelectedGridKey]])"/>
+    @if (GridList.Count > 1)
+    {
+        <nav class="grid-selector-container">
+            <ul class="nav nav-tabs nav-left grid-pagination">
+                @foreach (string key in keysNames.Keys)
+                {
+                    <li class="nav-item grid-selector-item">
+                        <a class="nav-link @(SelectedGridKey == key ? "active" : "")" @onclick="@(() => OnGridChange(key))">@(key)</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public List<GateGrid> GridList { get; set; } = null!;
+
+    private Dictionary<string, int> keysNames = new();
+
+    private string SelectedGridKey { get; set; } = null!;
+
+    private bool clickBox = false;
+
+    public void Dispose()
+    {
+        Notifier.NotifyClosed -= OnCloseMenuNotify;
+        Notifier.NotifyOpened -= OnOpenMenuNotify;
+    }
+
+    protected override void OnInitialized()
+    {
+        Notifier.NotifyClosed += OnCloseMenuNotify;
+        Notifier.NotifyOpened += OnOpenMenuNotify;
+    }
+
+    protected override void OnParametersSet()
+    {
+        keysNames = Enumerable.Range(0, GridList.Count)
+                              .ToDictionary(x => (x + 1).ToString(), x => x);
+        SelectedGridKey = "1";
+    }
+
+    void OnGridChange(string key) => SelectedGridKey = key;
+
+    private void OnBoxClick() => Notifier.NotifyMenuClosed();
+
+    private void OnCloseMenuNotify()
+    {
+        clickBox = false;
+        StateHasChanged();
+    }
+
+    private void OnOpenMenuNotify()
+    {
+        clickBox = true;
+        StateHasChanged();
+    }
+
+}

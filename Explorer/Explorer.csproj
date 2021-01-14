@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <Import Project="..\msbuild\Source.props" />
+
+  <PropertyGroup>
+    <RootNamespace>Explorer</RootNamespace>
+    <JsLibRoot>JsLib</JsLibRoot>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(JsLibRoot)\node_modules\**</DefaultItemExcludes>
+    <NpmInstallStampFile>$(JsLibRoot)\node_modules\.install-stamp</NpmInstallStampFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AstTransformations\AstTransformations.fsproj" />
+    <ProjectReference Include="..\Compiler.AzureFunction\Compiler.AzureFunction.csproj" />
+    <ProjectReference Include="..\Compiler\Compiler.csproj" />
+    <ProjectReference Include="..\DatabaseHandler\DatabaseHandler.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="Package references">
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
+    <PackageReference Include="Radzen.Blazor" Version="2.16.0" />
+  </ItemGroup>
+
+  <!--  Below are settings for NPM and webpack -->
+
+  <ItemGroup>
+    <None Include="$(JsLibRoot)\*.json" />
+    <JsFiles Include="$(JsLibRoot)\*" Exclude="$(JsLibRoot)\node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="CodeExamples\*.qs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="EnsureNodeEnv" BeforeTargets="RestoreNpmPackages" Condition="!Exists('$(JsLibRoot)\node_modules')">
+    <!-- Ensure Node.js is installed -->
+    <Exec Command="node --version" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+    </Exec>
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project." />
+  </Target>
+
+  <Target Name="RestoreNpmPackages" BeforeTargets="BuildJsBundle" Inputs="$(JsLibRoot)\package.json" Outputs="$(NpmInstallStampFile)">
+    <!-- Restore NPM dependencies -->
+    <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
+    <Exec WorkingDirectory="$(JsLibRoot)" Command="npm install" />
+    <Touch Files="$(NpmInstallStampFile)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="BuildJsBundle" BeforeTargets="PreBuildEvent" Inputs="@(JsFiles)" Outputs="wwwroot\js\library.bundle.js;wwwroot\js\editor.worker.js">
+    <!-- Rebuild the JS bundle -->
+    <Message Importance="high" Text="Building JS bundle..." />
+    <Exec WorkingDirectory="$(JsLibRoot)\" Command="npm run build" />
+  </Target>
+
+</Project>

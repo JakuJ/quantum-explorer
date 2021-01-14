@@ -1,0 +1,20 @@
+<div class="gate-menu dropdown-menu" style="left: @(Left)px;">
+    <a class="dropdown-item" @onclick="@(_ => OnClick("X"))">Pauli-X</a>
+    <a class="dropdown-item" @onclick="@(_ => OnClick("Y"))">Pauli-Y</a>
+    <a class="dropdown-item" @onclick="@(_ => OnClick("Z"))">Pauli-Z</a>
+    <a class="dropdown-item" @onclick="@(_ => OnClick("H"))">Hadamard</a>
+    <a class="dropdown-item" @onclick="@(_ => OnClick("__control__"))">Control</a>
+    <a class="dropdown-item" @onclick="@(_ => OnClick("MResetZ"))">MResetZ</a>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Left { get; set; }
+
+    [Parameter]
+    public Action<string?> ExitMenu { get; set; } = null!;
+
+    private void OnClick(string? gateName) => ExitMenu?.Invoke(gateName);
+
+}

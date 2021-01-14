@@ -1,0 +1,29 @@
+<svg height="@(Height)" width="@(Width)" class="composer-svg" style="left:@(Left)px; top: @(Top)px;">
+    <line x1="@(X1)" y1="@(Y1)" x2="@(X2)" y2="@(Y2)" class="composer-line"/>
+</svg>
+
+@code {
+
+    [Parameter]
+    public int X1 { get; set; } = 20;
+
+    [Parameter]
+    public int Y1 { get; set; } = 20;
+
+    [Parameter]
+    public int X2 { get; set; } = 20;
+
+    [Parameter]
+    public int Y2 { get; set; } = 20;
+
+    [Parameter]
+    public int Left { get; set; } = 0;
+
+    [Parameter]
+    public int Top { get; set; } = 0;
+
+    private int Width => (X2 - X1 == 0) ? 40 : (X2 - X1);
+
+    private int Height => (Y2 - Y1 == 0) ? 40 : (Y2 - Y1);
+
+}

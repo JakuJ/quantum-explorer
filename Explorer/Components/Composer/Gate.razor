@@ -1,0 +1,49 @@
+@using System.Diagnostics.CodeAnalysis
+@using Common
+
+<button id="@Id" class="gate @BorderStr" @onclick="OnClick">
+    @switch (Name)
+    {
+        case "M":
+            <GateMeasurement/>
+            break;
+        case "Reset":
+        case "MResetX":
+        case "MResetY":
+        case "MResetZ":
+            <GateReset/>
+            break;
+        case "X":
+            <GateX/>
+            break;
+        case "__control__":
+            <GateControl/>
+            break;
+        default:
+            <span class="gate-name">@TruncatedName</span>
+            break;
+    }
+</button>
+
+@code {
+
+    [Parameter]
+    public Action ClickAction { get; set; } = null!;
+
+    [Parameter]
+    public string Name { get; set; } = null!;
+
+    public string Id { get; } = UniqueId.CreateUniqueId();
+
+    [ExcludeFromCodeCoverage] // Reason: the coverage tool doesn't see the execution of this method
+    private string BorderStr => Name switch
+    {
+        "X"           => "",
+        "__control__" => "",
+        var _         => "gate-border",
+        };
+
+    private string TruncatedName => Name.Substring(0, Math.Min(Name.Length, 3));
+
+    private void OnClick() => ClickAction?.Invoke();
+}

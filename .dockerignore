@@ -1,0 +1,6 @@
+./.*
+**/bin
+**/obj
+Explorer/JsLib/node_modules
+Explorer/wwwroot/js
+TestResults

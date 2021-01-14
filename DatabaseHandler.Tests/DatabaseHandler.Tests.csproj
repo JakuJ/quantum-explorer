@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\msbuild\Test.props" />
+
+  <ItemGroup Label="Projects">
+    <ProjectReference Include="..\DatabaseHandler\DatabaseHandler.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup Label="Packages">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.0" />
+  </ItemGroup>
+</Project>

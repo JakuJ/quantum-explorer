@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\msbuild\Test.props" />
+
+  <ItemGroup Label="Projects">
+    <ProjectReference Include="..\Explorer\Explorer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="Packages">
+    <PackageReference Include="bunit.core" Version="1.0.0-beta-11" />
+    <PackageReference Include="bunit.web" Version="1.0.0-beta-11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestExampleCodes\*.qs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

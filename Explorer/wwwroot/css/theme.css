@@ -1,0 +1,33 @@
+:root {
+  --background: #f2f2f2;
+  --surface: white;
+  --accent: #e0e0e0;
+  --text: #212529;
+  --text-secondary: #808080;
+  --error-background: lightyellow;
+  --shadow: rgba(0, 0, 0, 0.2);
+  --popup: #f2f2f2;
+  --hover: #bfbfbf;
+  --logo: #fed758;
+  /* re-exported from Bootstrap */
+  --link: #17a2b8; /* .text-info */
+  --valid: var(--green);
+  --invalid: var(--red);
+  --secondary: #56efbb;
+  --compile: white;
+  --hints-url: url("images/hints_scr_light.png");
+}
+
+:root.dark-mode {
+  --background: #121212;
+  --surface: #1e1e1e;
+  --accent: #333;
+  --text: #e2e2e2;
+  --error-background: var(--surface);
+  --shadow: rgba(255, 255, 255, 0.2);
+  --hover: #262626;
+  --popup: #333;
+  --link: #5bc0de; /* .bd-callout-info */
+  --compile: var(--surface);
+  --hints-url: url("images/hints_scr_dark.png");
+}

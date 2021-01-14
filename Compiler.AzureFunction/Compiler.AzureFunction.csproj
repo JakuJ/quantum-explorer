@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\msbuild\Source.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AzureFunctionsVersion>v3</AzureFunctionsVersion>
+    <RootNamespace>Compiler.AzureFunction</RootNamespace>
+
+    <!-- Otherwise the Microsoft.CodeAnalysis.CSharp DLL is not found-->
+    <_FunctionsSkipCleanOutput>true</_FunctionsSkipCleanOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Compiler\Compiler.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="host.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Azure Functions can't find the runtime simulator DLL so we have to copy it manually to the output folder.
+       We want to do this after metadata generation, as otherwise it shows a warning. -->
+
+  <!-- Get the "runtimes" subfolder name based on the OS -->
+  <PropertyGroup>
+    <RuntimeFolder Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">osx</RuntimeFolder>
+    <RuntimeFolder Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">linux</RuntimeFolder>
+    <RuntimeFolder Condition=" '$(OS)' == 'Windows_NT' ">win</RuntimeFolder>
+  </PropertyGroup>
+
+  <!-- Remove the DLL if already present in the build folder.
+       We don't want it lingering after previous builds, otherwise a warning appears. -->
+  <Target Name="DeleteSimulatorDllFromBuildFolder" BeforeTargets="_GenerateFunctionsExtensionsMetadataPostBuild">
+    <Delete Files="$(OutDir)bin/Microsoft.Quantum.Simulator.Runtime.dll" ContinueOnError="true" />
+  </Target>
+
+  <!-- Copy the DLL after build, for local development -->
+  <Target Name="CopySimulatorDllToBuildFolder" AfterTargets="_GenerateFunctionsExtensionsMetadataPostBuild">
+    <Copy SourceFiles="$(OutDir)runtimes/$(RuntimeFolder)-x64/native/Microsoft.Quantum.Simulator.Runtime.dll" DestinationFolder="$(OutDir)bin" />
+  </Target>
+
+  <!-- Remove the DLL if already present in the publish folder. -->
+  <Target Name="DeleteSimulatorDllFromPublishFolder" BeforeTargets="_GenerateFunctionsExtensionsMetadataPostPublish">
+    <Delete Files="$(PublishDir)bin/Microsoft.Quantum.Simulator.Runtime.dll" ContinueOnError="true" />
+  </Target>
+
+  <!-- Same thing for publishing, but since we only do that to deploy on Azure, we copy the Linux runtime -->
+  <Target Name="CopySimulatorDllToPublishFolder" AfterTargets="_GenerateFunctionsExtensionsMetadataPostPublish">
+    <Copy SourceFiles="$(PublishDir)bin/runtimes/linux-x64/native/Microsoft.Quantum.Simulator.Runtime.dll" DestinationFolder="$(PublishDir)bin" />
+  </Target>
+
+</Project>

@@ -1,0 +1,362 @@
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+
+/* Editor */
+
+#editor {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.monaco-editor .overflow-guard {
+  position: fixed !important; /* fixes context menu pushing the editor up */
+}
+
+input.rename-input {
+  color: var(--text);
+}
+
+/* LsStatus */
+
+#ls-status {
+  margin: auto 10px;
+  padding: 0.25rem;
+  background: var(--surface);
+  color: var(--text);
+  border-color: transparent;
+  cursor: default;
+}
+
+#ls-status > img {
+  margin-bottom: 3px;
+}
+
+/* Tooltip text */
+#ls-status .tooltiptext {
+  visibility: hidden;
+  width: 240px;
+  background-color: var(--popup);
+  color: var(--text);
+  text-align: center;
+  padding: 2px 5px;
+
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+  top: 120%;
+  left: 50%;
+  margin-left: -120px;
+}
+
+#ls-status:hover .tooltiptext {
+  visibility: visible;
+}
+
+#ls-status .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  top: -60%; /* At the top of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent var(--popup) transparent;
+}
+
+/* Visualizer */
+
+.visualizer {
+  width: 100%;
+  height: 100%;
+}
+
+.vis-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.vis-content {
+  flex: 1;
+  overflow-y: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+.vis-area {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+.vis-gate-panel {
+  flex: 0 0 10em;
+  height: 100%;
+  font-size: 13px;
+  border-right: 1px solid var(--accent);
+}
+
+.vis-state-vis {
+  flex: 1;
+  height: 100%;
+  width: 100%;
+}
+
+.vis-output {
+  height: 100%;
+  width: 100%;
+  background-color: var(--surface);
+  color: var(--text);
+  resize: none;
+  border: none;
+  font-family: monospace;
+  font-size: 14px;
+  padding: 1rem;
+}
+
+.vis-setting {
+  margin: 10px 10px 0 10px;
+}
+
+.vis-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.vis-tree-item {
+  line-height: 80%;
+  margin-right: 20px;
+}
+
+
+/* inactive tabs */
+.nav-link {
+  color: var(--text-secondary);
+  padding: 0.25rem 1rem !important;
+}
+
+/* active tab */
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+  background-color: var(--accent);
+  border-radius: 0;
+  color: var(--text);
+  border: 1px solid transparent;
+}
+
+.nav-tabs.nav-left .nav-link.active, .nav-tabs.nav-left .nav-item.show .nav-link {
+  border-color: var(--accent) var(--surface) var(--accent) var(--accent);
+}
+
+/* on mouse hover over a tab */
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+  color: var(--text);
+  background-color: var(--accent);
+  border-radius: 0;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.nav-tabs.nav-left .nav-link:hover, .nav-tabs.nav-left .nav-link:focus {
+  border-color: var(--accent) var(--surface) var(--accent) var(--accent);
+}
+
+/* the tab bar */
+.nav-tabs {
+  display: contents;
+}
+
+/* the tab table cell */
+.nav-tabs .nav-item {
+  display: table-cell;
+}
+
+/* the tab bar container */
+.nav-tabs-container {
+  overflow-x: auto;
+  border-bottom: 1px solid var(--accent);
+}
+
+/* Grid lines and scrollbars on the plot*/
+
+.rz-tick-text {
+  fill: var(--text);
+}
+
+.rz-axis .rz-grid-line {
+  stroke: var(--accent);
+}
+
+.rz-chart-tooltip-content {
+  box-shadow: 0 6px 14px 0 rgba(255, 255, 255, 0.05);
+  border-radius: 0;
+}
+
+.visualizer select {
+  /* disable default select */
+  -webkit-appearance: none;
+
+  /* add some padding for image */
+  padding-right: 20px;
+
+  /* apply SVG with arrow */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="20" viewBox="0 0 15 15"><path d="M 8,5.5 11,9.5 14,5.5 z"></path></svg>');
+  background-repeat: no-repeat;
+  background-position: center right;
+
+  /* other styles */
+  border-radius: 0;
+  border-color: var(--accent);
+  cursor: pointer;
+}
+
+select,
+select:active,
+select:focus {
+  -moz-box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+}
+
+/*share button*/
+
+.bar-btn {
+  margin: auto 10px;
+  padding: 0.25rem;
+  background: var(--surface);
+  color: var(--text);
+  border-color: transparent;
+}
+
+.bar-btn.bar-btn-icon {
+  margin: 6px 3px;
+  padding: 2px;
+}
+
+.bar-btn:disabled {
+  color: var(--shadow);
+}
+
+.bar-btn:hover {
+  background: var(--accent);
+}
+
+.bar-btn:focus {
+  outline: none;
+}
+
+.share-popover {
+  display: flex;
+  align-items: center;
+}
+
+.share-link {
+  flex: 1;
+  width: 250px;
+  color: var(--text);
+}
+
+#link-placeholder {
+  cursor: text;
+  border-right: 1px solid var(--text);
+  padding: 5px 10px 5px 0;
+  font-size: 13px;
+}
+
+.share-copy-btn {
+  flex: 0 0;
+  margin-left: 10px;
+  height: 20px;
+  fill: var(--text);
+  color: var(--text);
+  cursor: pointer;
+  background: transparent;
+}
+
+:root.dark-mode .share-copy-btn {
+  filter: invert(1);
+}
+
+.popover {
+  background: var(--popup);
+  border-radius: 0;
+}
+
+.bs-popover-bottom > .arrow::after {
+  border-bottom-color: var(--popup);
+}
+
+#dropdownMenuButton {
+  margin: 0;
+}
+
+.dropdown-menu {
+  background-color: var(--popup);
+  border-radius: 0;
+}
+
+.dropdown-menu > a.dropdown-item {
+  color: var(--text);
+}
+
+.dropdown-menu > a.dropdown-item:hover {
+  background-color: var(--hover);
+  cursor: pointer;
+}
+
+/* Visualizer and graph colours */
+
+.ui-treenode-content-selected {
+  background-color: var(--primary);
+}
+
+.ui-treenode-content:not(.ui-treenode-content-selected):hover {
+  background-color: var(--accent);
+  color: var(--text);
+}
+
+.rz-scheme-pastel .rz-series-0 {
+  fill: var(--primary);
+  stroke: var(--primary);
+}
+
+.rz-scheme-pastel .rz-series-1 {
+  fill: var(--secondary);
+  stroke: var(--secondary);
+}
+
+/* modals */
+
+.modal-content {
+  border-radius: 0;
+  background-color: var(--popup);
+}
+
+.modal-header {
+  border-bottom-color: var(--hover);
+}
+
+.modal-header>button.close{
+  color: var(--text);
+  text-shadow: var(--hover);
+}
+
+.modal-header>button.close:focus{
+  outline:none;
+  box-shadow:none;
+}
+
+/* Usage hints modal */
+#hints-scr {
+  padding-top: 62.13%;
+  background-image: var(--hints-url);
+  background-size: contain;
+}

@@ -1,0 +1,70 @@
+@using System.IO
+
+<div class="dropdown">
+    <button class="bar-btn dropdown-toggle" type="button"
+            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false" @onclick="OnClick">
+        Examples
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        @if (items != null)
+        {
+            @foreach ((string name, string code) in items)
+            {
+                <a class="dropdown-item noselect" @onclick="@(() => OnPicked(code))">@name</a>
+            }
+        }
+    </div>
+</div>
+
+@code {
+
+    /// <summary>
+    /// Action to be invoked when code from list is selected.
+    /// </summary>
+    [Parameter]
+    public Action<string>? OnSelected { get; set; }
+
+    /// <summary>
+    /// Path to folder with code examples stored as *.qs files.
+    /// </summary>
+    [Parameter]
+    public string? ExamplesFolderPath { get; set; }
+
+    List<(string name, string code)>? items;
+
+    private void OnClick()
+    {
+        if (ExamplesFolderPath != null)
+        {
+            items = GetExampleCodes(ExamplesFolderPath);
+        }
+    }
+
+    private void OnPicked(string code) => OnSelected?.Invoke(code);
+
+    /// <summary>
+    /// Gets codes and their names from specified folder.
+    /// </summary>
+    /// <param name="folderPath">Path to folder</param>
+    /// <returns></returns>
+    private List<(string name, string code)> GetExampleCodes(string folderPath)
+    {
+        List<(string name, string code)> codes = new();
+
+        if (!Directory.Exists(folderPath))
+        {
+            return codes;
+        }
+
+        foreach (string file in Directory.EnumerateFiles(folderPath, "*.qs"))
+        {
+            string name = Path.GetFileNameWithoutExtension(file).Replace('_', ' ');
+            string code = File.ReadAllText(file);
+            codes.Add((name, code));
+        }
+
+        return codes;
+    }
+
+}

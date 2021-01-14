@@ -1,0 +1,227 @@
+@using Compiler
+@using System.Numerics
+<div class="visualizer vis-container">
+    <div class="nav-tabs-container no-scrollbar">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link noselect @(isOutputChosen ? "active" : "")" @onclick="@(() => { isOutputChosen = true; })">Output</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link noselect @(isOutputChosen ? "" : "active")" @onclick="@(() => { isOutputChosen = false; })">Trace</a>
+            </li>
+        </ul>
+    </div>
+    <div class="vis-content">
+        @if (isPlaceholder)
+        {
+            <div class="vis-placeholder">
+                @Placeholder
+            </div>
+        }
+        else
+        {
+            @if (isOutputChosen)
+            {
+                <textarea @bind="Output" class="vis-output" readonly></textarea>
+            }
+            else
+            {
+                <div class="vis-area">
+                    <div class="vis-gate-panel">
+                        <RadzenTree Data="@States"
+                                    Change="@ShowOperationState"
+                                    Style="width: 100%; height: 100%">
+                            <RadzenTreeLevel TextProperty="Name"
+                                             ChildrenProperty="Children"
+                                             HasChildren="@(e => ((OperationState)e).Children.Any())"
+                                             Expanded="@(_ => true)">
+                                <Template>
+                                    <span class="vis-tree-item">@(((OperationState)context.Value).Name)</span>
+                                </Template>
+                            </RadzenTreeLevel>
+                        </RadzenTree>
+                    </div>
+                    <div class="vis-container vis-state-vis @(selectedOperation == null ? "invisible" : "")">
+                        <div class="form-inline">
+                            <select class="form-control float-left vis-setting" @onchange="DataTypeChanged">
+                                <option>Arguments</option>
+                                <option>Results</option>
+                            </select>
+                            <div class="form-check float-left align-middle vis-setting">
+                                <input class="form-check-input" type="checkbox" checked="@showZeros" @onchange="ZerosSwitch">
+                                <label class="form-check-label">
+                                    Show Zero States
+                                </label>
+                            </div>
+                        </div>
+                        <div class="vis-content" style="overflow-x: scroll;position:relative">
+                            <RadzenChart Style=@($"height: 90%;width:{chartSize};min-width: 100%; position:absolute; bottom:0;")>
+                                <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Real">
+                                    <TooltipTemplate Context="data">
+                                        <div>
+                                            <strong>@($"{data.Real:0.###}")</strong>@($"{data.Imaginary:+0.###;-0.###;+0}")i
+                                        </div>
+                                    </TooltipTemplate>
+                                </RadzenColumnSeries>
+                                <RadzenColumnSeries Data="@chartData" CategoryProperty="Idx" ValueProperty="Imaginary">
+                                    <TooltipTemplate Context="data">
+                                        <div>
+                                            @($"{data.Real:0.###}")<strong>@($"{data.Imaginary:+0.###;-0.###;+0}")i</strong>
+                                        </div>
+                                    </TooltipTemplate>
+                                </RadzenColumnSeries>
+                                <RadzenValueAxis Min="-1" Max="1">
+                                    <RadzenGridLines Visible="true"/>
+                                </RadzenValueAxis>
+                                <RadzenLegend Visible="false"/>
+                                <RadzenColumnOptions Margin="0"/>
+                            </RadzenChart>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+@code {
+
+    private string Placeholder { get; set; } = "Run the simulation to see the output";
+
+    private string Output { get; set; } = "";
+
+    private bool isPlaceholder = true;
+
+    bool isOutputChosen = true;
+
+    private IEnumerable<OperationState>? States { get; set; }
+
+    private IEnumerable<DataItem>? chartData;
+
+    private OperationState? selectedOperation;
+
+    private bool showZeros = true;
+
+    private string dataType = "Arguments";
+
+    private string chartSize
+    {
+        get
+        {
+            if (chartData == null)
+            {
+                return "100%";
+            }
+
+            var binLength = (int)Math.Ceiling(Math.Log2(chartData.Count()));
+            return 136 + (15 * (binLength + 2) + 20) * chartData.Count() + "px";
+        }
+    }
+
+    /// <summary>
+    /// Displays text in the placeholder.
+    /// </summary>
+    /// <param name="text">Text to be set in placeholder.</param>
+    public async Task SetPlaceholder(string text)
+    {
+        isPlaceholder = true;
+        Placeholder = text;
+        Output = "<No output>";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Sets simulation and compilation output in output console tab.
+    /// </summary>
+    /// <param name="text">Text to be set in console.</param>
+    public async Task SetOutput(string text)
+    {
+        isPlaceholder = false;
+        Output = text;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Passes quantum states of operations to be listed in a tree.
+    /// </summary>
+    /// <param name="states">Collection of <see cref="OperationState"/> representing quantum operation states.</param>
+    public async Task ShowStates(IEnumerable<OperationState> states)
+    {
+        States = states;
+        selectedOperation = null;
+        chartData = null;
+        isPlaceholder = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Transforms chosen operation state to a displayable list bound to the chart.
+    /// </summary>
+    private void CreateDisplayList()
+    {
+        List<(int idx, Complex v)>? list = dataType == "Arguments" ? selectedOperation?.Arguments : selectedOperation?.Results;
+
+        if (list == null) return;
+
+        var binLength = (int)Math.Ceiling(Math.Log2(list.Count)); //calculate number of qubits to include in labels
+
+        if (!showZeros)
+        {
+            list = list.Where(x => x.v.Magnitude != 0).ToList();
+        }
+
+        chartData = list.Select(pair => new DataItem
+        {
+            Idx = '|' + new string(Convert.ToString(pair.idx, 2).PadLeft(binLength, '0').Reverse().ToArray()) + '>',
+            Real = pair.v.Real,
+            Imaginary = pair.v.Imaginary,
+        });
+    }
+
+    /// <summary>
+    /// Displays the chart whenever an operation is chosen.
+    /// </summary>
+    private void ShowOperationState(TreeEventArgs args)
+    {
+        if (args.Value is OperationState state)
+        {
+            selectedOperation = state;
+            CreateDisplayList();
+        }
+    }
+
+    /// <summary>
+    /// Filter out zero states and update the chart.
+    /// </summary>
+    private void ZerosSwitch(ChangeEventArgs checkedValue)
+    {
+        showZeros = checkedValue.Value is bool value && value;
+        if (selectedOperation != null)
+        {
+            CreateDisplayList();
+        }
+    }
+
+    /// <summary>
+    /// Switch between an operation's arguments and results, then update the chart.
+    /// </summary>
+    private void DataTypeChanged(ChangeEventArgs e)
+    {
+        var selected = e.Value?.ToString();
+        if (selected == null || selected == dataType) return;
+
+        dataType = selected;
+        CreateDisplayList();
+    }
+
+    struct DataItem
+    {
+        public string Idx { get; init; }
+
+        public double Real { get; init; }
+
+        public double Imaginary { get; init; }
+    }
+
+}
