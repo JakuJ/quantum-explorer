@@ -15,7 +15,7 @@
   --invalid: var(--red);
   --secondary: #56efbb;
   --compile: white;
-  --hints-url: url("images/hints_scr_light.png");
+  --hints-url: url("/images/hints_scr_light.png");
 }
 
 :root.dark-mode {
@@ -29,5 +29,5 @@
   --popup: #333;
   --link: #5bc0de; /* .bd-callout-info */
   --compile: var(--surface);
-  --hints-url: url("images/hints_scr_dark.png");
+  --hints-url: url("/images/hints_scr_dark.png");
 }
