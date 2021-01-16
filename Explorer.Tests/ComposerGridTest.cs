@@ -15,7 +15,7 @@ namespace Explorer.Tests
     [Parallelizable]
     public class ComposerGridTest
     {
-        private static TestContext GetTextContext()
+        private static TestContext GetTestContext()
         {
             using TestContext ctx = new();
             ctx.Services.AddMockJSRuntime();
@@ -32,7 +32,7 @@ namespace Explorer.Tests
         public void RendersGridControlled()
         {
             // Arrange
-            using var ctx = GetTextContext();
+            using var ctx = GetTestContext();
 
             GateGrid grid = new();
             grid.AddGate(0, 0, new QuantumGate("X"));
@@ -54,7 +54,7 @@ namespace Explorer.Tests
         public void RendersGridSwap()
         {
             // Arrange
-            using var ctx = GetTextContext();
+            using var ctx = GetTestContext();
 
             GateGrid grid = new();
             grid.AddGate(0, 0, new QuantumGate("SWAP"));
