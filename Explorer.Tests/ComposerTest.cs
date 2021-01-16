@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bunit;
 using Bunit.TestDoubles;
 using Common;
-using Explorer.Components;
 using Explorer.Components.Composer;
 using Explorer.Components.Composer.Drawing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -61,6 +59,7 @@ namespace Explorer.Tests
             {
                 { "ExampleNamespace.Tab1", new List<GateGrid> { grid } },
                 { "ExampleNamespace.Tab2", new List<GateGrid> { grid21, grid22 } },
+                { "ExampleNamespace.EmptyTab", new List<GateGrid> { } },
             };
 
             // Act

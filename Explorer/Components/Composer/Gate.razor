@@ -16,6 +16,9 @@
         case "X":
             <GateX/>
             break;
+        case "SWAP":
+            <GateSwap/>
+            break;
         case "__control__":
             <GateControl/>
             break;
@@ -39,6 +42,7 @@
     private string BorderStr => Name switch
     {
         "X"           => "",
+        "SWAP"        => "",
         "__control__" => "",
         var _         => "gate-border",
         };
