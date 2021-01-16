@@ -16,7 +16,7 @@
   padding: 0;
 }
 
-.grids {  
+.grids {
   flex: 1;
   overflow: hidden;
   display: flex;
@@ -110,6 +110,8 @@ li.nav-item.grid-selector-item {
   padding: 0;
   border: none;
   background: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gate.gate-border {

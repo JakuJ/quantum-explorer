@@ -7,7 +7,7 @@
 <div class="grids">
     @if (clickBox)
     {
-        <button class="click-box" @onclick="OnBoxClick"></button>
+        <button class="click-box" @onclick="OnBoxClick" @oncontextmenu="OnBoxClick" @oncontextmenu:preventDefault="true"></button>
     }
     <Grid GateGrid="@(GridList[keysNames[SelectedGridKey]])"/>
     @if (GridList.Count > 1)
