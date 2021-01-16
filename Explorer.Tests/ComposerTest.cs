@@ -59,6 +59,7 @@ namespace Explorer.Tests
             {
                 { "ExampleNamespace.Tab1", new List<GateGrid> { grid } },
                 { "ExampleNamespace.Tab2", new List<GateGrid> { grid21, grid22 } },
+                { "ExampleNamespace.EmptyTab", new List<GateGrid> { } },
             };
 
             // Act
