@@ -12,17 +12,18 @@
                 <Line X1="0" X2="@(50 * GateGrid.Width + 10)"/>
                 @for (var x = 0; x < gates.GetLength(0); x++)
                 {
-                    QuantumGate? localQGate = gates[x, y];
+                    QuantumGate? g1 = gates[x, y];
 
                     // Vertical lines for the controlled gates
-                    @if (localQGate.HasValue)
+                    @if (g1.HasValue)
                     {
-                        bool isControl = localQGate.Value.IsControlGate();
+                        bool isControl = g1.Value.IsControlGate();
                         @for (int y2 = y + 1; y2 < gates.GetLength(1); y2++)
                         {
                             QuantumGate? g2 = gates[x, y2];
                             bool isControl2 = g2?.IsControlGate() ?? isControl;
-                            @if (isControl != isControl2)
+                            bool connect = (isControl != isControl2) || (g1?.Name == "SWAP" && g2?.Name == "SWAP");
+                            @if (connect)
                             {
                                 // a gate controls another one
                                 int xPix = 10 + 50 * x;
@@ -38,7 +39,7 @@
                     // Snap point between the cells
                     <SnapPoint X="@x" Y="@y" Half="@true" @ref="SnapRef"/>
 
-                    <Cell X="@x" Y="@y" QuantumGate="@localQGate" SnapPoints="@snapPoints" AddGate="@Add" DeleteGate="@Delete"/>
+                    <Cell X="@x" Y="@y" QuantumGate="@g1" SnapPoints="@snapPoints" AddGate="@Add" DeleteGate="@Delete"/>
                 }
             </div>
         </div>
