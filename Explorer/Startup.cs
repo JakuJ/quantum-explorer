@@ -1,10 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Compression;
 using Compiler;
 using Compiler.AzureFunction;
 using Compiler.AzureFunction.Connection;
 using DatabaseHandler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +41,7 @@ namespace Explorer
             }
 
             app.UseRouting()
+               .UseResponseCompression()
                .UseStaticFiles()
                .UseEndpoints(endpoints =>
                 {
@@ -51,6 +54,14 @@ namespace Explorer
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+
+            services.Configure<BrotliCompressionProviderOptions>(options => { options.Level = CompressionLevel.Fastest; });
+            services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+            });
+
             services.AddSingleton(_ => Env);
 
             if (Env.IsProduction())
