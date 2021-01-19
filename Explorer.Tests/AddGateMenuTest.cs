@@ -10,12 +10,18 @@ namespace Explorer.Tests
     [Parallelizable]
     public class AddGateMenuTest
     {
-        [TestCase("X", 0)]
-        [TestCase("Y", 1)]
-        [TestCase("Z", 2)]
-        [TestCase("H", 3)]
-        [TestCase("__control__", 4)]
-        [TestCase("MResetZ", 5)]
+        [TestCase("__control__", 0)]
+        [TestCase("X", 1)]
+        [TestCase("Y", 2)]
+        [TestCase("Z", 3)]
+        [TestCase("SWAP", 4)]
+        [TestCase("H", 5)]
+        [TestCase("S", 6)]
+        [TestCase("T", 7)]
+        [TestCase("I", 8)]
+        [TestCase("MResetX", 9)]
+        [TestCase("MResetY", 10)]
+        [TestCase("MResetZ", 11)]
         public void AddsGate(string name, int index)
         {
             // Arrange
@@ -26,7 +32,7 @@ namespace Explorer.Tests
             IRenderedComponent<AddGateMenu> cut = ctx.RenderComponent<AddGateMenu>(parameters => parameters
                                                                                       .Add(p => p.ExitMenu, gateName => { temp = gateName; }));
 
-            IRefreshableElementCollection<IElement> item = cut.FindAll(".dropdown-item");
+            IRefreshableElementCollection<IElement> item = cut.FindAll(".menu-gate");
             item[index].Click();
 
             // Assert

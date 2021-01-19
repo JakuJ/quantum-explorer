@@ -75,7 +75,7 @@ namespace Explorer.Tests
             gridComponent.Find(".gate-name").TextContent.MarkupMatches("H");
 
             // Check if the icon is displayed
-            gridComponent.Find("#Reset_Gate");
+            gridComponent.Find("#Measurement_Gate");
         }
 
         [Test]
@@ -160,7 +160,7 @@ namespace Explorer.Tests
             await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astTab));
 
             var blankCellButton = cut.Find(".grid-blankcell-button");
-            blankCellButton.Click(); // click the button -> show menu to add new gate
+            blankCellButton.ContextMenu(); // right-click the button -> show menu to add new gate
 
             var clickBox = cut.FindAll(".click-box")[0];
             clickBox.Click(); // hide the menu
@@ -184,7 +184,7 @@ namespace Explorer.Tests
 
             Dictionary<string, List<GateGrid>> astTab = new()
             {
-                { "DefaultNamespace", new List<GateGrid> { new GateGrid(1, 1) } },
+                { "DefaultNamespace", new List<GateGrid> { new(1, 1) } },
             };
 
             // Act
@@ -192,14 +192,14 @@ namespace Explorer.Tests
             await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astTab));
 
             var blankCellButton = cut.Find(".grid-blankcell-button");
-            blankCellButton.Click(); // click the button -> show menu to add new gate
+            blankCellButton.ContextMenu(); // right-click the button -> show menu to add new gate
 
-            var addGateLink = cut.FindAll(".gate-menu.dropdown-menu .dropdown-item")[0];
+            var addGateLink = cut.FindAll(".gate-menu.dropdown-menu .menu-gate")[1];
             addGateLink.Click(); // add the Pauli-X gate
 
             // Assert
             // Check if the addGateLink refers to Pauli-X gate
-            addGateLink.TextContent.Equals("Pauli-X");
+            addGateLink.TextContent.Equals("X");
 
             // Check if the Grid component is rendered
             IRenderedComponent<Grid> gridComponent = cut.FindComponent<Grid>();
@@ -227,7 +227,7 @@ namespace Explorer.Tests
             await cut.InvokeAsync(async () => await cut.Instance.UpdateGridsAsync(astTab));
 
             var hCellButton = cut.Find(".grid-cell .gate");
-            hCellButton.Click(); // click the button -> show menu to delete the gate
+            hCellButton.ContextMenu(); // right-click the button -> show menu to delete the gate
 
             var delGateLink = cut.FindAll(".gate-menu.dropdown-menu .dropdown-item")[0];
             delGateLink.Click(); // delete the gate
