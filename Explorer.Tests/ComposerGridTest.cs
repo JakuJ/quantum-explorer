@@ -60,6 +60,10 @@ namespace Explorer.Tests
             grid.AddGate(0, 0, new QuantumGate("SWAP"));
             grid.AddGate(0, 1, new QuantumGate("SWAP"));
             grid.AddGate(1, new QuantumGate("M"));
+            grid.AddGate(2, new QuantumGate("Reset"));
+            grid.AddGate(3, new QuantumGate("MResetX"));
+            grid.AddGate(4, new QuantumGate("MResetY"));
+            grid.AddGate(5, new QuantumGate("MResetZ"));
 
             // Act
             IRenderedComponent<Grid> cut = ctx.RenderComponent<Grid>(("GateGrid", grid));
