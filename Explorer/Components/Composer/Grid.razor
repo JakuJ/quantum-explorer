@@ -8,8 +8,8 @@
     {
         <div class="grid-outer-row">
             <RowID Name="@(GateGrid.Names[y])"/>
-            <div class="grid-row" style="width: @(50 * GateGrid.Width + 10)px;">
-                <Line X1="0" X2="@(50 * GateGrid.Width + 10)"/>
+            <div class="grid-row" style="width: @(50 * gates.GetLength(0) + 10)px;">
+                <Line X1="0" X2="@(50 * gates.GetLength(0) + 10)"/>
                 @for (var x = 0; x < gates.GetLength(0); x++)
                 {
                     QuantumGate? g1 = gates[x, y];
@@ -22,7 +22,7 @@
                         {
                             QuantumGate? g2 = gates[x, y2];
                             bool isControl2 = g2?.IsControlGate() ?? isControl;
-                            bool connect = (isControl != isControl2) || (g1?.Name == "SWAP" && g2?.Name == "SWAP");
+                            bool connect = (isControl != isControl2) || (g1.Value.Name == "SWAP" && g2?.Name == "SWAP");
                             @if (connect)
                             {
                                 // a gate controls another one
@@ -126,7 +126,7 @@
 
     private QuantumGate?[,] RefreshGateArray()
     {
-        var arr = new QuantumGate?[GateGrid.Width, GateGrid.Height];
+        var arr = new QuantumGate?[GateGrid.Width + 1, GateGrid.Height];
         foreach ((QuantumGate gate, int x, int y) in GateGrid.Gates)
         {
             arr[x, y] = gate;

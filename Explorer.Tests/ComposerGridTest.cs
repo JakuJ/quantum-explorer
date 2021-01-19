@@ -46,8 +46,8 @@ namespace Explorer.Tests
             IRenderedComponent<Line> lineComponent = cut.FindComponent<Line>();
 
             // Check if the proper line is displayed
-            lineComponent.MarkupMatches(@"<svg height=""40"" width=""60"" class=""composer-svg""style=""left:0px; top: 0px;"">
-                <line x1=""0"" y1=""20"" x2=""60"" y2=""20"" class=""composer-line""></line></svg>");
+            lineComponent.MarkupMatches(@"<svg height=""40"" width=""110"" class=""composer-svg""style=""left:0px; top: 0px;"">
+                <line x1=""0"" y1=""20"" x2=""110"" y2=""20"" class=""composer-line""></line></svg>");
         }
 
         [Test]
