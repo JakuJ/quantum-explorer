@@ -1,17 +1,23 @@
 @using System.Diagnostics.CodeAnalysis
 @using Common
 
-<button id="@Id" class="gate @BorderStr" @oncontextmenu="OnClick" @oncontextmenu:preventDefault="true">
+<button id="@Id" class="gate @BorderStr composer-gate" @oncontextmenu="OnClick" @oncontextmenu:preventDefault="true">
     @switch (Name)
     {
         case "M":
             <GateMeasurement/>
             break;
         case "Reset":
+            <GateMeasurement Text="RST"/>
+            break;
         case "MResetX":
+            <GateMeasurement Text="X"/>
+            break;
         case "MResetY":
+            <GateMeasurement Text="Y"/>
+            break;
         case "MResetZ":
-            <GateReset/>
+            <GateMeasurement Text="Z"/>
             break;
         case "X":
             <GateX/>
@@ -50,4 +56,5 @@
     private string TruncatedName => Name.Substring(0, Math.Min(Name.Length, 3));
 
     private void OnClick() => ClickAction?.Invoke();
+
 }

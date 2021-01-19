@@ -1,10 +1,48 @@
-<div class="gate-menu dropdown-menu" style="left: @(Left)px;">
-    <a class="dropdown-item" @onclick="@(_ => OnClick("X"))">Pauli-X</a>
-    <a class="dropdown-item" @onclick="@(_ => OnClick("Y"))">Pauli-Y</a>
-    <a class="dropdown-item" @onclick="@(_ => OnClick("Z"))">Pauli-Z</a>
-    <a class="dropdown-item" @onclick="@(_ => OnClick("H"))">Hadamard</a>
-    <a class="dropdown-item" @onclick="@(_ => OnClick("__control__"))">Control</a>
-    <a class="dropdown-item" @onclick="@(_ => OnClick("MResetZ"))">MResetZ</a>
+<div id="add-gate-menu" class="gate-menu dropdown-menu" style="left: @(Left)px;">
+    <div class="container">
+        <div class="row">
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("__control__"))">
+                <GateControl/>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("X"))">
+                <GateX/>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("Y"))">
+                <span class="gate-name">Y</span>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("Z"))">
+                <span class="gate-name">Z</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("SWAP"))">
+                <GateSwap/>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("H"))">
+                <span class="gate-name">H</span>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("S"))">
+                <span class="gate-name">S</span>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("T"))">
+                <span class="gate-name">T</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("I"))">
+                <span class="gate-name">I</span>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("MResetX"))">
+                <GateMeasurement Text="X"/>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("MResetY"))">
+                <GateMeasurement Text="Y"/>
+            </div>
+            <div class="col gate menu-gate" @onclick="@(_ => OnClick("MResetZ"))">
+                <GateMeasurement Text="Z"/>
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {

@@ -121,6 +121,14 @@ li.nav-item.grid-selector-item {
   background: var(--surface);
 }
 
+.gate.menu-gate:hover {
+  background-color: var(--surface);
+}
+
+#add-gate-menu {
+  padding: 0;
+}
+
 .gate-name {
   vertical-align: baseline;
   font-size: x-large;
