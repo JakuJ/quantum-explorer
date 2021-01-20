@@ -14,23 +14,23 @@
     <base href="~/"/>
     <!-- External CSS -->
     <environment exclude="Development">
-        <link rel="stylesheet" href="lib/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="lib/css/jquery-ui.min.css"/>
-        <link rel="stylesheet" href="lib/css/jquery-ui.structure.min.css"/>
+        <link rel="preload" href="lib/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+        <link rel="preload" href="lib/css/jquery-ui.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+        <link rel="preload" href="lib/css/jquery-ui.structure.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
     </environment>
     <environment include="Development">
-        <link rel="stylesheet" href="lib/css/bootstrap.css"/>
-        <link rel="stylesheet" href="lib/css/jquery-ui.css"/>
-        <link rel="stylesheet" href="lib/css/jquery-ui.structure.css"/>
+        <link rel="preload" href="lib/css/bootstrap.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+        <link rel="preload" href="lib/css/jquery-ui.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+        <link rel="preload" href="lib/css/jquery-ui.structure.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
     </environment>
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/default-base.css">
+    <link rel="preload" href="_content/Radzen.Blazor/css/default-base.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <!-- Our CSS -->
     <link href="css/theme.css" rel="stylesheet"/>
-    <link href="css/progressbar.css" rel="stylesheet"/>
     <link href="css/site.css" rel="stylesheet"/>
-    <link href="css/split.css" rel="stylesheet"/>
-    <link href="css/components.css" rel="stylesheet"/>
-    <link href="css/composer.css" rel="stylesheet"/>
+    <link href="css/progressbar.css" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link href="css/split.css" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link href="css/components.css" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+    <link href="css/composer.css" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
     <!-- Favicons -->
     @await Html.PartialAsync("_Favicons")
 </head>

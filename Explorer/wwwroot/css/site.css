@@ -171,7 +171,7 @@ a, .btn-link {
   background-color: var(--background) !important;
 }
 
-#hintsModal .modal-dialog {
+#helpModal .modal-dialog {
   max-width: 75%;
 }
 

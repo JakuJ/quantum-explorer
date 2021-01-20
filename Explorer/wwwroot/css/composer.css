@@ -16,7 +16,7 @@
   padding: 0;
 }
 
-.grids {  
+.grids {
   flex: 1;
   overflow: hidden;
   display: flex;
@@ -110,6 +110,8 @@ li.nav-item.grid-selector-item {
   padding: 0;
   border: none;
   background: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gate.gate-border {
@@ -117,6 +119,14 @@ li.nav-item.grid-selector-item {
   border-width: 2px;
   border-style: solid;
   background: var(--surface);
+}
+
+.gate.menu-gate:hover {
+  background-color: var(--surface);
+}
+
+#add-gate-menu {
+  padding: 0;
 }
 
 .gate-name {

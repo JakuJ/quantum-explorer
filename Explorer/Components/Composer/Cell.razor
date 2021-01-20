@@ -13,7 +13,7 @@
     }
     else
     {
-        <button class="grid-blankcell-button" @onclick="OnClick"></button>
+        <button class="grid-blankcell-button" @oncontextmenu:preventDefault="true" @oncontextmenu="OnClick"></button>
     }
 </div>
 @if (Clicked)

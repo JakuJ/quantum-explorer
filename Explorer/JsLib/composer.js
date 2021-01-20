@@ -6,7 +6,7 @@ export function setReference(ref) {
 
 export function initGrids() {
   // make gates draggable
-  $('.gate').draggable({
+  $('.composer-gate').draggable({
     containment: '#grid',
     scroll: false,
     snap: '.grid-snap',

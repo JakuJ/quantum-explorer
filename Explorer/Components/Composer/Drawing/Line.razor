@@ -1,3 +1,5 @@
+@using System
+
 <svg height="@(Height)" width="@(Width)" class="composer-svg" style="left:@(Left)px; top: @(Top)px;">
     <line x1="@(X1)" y1="@(Y1)" x2="@(X2)" y2="@(Y2)" class="composer-line"/>
 </svg>
@@ -22,8 +24,8 @@
     [Parameter]
     public int Top { get; set; } = 0;
 
-    private int Width => (X2 - X1 == 0) ? 40 : (X2 - X1);
+    private int Width => (X2 - X1 == 0) ? 40 : Math.Abs(X2 - X1);
 
-    private int Height => (Y2 - Y1 == 0) ? 40 : (Y2 - Y1);
+    private int Height => (Y2 - Y1 == 0) ? 40 : Math.Abs(Y2 - Y1);
 
 }
