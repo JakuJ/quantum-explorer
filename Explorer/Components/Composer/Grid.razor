@@ -91,8 +91,8 @@
         SnapPoint oldSnap = snapPoints[gateId];
         SnapPoint newSnap = snapPoints[snapId];
 
-        GateGrid.InsertColumn(newSnap.X + 1);
-        GateGrid.MoveGate(oldSnap.X + (newSnap.X < oldSnap.X ? 1 : 0), oldSnap.Y, newSnap.X + 1, newSnap.Y);
+        GateGrid.InsertColumn(newSnap.X);
+        GateGrid.MoveGate(oldSnap.X + (newSnap.X <= oldSnap.X ? 1 : 0), oldSnap.Y, newSnap.X, newSnap.Y);
 
         ForceRerender();
     }
@@ -120,7 +120,7 @@
     private void Delete(string snapId)
     {
         SnapPoint snap = snapPoints[snapId];
-        GateGrid.RemoveAt(snap.X, snap.Y, false);
+        GateGrid.RemoveAt(snap.X, snap.Y);
         ForceRerender();
     }
 
