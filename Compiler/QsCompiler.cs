@@ -207,7 +207,7 @@ namespace Compiler
 
             if (type != null)
             {
-                using InterceptingSimulator sim = new(userNamespaces, expanding);
+                using InterceptingSimulator sim = new(userNamespaces, expanding, logger);
                 StateRecorder recorder = new(sim);
 
                 var simSuccess = true;
