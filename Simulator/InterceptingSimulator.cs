@@ -51,7 +51,8 @@ namespace Simulator
             this.userNamespaces = userNamespaces.ToImmutableHashSet();
             OnOperationStart += OperationStartHandler;
             OnOperationEnd += OperationEndHandler;
-            AfterAllocateQubits += AllocateQubitsHandler;
+            AfterAllocateQubits += QubitScopeOpenedHandler;
+            AfterBorrowQubits += QubitScopeOpenedHandler;
         }
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace Simulator
             return ret;
         }
 
-        private void AllocateQubitsHandler(IQArray<Qubit> qubits)
+        private void QubitScopeOpenedHandler(IQArray<Qubit> qubits)
             => allocationQueue.Enqueue(qubits.Select(x => x.Id).ToArray());
 
         private void OperationStartHandler(ICallable op, IApplyData data)
