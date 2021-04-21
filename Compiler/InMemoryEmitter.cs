@@ -48,8 +48,8 @@ namespace Compiler
             if (!compilation.EntryPoints.IsEmpty)
             {
                 QsCallable? callable = context.allCallables.First(c => c.Key.Equals(compilation.EntryPoints.First())).Value;
-                string? content = EntryPoint.generate(context, callable);
-                string entryPointName = callable.SourceFile + ".EntryPoint";
+                string? content = EntryPoint.generateSource(context, new[] { callable });
+                string entryPointName = callable.Source + ".EntryPoint";
                 FileContents.Add(entryPointName, content);
             }
 
