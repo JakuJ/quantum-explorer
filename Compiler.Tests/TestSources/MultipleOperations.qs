@@ -6,7 +6,7 @@ namespace MultipleOperations {
     @EntryPoint()
     operation Main(): Unit {
         let x = RandomBit();
-        using ((q1, q2) = (Qubit(), Qubit())) {
+        use (q1, q2) = (Qubit(), Qubit()) {
             NoOp();
             let q11 = IdentityGate(q1);
             let q22 = IdentityGate(q2);
@@ -16,7 +16,7 @@ namespace MultipleOperations {
     }
 
     operation RandomBit () : Result {
-        using (q = Qubit()) {
+        use q = Qubit() {
             H(q);
             return MResetZ(q);
         }

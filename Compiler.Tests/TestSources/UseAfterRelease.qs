@@ -2,7 +2,7 @@ namespace UseAfterRelease {
     open Microsoft.Quantum.Intrinsic;
 
     operation BadAlloc(): Qubit {
-        using (q = Qubit()) {
+        use q = Qubit() {
             X(q);               // legal Q#
             return q;
         }

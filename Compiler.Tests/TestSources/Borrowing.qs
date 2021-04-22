@@ -6,7 +6,7 @@ namespace Borrowing {
     // Test "borrowing" statement and also partial functions 
     @EntryPoint()
     operation Main(): Unit {
-        borrowing (qs = Qubit[3]) {
+        borrow qs = Qubit[3] {
             ApplyToEachCA(Ry(0.5, _), qs);
             ResetAll(qs);
         }

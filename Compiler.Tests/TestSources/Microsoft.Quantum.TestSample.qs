@@ -8,7 +8,7 @@ namespace Microsoft.Quantum.TestSample {
     }
 
     operation RandomBit () : Result {
-        using (q = Qubit()) {
+        use q = Qubit() {
             H(q);
             return MResetZ(q);
         }

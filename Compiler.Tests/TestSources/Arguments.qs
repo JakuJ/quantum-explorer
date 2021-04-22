@@ -11,7 +11,7 @@ namespace Arguments {
 
     @EntryPoint()
     operation TestOp(): Unit {
-        using (qs = Qubit[5]) {
+        use qs = Qubit[5] {
             X(qs[0]);
             TwoArgs(qs[0], qs[1]);
             TwoArgs(qs[4], qs[4]);
