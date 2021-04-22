@@ -38,6 +38,7 @@ namespace Compiler
                 {
                     "Microsoft.Quantum.Standard",
                     "Microsoft.Quantum.QSharp.Core",
+                    "Microsoft.Quantum.QSharp.Foundation",
                     "Microsoft.Quantum.Runtime.Core",
                     typeof(InterceptingSimulator).Assembly.FullName!,
                 }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
@@ -104,6 +105,7 @@ namespace Compiler
                 IsExecutable = true,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 GenerateFunctorSupport = true,
+                RuntimeCapability = RuntimeCapability.FullComputation,
                 RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
                     (new AllocationTagger(userNamespaces), null),
@@ -124,7 +126,7 @@ namespace Compiler
                         config,
                         new EventLogger(str => OnDiagnostics?.Invoke(this, str)));
                 }
-                catch (NullReferenceException)
+                catch (NullReferenceException e)
                 {
                     // Bond DLL deserialization throws this from QDK v0.13.* onwards when IsExecutable is true but the user provides no @EntryPoint
                     // We have unit tests assuring that this should never happen
