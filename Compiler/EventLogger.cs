@@ -12,6 +12,7 @@ namespace Compiler
     {
         private readonly Action<string> logAction;
         private readonly Func<Diagnostic, string> applyFormatting;
+        public bool seenErrors = false;
 
         /// <inheritdoc cref="LogTracker"/>
         /// <summary>Initializes a new instance of the <see cref="EventLogger"/> class.</summary>
@@ -37,6 +38,11 @@ namespace Compiler
             {
                 var withFilesSkipped = string.Join('\n', message.Split('\n').Where(x => !x.StartsWith("File:")));
                 logAction(withFilesSkipped);
+            }
+
+            if (msg is { Severity: Error })
+            {
+                seenErrors = true;
             }
         }
     }

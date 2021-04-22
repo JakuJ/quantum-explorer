@@ -82,9 +82,7 @@ namespace Compiler.Tests
                 Assert.IsTrue(s.StartsWith("Attempted to apply an operation to a released qubit."));
             };
 
-            compiler.OnOutput += (_, s) => Assert.Fail("Code should not return any output");
-            compiler.OnStatesRecorded += (_, _) => Assert.Fail("Code should not return any states");
-            compiler.OnGrids += (_, _) => Assert.Fail("Code should not return any grids");
+            compiler.OnOutput += (_, s) => Assert.Fail($"Code should not return any output, got: {s}");
 
             // Act
             await compiler.Compile(sourceCode);
@@ -100,11 +98,8 @@ namespace Compiler.Tests
             string sourceCode = await Helpers.GetSourceFile("Borrowing");
             QsCompiler compiler = new(Helpers.ConsoleLogger);
             var compiled = false;
-            var executed = false;
 
             compiler.OnDiagnostics += (_, s) => { Assert.Fail($"There should be no diagnostics emitted! Got: {s}"); };
-
-            compiler.OnOutput += (_, s) => { executed = true; };
 
             compiler.OnGrids += (_, s) =>
             {
@@ -124,7 +119,6 @@ namespace Compiler.Tests
 
             // Assert
             Assert.IsTrue(compiled, "Compilation should be successful");
-            Assert.IsTrue(executed, "Execution must emit output.");
         }
     }
 }

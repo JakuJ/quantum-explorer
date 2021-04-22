@@ -120,11 +120,18 @@ namespace Compiler
             {
                 try
                 {
+                    EventLogger eventLogger = new(str => OnDiagnostics?.Invoke(this, str));
                     compilationLoader = new CompilationLoader(
                         _ => new Dictionary<Uri, string> { { new Uri(Path.GetFullPath(filename)), qsharpCode } }.ToImmutableDictionary(),
                         load => cachedRefs ??= load(qsharpReferences!), // never null
                         config,
-                        new EventLogger(str => OnDiagnostics?.Invoke(this, str)));
+                        eventLogger);
+
+                    // Abort if errors occured during the Q# compilation stage
+                    if (eventLogger.seenErrors)
+                    {
+                        return;
+                    }
                 }
                 catch (NullReferenceException e)
                 {
@@ -211,7 +218,6 @@ namespace Compiler
                 using InterceptingSimulator sim = new(userNamespaces, expanding, logger);
                 StateRecorder recorder = new(sim);
 
-                var simSuccess = true;
                 try
                 {
                     // simulate the entry point operation using reflection
@@ -224,29 +230,25 @@ namespace Compiler
                 }
                 catch (ExecutionFailException e)
                 {
-                    OnOutput?.Invoke(this, sim.Messages);
                     OnDiagnostics?.Invoke(this, e.Message);
-                    OnStatesRecorded?.Invoke(this, recorder.Root.Children);
-                    simSuccess = false;
                 }
                 catch (Exception e)
                 {
                     logger.LogError(e, "Unknown error during simulation");
-                    OnOutput?.Invoke(this, sim.Messages);
                     OnDiagnostics?.Invoke(this, "Unknown error has occured during the simulation.");
-                    simSuccess = false;
                 }
 
-                if (simSuccess)
+                if (sim.Messages.Length > 0)
                 {
                     OnOutput?.Invoke(this, sim.Messages);
-                    OnStatesRecorded?.Invoke(this, recorder.Root.Children);
+                }
 
-                    Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
-                    if (grids.Count > 0)
-                    {
-                        OnGrids?.Invoke(this, grids);
-                    }
+                OnStatesRecorded?.Invoke(this, recorder.Root.Children);
+
+                Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
+                if (grids.Count > 0)
+                {
+                    OnGrids?.Invoke(this, grids);
                 }
             }
             else
