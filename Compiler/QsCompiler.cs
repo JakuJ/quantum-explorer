@@ -131,8 +131,7 @@ namespace Compiler
                     // Bond DLL deserialization throws this from QDK v0.13.* onwards when IsExecutable is true but the user provides no @EntryPoint
                     // We have unit tests assuring that this should never happen
                     // This try/catch block exists just to be extra safe
-                    logger.LogError(
-                        $"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
+                    logger.LogDebug(e, "User code has no @EntryPoint()");
                     OnDiagnostics?.Invoke(this, "No entry point operation specified.\nDecorate the main method with the @EntryPoint attribute.");
                     return;
                 }
@@ -225,7 +224,16 @@ namespace Compiler
                 }
                 catch (ExecutionFailException e)
                 {
+                    OnOutput?.Invoke(this, sim.Messages);
                     OnDiagnostics?.Invoke(this, e.Message);
+                    OnStatesRecorded?.Invoke(this, recorder.Root.Children);
+                    simSuccess = false;
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Unknown error during simulation");
+                    OnOutput?.Invoke(this, sim.Messages);
+                    OnDiagnostics?.Invoke(this, "Unknown error has occured during the simulation.");
                     simSuccess = false;
                 }
 
@@ -235,7 +243,6 @@ namespace Compiler
                     OnStatesRecorded?.Invoke(this, recorder.Root.Children);
 
                     Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
-
                     if (grids.Count > 0)
                     {
                         OnGrids?.Invoke(this, grids);

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 namespace Qrng {
     open Microsoft.Quantum.Convert;
     open Microsoft.Quantum.Math;
@@ -6,30 +9,26 @@ namespace Qrng {
     open Microsoft.Quantum.Intrinsic;
     
     operation SampleQuantumRandomNumberGenerator() : Result {
-        using (q = Qubit())  {
-            H(q);               // Put the qubit to superposition. It now has a 50% chance of being 0 or 1.
-            return MResetZ(q);  // Measure the qubit value.
-        }
+        use q = Qubit();   // Allocate a qubit.
+        H(q);              // Put the qubit to superposition. It now has a 50% chance of being 0 or 1.
+        return MResetZ(q); // Measure the qubit value.
     }
 
-    operation SampleRandomNumberInRange(byteSize : Int) : Int {
+    operation SampleRandomNumberInRange(max : Int) : Int {
         mutable bits = new Result[0];
-        for (idxBit in 1..byteSize) {
+        for idxBit in 1..BitSizeI(max) {
             set bits += [SampleQuantumRandomNumberGenerator()];
         }
-        return ResultArrayAsInt(bits);
+        let sample = ResultArrayAsInt(bits);
+        return sample > max
+               ? SampleRandomNumberInRange(max)
+               | sample;
     }
     
     @EntryPoint()
-    operation SampleRandomNumber() : Unit {
+    operation SampleRandomNumber() : Int {
         let max = 50;
         Message($"Sampling a random number between 0 and {max}: ");
-        let byteSize = BitSizeI(max);
-        mutable number = max;
-        repeat{
-            set number = SampleRandomNumberInRange(byteSize);
-        }
-        until(number < max);
-        Message($"Generated number is {number}");
+        return SampleRandomNumberInRange(max);
     }
 }

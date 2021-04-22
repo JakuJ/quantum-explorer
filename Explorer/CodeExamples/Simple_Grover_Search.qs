@@ -15,19 +15,18 @@ namespace Microsoft.Quantum.Samples.SimpleGrover {
     /// search.
     operation ReflectAboutMarked(inputQubits : Qubit[]) : Unit {
         Message("Reflecting about marked state...");
-        using (outputQubit = Qubit()) {
-            within {
-                // We initialize the outputQubit to (|0⟩ - |1⟩) / √2,
-                // so that toggling it results in a (-1) phase.
-                X(outputQubit);
-                H(outputQubit);
-                // Flip the outputQubit for marked states.
-                // Here, we get the state with alternating 0s and 1s by using
-                // the X instruction on every other qubit.
-                ApplyToEachA(X, inputQubits[...2...]);
-            } apply {
-                Controlled X(inputQubits, outputQubit);
-            }
+        use outputQubit = Qubit();
+        within {
+            // We initialize the outputQubit to (|0⟩ - |1⟩) / √2,
+            // so that toggling it results in a (-1) phase.
+            X(outputQubit);
+            H(outputQubit);
+            // Flip the outputQubit for marked states.
+            // Here, we get the state with alternating 0s and 1s by using
+            // the X instruction on every other qubit.
+            ApplyToEachA(X, inputQubits[...2...]);
+        } apply {
+            Controlled X(inputQubits, outputQubit);
         }
     }
 
@@ -70,20 +69,20 @@ namespace Microsoft.Quantum.Samples.SimpleGrover {
     /// # Summary
     /// This operation applies Grover's algorithm to search all possible inputs
     /// to an operation to find a particular marked state.
+    @EntryPoint()
     operation SearchForMarkedInput(nQubits : Int) : Result[] {
-        using (qubits = Qubit[nQubits]) {
-            // Initialize a uniform superposition over all possible inputs.
-            PrepareUniform(qubits);
-            // The search itself consists of repeatedly reflecting about the
-            // marked state and our start state, which we can write out in Q#
-            // as a for loop.
-            for (idxIteration in 0..NIterations(nQubits) - 1) {
-                ReflectAboutMarked(qubits);
-                ReflectAboutUniform(qubits);
-            }
-            // Measure and return the answer.
-            return ForEach(MResetZ, qubits);
+        use qubits = Qubit[nQubits];
+        // Initialize a uniform superposition over all possible inputs.
+        PrepareUniform(qubits);
+        // The search itself consists of repeatedly reflecting about the
+        // marked state and our start state, which we can write out in Q#
+        // as a for loop.
+        for idxIteration in 0..NIterations(nQubits) - 1 {
+            ReflectAboutMarked(qubits);
+            ReflectAboutUniform(qubits);
         }
+        // Measure and return the answer.
+        return ForEach(MResetZ, qubits);
     }
 
     /// # Summary

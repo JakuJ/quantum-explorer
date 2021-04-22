@@ -37,27 +37,26 @@ namespace Microsoft.Quantum.Samples.Teleportation {
     /// A qubit initially in the |0〉 state that we want to send
     /// the state of msg to.
     operation Teleport (msg : Qubit, target : Qubit) : Unit {
-        using (register = Qubit()) {
-            // Create some entanglement that we can use to send our message.
-            H(register);
-            CNOT(register, target);
+        use register = Qubit();
+        // Create some entanglement that we can use to send our message.
+        H(register);
+        CNOT(register, target);
 
-            // Encode the message into the entangled pair.
-            CNOT(msg, register);
-            H(msg);
+        // Encode the message into the entangled pair.
+        CNOT(msg, register);
+        H(msg);
 
-            // Measure the qubits to extract the classical data we need to
-            // decode the message by applying the corrections on
-            // the target qubit accordingly.
-            // We use MResetZ from the Microsoft.Quantum.Measurement namespace
-            // to reset our qubits as we go.
-            if (MResetZ(msg) == One) { Z(target); }
-            // We can also use library functions such as IsResultOne to write
-            // out correction steps. This is especially helpful when composing
-            // conditionals with other functions and operations, or with partial
-            // application.
-            if (IsResultOne(MResetZ(register))) { X(target); }
-        }
+        // Measure the qubits to extract the classical data we need to
+        // decode the message by applying the corrections on
+        // the target qubit accordingly.
+        // We use MResetZ from the Microsoft.Quantum.Measurement namespace
+        // to reset our qubits as we go.
+        if (MResetZ(msg) == One) { Z(target); }
+        // We can also use library functions such as IsResultOne to write
+        // out correction steps. This is especially helpful when composing
+        // conditionals with other functions and operations, or with partial
+        // application.
+        if (IsResultOne(MResetZ(register))) { X(target); }
     }
 
     // One can use quantum teleportation circuit to send an unobserved
@@ -79,19 +78,18 @@ namespace Microsoft.Quantum.Samples.Teleportation {
     /// represented as a Bool.
     operation TeleportClassicalMessage (message : Bool) : Bool {
         // Ask for some qubits that we can use to teleport.
-        using ((msg, target) = (Qubit(), Qubit())) {
+        use (msg, target) = (Qubit(), Qubit());
 
-            // Encode the message we want to send.
-            if (message) {
-                X(msg);
-            }
-
-            // Use the operation we defined above.
-            Teleport(msg, target);
-
-            // Check what message was sent.
-            return MResetZ(target) == One;
+        // Encode the message we want to send.
+        if (message) {
+            X(msg);
         }
+
+        // Use the operation we defined above.
+        Teleport(msg, target);
+
+        // Check what message was sent.
+        return MResetZ(target) == One;
     }
 
     // One can also use quantum teleportation to send any quantum state
@@ -104,24 +102,23 @@ namespace Microsoft.Quantum.Samples.Teleportation {
     /// to another.
     operation TeleportRandomMessage () : Unit {
         // Ask for some qubits that we can use to teleport.
-        using ((msg, target) = (Qubit(), Qubit())) {
-            PrepareRandomMessage(msg);
+        use (msg, target) = (Qubit(), Qubit());
+        PrepareRandomMessage(msg);
 
-            // Use the operation we defined above.
-            Teleport(msg, target);
+        // Use the operation we defined above.
+        Teleport(msg, target);
 
-            // Report message received:
-            if (MeasureIsPlus(target))  { Message("Received |+>"); }
-            if (MeasureIsMinus(target)) { Message("Received |->"); }
+        // Report message received:
+        if (MeasureIsPlus(target))  { Message("Received |+>"); }
+        if (MeasureIsMinus(target)) { Message("Received |->"); }
 
-            // Reset all of the qubits that we used before releasing
-            // them.
-            Reset(msg);
-            Reset(target);
-        }
+        // Reset all of the qubits that we used before releasing
+        // them.
+        Reset(msg);
+        Reset(target);
     }
 
-        /// # Summary
+    /// # Summary
     /// Sets the qubit's state to |+⟩.
     operation SetToPlus(q: Qubit) : Unit {
         Reset(q);
@@ -161,10 +158,10 @@ namespace Microsoft.Quantum.Samples.Teleportation {
             SetToPlus(q);
         }
     }
-    
+
     @EntryPoint()
     operation RunProgram () : Unit {
-        for (idxRun in 1 .. 8) {
+        for idxRun in 1 .. 8 {
             let sent = DrawRandomBool(0.5);
             let received = TeleportClassicalMessage(sent);
             Message($"Round {idxRun}: Sent {sent}, got {received}.");
@@ -186,3 +183,4 @@ namespace Microsoft.Quantum.Samples.Teleportation {
 // of |β〉. Both bits can be recovered on the target by measurement in the Bell basis.
 // For details refer to discussion and code in Unit Testing Sample, in file SuperdenseCoding.qs.
 // ////////////////////////////////////////////////////////////////////////
+
