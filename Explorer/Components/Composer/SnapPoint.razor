@@ -20,7 +20,7 @@
 
     public string Id { get; } = UniqueId.CreateUniqueId();
 
-    private int XCoord => Half ? X * 50 + 30 : X * 50 + 10;
+    private int XCoord => X * 50 + (Half ? -10 : 10);
 
     private string XOffset => $"{XCoord}px";
 
