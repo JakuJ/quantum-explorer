@@ -26,9 +26,9 @@ namespace Qrng {
     }
     
     @EntryPoint()
-    operation SampleRandomNumber() : Int {
+    operation SampleRandomNumber() : Unit {
         let max = 50;
-        Message($"Sampling a random number between 0 and {max}: ");
-        return SampleRandomNumberInRange(max);
+        let sample = SampleRandomNumberInRange(max);
+        Message($"Sampling a random number between 0 and {max}: {sample}");
     }
 }

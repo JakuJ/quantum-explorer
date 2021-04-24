@@ -69,7 +69,6 @@ namespace Microsoft.Quantum.Samples.SimpleGrover {
     /// # Summary
     /// This operation applies Grover's algorithm to search all possible inputs
     /// to an operation to find a particular marked state.
-    @EntryPoint()
     operation SearchForMarkedInput(nQubits : Int) : Result[] {
         use qubits = Qubit[nQubits];
         // Initialize a uniform superposition over all possible inputs.
