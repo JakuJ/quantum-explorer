@@ -128,7 +128,7 @@ namespace Compiler
                         eventLogger);
 
                     // Abort if errors occured during the Q# compilation stage
-                    if (eventLogger.seenErrors)
+                    if (eventLogger.SeenErrors)
                     {
                         return;
                     }

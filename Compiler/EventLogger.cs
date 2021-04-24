@@ -12,7 +12,6 @@ namespace Compiler
     {
         private readonly Action<string> logAction;
         private readonly Func<Diagnostic, string> applyFormatting;
-        public bool seenErrors = false;
 
         /// <inheritdoc cref="LogTracker"/>
         /// <summary>Initializes a new instance of the <see cref="EventLogger"/> class.</summary>
@@ -28,6 +27,9 @@ namespace Compiler
             applyFormatting = format ?? Formatting.HumanReadableFormat;
         }
 
+        /// <summary>Gets a value indicating whether any errors were logged during compilation.</summary>
+        public bool SeenErrors { get; private set; }
+
         /// <inheritdoc/>
         protected override void Print(Diagnostic msg)
         {
@@ -42,7 +44,7 @@ namespace Compiler
 
             if (msg is { Severity: Error })
             {
-                seenErrors = true;
+                SeenErrors = true;
             }
         }
     }
