@@ -4,7 +4,7 @@ namespace MixedSources {
 
     @EntryPoint()
     operation Main(): Unit {
-        using (qs = Qubit[6]) {
+        use qs = Qubit[6] {
             Mixed1(qs[0], qs[1..5]);
             Mixed2(qs[1..5], qs[0]);
             Mixed3(qs[0..2], qs[3..5]);

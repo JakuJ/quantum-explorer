@@ -5,7 +5,7 @@ namespace ExpandableOperationCalls {
 
     @EntryPoint()
     operation RunProgram() : Unit {
-        using (qs = Qubit[5]) {
+        use qs = Qubit[5] {
             CX(qs[0], qs[1]);
             CY(qs[1], qs[2]);
             CZ(qs[0], qs[2]);

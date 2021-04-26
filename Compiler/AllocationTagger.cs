@@ -21,10 +21,10 @@ namespace Compiler
         public AllocationTagger(List<string> userNamespaces) => this.userNamespaces = userNamespaces;
 
         /// <inheritdoc/>
-        public string Name => "AllocationTagging";
+        public string Name => "Allocation tagging";
 
         /// <inheritdoc/>
-        public int Priority => -2;
+        public int Priority => -1;
 
         /// <inheritdoc/>
         public bool ImplementsPostconditionVerification => false;

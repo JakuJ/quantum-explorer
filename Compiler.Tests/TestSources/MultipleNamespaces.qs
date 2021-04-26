@@ -1,7 +1,7 @@
 namespace Ns1 {
     @EntryPoint()
     operation Op1(): Unit {
-        using (q = Qubit()) {
+        use q = Qubit() {
             Ns2.Op1(q);
             Ns3.Op2(q);
         }

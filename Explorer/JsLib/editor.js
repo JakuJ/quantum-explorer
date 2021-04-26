@@ -44,10 +44,9 @@ const DEFAULT_CODE = `namespace HelloWorld {
     open Microsoft.Quantum.Canon;
 
     operation RandomBit(): Result {
-        using (q = Qubit()) {
-            H(q);
-            return MResetZ(q);
-        }
+        use q = Qubit();
+        H(q);
+        return MResetZ(q);
     }
 
     @EntryPoint()
@@ -82,6 +81,13 @@ export class Editor {
       aliases: ['Q#', 'qsharp']
     });
 
+    // set '//' as the line comment
+    monaco.languages.setLanguageConfiguration(LANGUAGE_ID, {
+      comments: {
+        lineComment: '//'
+      }
+    });
+
     // set up the registry with our custom grammar
     const registry = new Registry({
       getGrammarDefinition: async () => ({
@@ -100,7 +106,7 @@ export class Editor {
     );
 
     // create the editor instance
-    window.editorsDict[id] = monaco.editor.create(element, {
+    const editor = monaco.editor.create(element, {
       model: monaco.editor.createModel(initialCode || loadCode() || DEFAULT_CODE, LANGUAGE_ID, FILE_URI),
       theme: getThemeName(),
       minimap: {
@@ -119,19 +125,21 @@ export class Editor {
       foldingStrategy: 'indentation',
     });
 
+    window.editorsDict[id] = editor;
+
     // install Monaco services required to communicate with the LS
-    MonacoServices.install(window.editorsDict[id]);
+    MonacoServices.install(editor);
 
     // wire TM grammars
     const grammars = new Map([[LANGUAGE_ID, 'source.qsharp']]);
-    await wireTmGrammars(monaco, registry, grammars, window.editorsDict[id]);
+    await wireTmGrammars(monaco, registry, grammars, editor);
 
     // enable dynamic layout changes
-    new ResizeObserver(() => window.editorsDict[id].layout()).observe(element);
+    new ResizeObserver(() => editor.layout()).observe(element);
 
     // bind the save command to Ctrl+S
-    window.editorsDict[id].addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
-      saveCode(window.editorsDict[id].getValue());
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+      saveCode(editor.getValue());
     });
 
     // create the web socket

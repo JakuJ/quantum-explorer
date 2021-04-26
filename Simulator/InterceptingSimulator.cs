@@ -87,7 +87,7 @@ namespace Simulator
             {
                 try
                 {
-                    this.CheckQubits(new QArray<Qubit>(origQubits), "arguments");
+                    CheckQubits(new QArray<Qubit>(origQubits), "arguments");
                 }
                 catch (ArgumentException e)
                 {
@@ -96,7 +96,7 @@ namespace Simulator
                 }
             }
 
-            int[] qubits = origQubits.Select(x => x.Id).ToArray() ?? Array.Empty<int>();
+            int[] qubits = origQubits.Select(x => x.Id).ToArray();
             int[]? controls = null;
             string @namespace = op.FullName[..^(op.Name.Length + 1)];
 

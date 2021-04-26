@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Compiler;
 using Microsoft.Extensions.Logging;
@@ -18,37 +19,31 @@ namespace Explorer.Tests
             // Arrange
             var codes = GetExampleCodes(directoryPath);
             QsCompiler compiler = new(Mock.Of<ILogger>());
-            bool runs = false;
+            var runs = false;
 
             compiler.OnOutput += (_, _) => { runs = true; };
 
-            foreach (var codeInfo in codes)
+            foreach ((string name, string code) in codes)
             {
                 // Act
                 runs = false;
-                await compiler.Compile(codeInfo.Code);
+                await compiler.Compile(code);
 
                 // Assert
-                Assert.IsTrue(runs, $"Code from {codeInfo.Name} should compile.");
+                Assert.IsTrue(runs, $"Code from {name} should compile.");
             }
         }
 
-        private List<(string Name, string Code)> GetExampleCodes(string folderPath)
+        private static IEnumerable<(string Name, string Code)> GetExampleCodes(string folderPath)
         {
-            List<(string Name, string Code)> codes = new();
             if (!Directory.Exists(folderPath))
             {
                 throw new DirectoryNotFoundException();
             }
 
-            foreach (string file in Directory.EnumerateFiles(folderPath, "*.qs"))
-            {
-                string name = Path.GetFileNameWithoutExtension(file);
-                string code = File.ReadAllText(file);
-                codes.Add((name, code));
-            }
-
-            return codes;
+            return from file in Directory.EnumerateFiles(folderPath, "*.qs")
+                   let code = File.ReadAllText(file)
+                   select (file, code);
         }
     }
 }

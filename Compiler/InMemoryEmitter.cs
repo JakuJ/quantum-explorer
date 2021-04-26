@@ -16,7 +16,7 @@ namespace Compiler
     {
         public Dictionary<string, string> FileContents { get; } = new();
 
-        public string Name => "InMemoryCsharpGeneration";
+        public string Name => "In-memory C# code generation";
 
         public int Priority => -2;
 
@@ -30,10 +30,7 @@ namespace Compiler
 
         public bool ImplementsPostconditionVerification => false;
 
-        /// <summary>Generate C# code for a Q# compilation in-memory.</summary>
-        /// <param name="compilation">The compilation to generate code for.</param>
-        /// <param name="transformed">The output compilation, unchanged.</param>
-        /// <returns>Whether the code generation succeeded.</returns>
+        /// <inheritdoc />
         public bool Transformation(QsCompilation compilation, out QsCompilation transformed)
         {
             var context = CodegenContext.Create(compilation, AssemblyConstants);
@@ -48,9 +45,11 @@ namespace Compiler
             if (!compilation.EntryPoints.IsEmpty)
             {
                 QsCallable? callable = context.allCallables.First(c => c.Key.Equals(compilation.EntryPoints.First())).Value;
-                string? content = EntryPoint.generate(context, callable);
-                string entryPointName = callable.SourceFile + ".EntryPoint";
-                FileContents.Add(entryPointName, content);
+                string? mainContent = EntryPoint.generateMainSource(context, new[] { callable });
+                FileContents.Add(callable.Source + ".EntryPoint", mainContent);
+
+                string content = EntryPoint.generateSource(context, new[] { callable });
+                FileContents.Add(callable.Source.ToString(), content);
             }
 
             transformed = compilation;
