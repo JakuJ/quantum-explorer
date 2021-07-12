@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Common;
+using Microsoft.Extensions.Logging;
 using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
 using Simulator.Custom;
@@ -22,6 +23,7 @@ namespace Simulator
         }.Select(x => new Regex(x)).ToArray();
 
         private readonly bool expanding;
+        private readonly ILogger logger;
 
         private readonly ImmutableHashSet<string> userNamespaces;
 
@@ -39,16 +41,18 @@ namespace Simulator
         /// <summary>
         /// Initializes a new instance of the <see cref="InterceptingSimulator" /> class.
         /// </summary>
-        public InterceptingSimulator(IEnumerable<string> userNamespaces, bool expanding) : base(false)
+        public InterceptingSimulator(IEnumerable<string> userNamespaces, bool expanding, ILogger logger) : base(false)
         {
             // throwing our own exceptions produces unnecessary logs
             DisableExceptionPrinting();
 
             this.expanding = expanding;
+            this.logger = logger;
             this.userNamespaces = userNamespaces.ToImmutableHashSet();
             OnOperationStart += OperationStartHandler;
             OnOperationEnd += OperationEndHandler;
-            AfterAllocateQubits += AllocateQubitsHandler;
+            AfterAllocateQubits += QubitScopeOpenedHandler;
+            AfterBorrowQubits += QubitScopeOpenedHandler;
         }
 
         /// <summary>
@@ -72,25 +76,27 @@ namespace Simulator
             return ret;
         }
 
-        private void AllocateQubitsHandler(IQArray<Qubit> qubits)
+        private void QubitScopeOpenedHandler(IQArray<Qubit> qubits)
             => allocationQueue.Enqueue(qubits.Select(x => x.Id).ToArray());
 
         private void OperationStartHandler(ICallable op, IApplyData data)
         {
             // Look out for use-after-release
-            if (data.Qubits != null)
+            Qubit[] origQubits = data.Qubits?.Where(x => x != null).ToArray() ?? Array.Empty<Qubit>();
+            if (origQubits.Length != 0)
             {
                 try
                 {
-                    this.CheckQubits(new QArray<Qubit>(data.Qubits), "arguments");
+                    CheckQubits(new QArray<Qubit>(origQubits), "arguments");
                 }
-                catch (ArgumentException)
+                catch (ArgumentException e)
                 {
+                    logger.LogWarning(e.Message);
                     throw new ExecutionFailException($"Attempted to apply an operation to a released qubit.\nOperation: {op.FullName}");
                 }
             }
 
-            int[] qubits = (data.Qubits?.Select(x => x.Id) ?? Enumerable.Empty<int>()).ToArray();
+            int[] qubits = origQubits.Select(x => x.Id).ToArray();
             int[]? controls = null;
             string @namespace = op.FullName[..^(op.Name.Length + 1)];
 

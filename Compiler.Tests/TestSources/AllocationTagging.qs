@@ -20,7 +20,7 @@ namespace AllocationTagging4{
     }
 
     operation DoStuff() : Unit {
-        using (q1 = Qubit()) {
+        use q1 = Qubit() {
             Reset(q1);
         }
     }
@@ -30,7 +30,7 @@ namespace
 AllocationTagging5 {
     open Microsoft.Quantum.Intrinsic;
     operation DoStuff() : Unit {
-        using ((q1, qs, q2) = (Qubit(), Qubit[1], Qubit())) {
+        use (q1, qs, q2) = (Qubit(), Qubit[1], Qubit()) {
             ResetAll([q1, qs[0], q2]);
         }
     }
@@ -39,7 +39,7 @@ AllocationTagging5 {
 namespace AllocationTagging6 
 { open Microsoft.Quantum.Intrinsic;
     operation DoStuff() : Unit {
-        using (q = Qubit()) {
+        use q = Qubit() {
             Reset(q);
         }
     }
@@ -52,7 +52,7 @@ AllocationTagging7
     open Microsoft.Quantum.Intrinsic;
 
     operation DoStuff() : Unit {
-        using ((x1, (x2, (x3))) = (Qubit(), (Qubit(), Qubit()))) {
+        use (x1, (x2, (x3))) = (Qubit(), (Qubit(), Qubit())) {
             ResetAll([x3, x1, x2]);
         }
     }

@@ -4,7 +4,7 @@ namespace LocalOps {
     open Microsoft.Quantum.Measurement;
 
     operation DoesSomethingWithNoQubits() : Result {
-        using (q = Qubit())
+        use q = Qubit()
         {
             H(q);
             X(q);
@@ -20,7 +20,7 @@ namespace LocalOps {
 
     @EntryPoint()
     operation MotherOp(): Unit {
-        using (q = Qubit())
+        use q = Qubit()
         {
             let k = DoesSomethingWithNoQubits();
             let x = DoesSomethingWithASingleQubit(q);

@@ -27,6 +27,9 @@ namespace Compiler
             applyFormatting = format ?? Formatting.HumanReadableFormat;
         }
 
+        /// <summary>Gets a value indicating whether any errors were logged during compilation.</summary>
+        public bool SeenErrors { get; private set; }
+
         /// <inheritdoc/>
         protected override void Print(Diagnostic msg)
         {
@@ -37,6 +40,11 @@ namespace Compiler
             {
                 var withFilesSkipped = string.Join('\n', message.Split('\n').Where(x => !x.StartsWith("File:")));
                 logAction(withFilesSkipped);
+            }
+
+            if (msg is { Severity: Error })
+            {
+                SeenErrors = true;
             }
         }
     }

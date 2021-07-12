@@ -15,7 +15,7 @@
     function DoNothing() : Unit {}
     
     operation RandomBit () : Result {
-        using (q = Qubit()) {
+        use q = Qubit() {
             H(q);
             return MResetZ(q);
         }
@@ -25,7 +25,7 @@
         mutable result = 0;
         repeat {
             mutable bits = new Result[0];
-            for (i in 1 .. BitSizeI(max)) {
+            for i in 1 .. BitSizeI(max) {
                 set bits += [RandomBit()];
             }
             set result = ResultArrayAsInt(bits);

@@ -38,6 +38,7 @@ namespace Compiler
                 {
                     "Microsoft.Quantum.Standard",
                     "Microsoft.Quantum.QSharp.Core",
+                    "Microsoft.Quantum.QSharp.Foundation",
                     "Microsoft.Quantum.Runtime.Core",
                     typeof(InterceptingSimulator).Assembly.FullName!,
                 }.Select(x => Assembly.Load(new AssemblyName(x)).Location)
@@ -104,6 +105,7 @@ namespace Compiler
                 IsExecutable = true,
                 SkipMonomorphization = true, // performs calls to PrependGuid causing some library methods not to be recognized
                 GenerateFunctorSupport = true,
+                RuntimeCapability = RuntimeCapability.FullComputation,
                 RewriteStepInstances = new (IRewriteStep, string?)[]
                 {
                     (new AllocationTagger(userNamespaces), null),
@@ -118,19 +120,25 @@ namespace Compiler
             {
                 try
                 {
+                    EventLogger eventLogger = new(str => OnDiagnostics?.Invoke(this, str));
                     compilationLoader = new CompilationLoader(
                         _ => new Dictionary<Uri, string> { { new Uri(Path.GetFullPath(filename)), qsharpCode } }.ToImmutableDictionary(),
                         load => cachedRefs ??= load(qsharpReferences!), // never null
                         config,
-                        new EventLogger(str => OnDiagnostics?.Invoke(this, str)));
+                        eventLogger);
+
+                    // Abort if errors occured during the Q# compilation stage
+                    if (eventLogger.SeenErrors)
+                    {
+                        return;
+                    }
                 }
-                catch (NullReferenceException)
+                catch (NullReferenceException e)
                 {
                     // Bond DLL deserialization throws this from QDK v0.13.* onwards when IsExecutable is true but the user provides no @EntryPoint
                     // We have unit tests assuring that this should never happen
                     // This try/catch block exists just to be extra safe
-                    logger.LogError(
-                        $"{nameof(NullReferenceException)} raised during Q# compilation. Presumably missing @EntryPoint in code:\n{qsharpCode}");
+                    logger.LogDebug(e, "User code has no @EntryPoint()");
                     OnDiagnostics?.Invoke(this, "No entry point operation specified.\nDecorate the main method with the @EntryPoint attribute.");
                     return;
                 }
@@ -207,10 +215,9 @@ namespace Compiler
 
             if (type != null)
             {
-                using InterceptingSimulator sim = new(userNamespaces, expanding);
+                using InterceptingSimulator sim = new(userNamespaces, expanding, logger);
                 StateRecorder recorder = new(sim);
 
-                var simSuccess = true;
                 try
                 {
                     // simulate the entry point operation using reflection
@@ -224,20 +231,24 @@ namespace Compiler
                 catch (ExecutionFailException e)
                 {
                     OnDiagnostics?.Invoke(this, e.Message);
-                    simSuccess = false;
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Unknown error during simulation");
+                    OnDiagnostics?.Invoke(this, "Unknown error has occured during the simulation.");
                 }
 
-                if (simSuccess)
+                if (sim.Messages.Length > 0)
                 {
                     OnOutput?.Invoke(this, sim.Messages);
-                    OnStatesRecorded?.Invoke(this, recorder.Root.Children);
+                }
 
-                    Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
+                OnStatesRecorded?.Invoke(this, recorder.Root.Children);
 
-                    if (grids.Count > 0)
-                    {
-                        OnGrids?.Invoke(this, grids);
-                    }
+                Dictionary<string, List<GateGrid>> grids = sim.GetGrids();
+                if (grids.Count > 0)
+                {
+                    OnGrids?.Invoke(this, grids);
                 }
             }
             else

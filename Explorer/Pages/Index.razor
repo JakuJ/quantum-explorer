@@ -116,7 +116,8 @@
                 {
                     await ToggleCompilation(false);
                     var messages = string.Join('\n', t.Exception!.InnerExceptions.Select(x => x.Message));
-                    await Visualizer.SetOutput(messages);
+                    output.AppendLine(messages);
+                    await Visualizer.SetOutput(output.ToString());
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
         }, TaskCreationOptions.LongRunning);

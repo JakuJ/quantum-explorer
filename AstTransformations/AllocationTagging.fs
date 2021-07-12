@@ -51,8 +51,7 @@ module AllocationTagging =
                     <| List.ofArray (t.ToArray())
                 | InvalidInitializer -> failwithf "Invalid qubit initializer"
 
-        /// Process qubit allocations ("using" statements)
-        override this.OnAllocateQubits(scope: QsQubitScope) =
+        member this.ProcessStatement (scope: QsQubitScope) allocating =
             let qubitIDs = this.FlattenNames scope.Binding.Lhs
             let registerFlags = this.FlattenQubits scope.Binding.Rhs
 
@@ -72,7 +71,13 @@ module AllocationTagging =
                           { scope.Body with
                                 Statements = newStatements.ToImmutableArray() } }
 
-            base.OnAllocateQubits newScope
+            if allocating then base.OnAllocateQubits newScope else base.OnBorrowQubits newScope
+
+        /// Process qubit allocations ("using" statements)
+        override this.OnAllocateQubits(scope: QsQubitScope) = this.ProcessStatement scope true
+
+        /// Process qubit borrowing ("borrowing" statements)
+        override this.OnBorrowQubits(scope: QsQubitScope) = this.ProcessStatement scope false
 
     /// Process a QsCompilation and return operation names and corresponding GateGrids
     let TagAllocations (compilation: QsCompilation, userNamespaces: string array): QsCompilation =

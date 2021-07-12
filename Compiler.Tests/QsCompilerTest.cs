@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Common;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
@@ -80,15 +82,43 @@ namespace Compiler.Tests
                 Assert.IsTrue(s.StartsWith("Attempted to apply an operation to a released qubit."));
             };
 
-            compiler.OnOutput += (_, s) => Assert.Fail("Code should not return any output");
-            compiler.OnStatesRecorded += (_, _) => Assert.Fail("Code should not return any states");
-            compiler.OnGrids += (_, _) => Assert.Fail("Code should not return any grids");
+            compiler.OnOutput += (_, s) => Assert.Fail($"Code should not return any output, got: {s}");
 
             // Act
             await compiler.Compile(sourceCode);
 
             // Assert
             Assert.IsTrue(failed, "Simulation should fail with diagnostics");
+        }
+
+        [Test]
+        public async Task HandlesPartialFunctionsAndBorrowingStatement()
+        {
+            // Arrange
+            string sourceCode = await Helpers.GetSourceFile("Borrowing");
+            QsCompiler compiler = new(Helpers.ConsoleLogger);
+            var compiled = false;
+
+            compiler.OnDiagnostics += (_, s) => { Assert.Fail($"There should be no diagnostics emitted! Got: {s}"); };
+
+            compiler.OnGrids += (_, s) =>
+            {
+                compiled = true;
+                GateGrid grid = s["Borrowing.Main"].First();
+                Assert.AreEqual(3, grid.Height, "Grid should have 3 qubits allocated");
+
+                foreach (int row in new[] { 0, 1, 2 })
+                {
+                    Assert.AreEqual("Ry", grid.At(0, row)!.Value.Name, "Grid should 3 Ry gates");
+                    Assert.AreEqual("Reset", grid.At(1, row)!.Value.Name, "Grid should 3 Reset gates");
+                }
+            };
+
+            // Act
+            await compiler.Compile(sourceCode);
+
+            // Assert
+            Assert.IsTrue(compiled, "Compilation should be successful");
         }
     }
 }

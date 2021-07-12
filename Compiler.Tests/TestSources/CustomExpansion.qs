@@ -4,11 +4,11 @@ namespace CustomExpansion {
     
     @EntryPoint()
     operation Main() : Unit {
-        using (qs = Qubit[2]) {
+        use qs = Qubit[2] {
             Custom(qs);
         }
 
-        using (qs = Qubit[2]) {
+        use qs = Qubit[2] {
             Custom(qs);
         }
     }
